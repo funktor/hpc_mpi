@@ -1,7 +1,7 @@
 #include "logistic_regression.h"
 using namespace std;
 
-void generate(double *x, int *y, int n, int m){
+void generate(double *x, int *y, int n, int m) {
     std::random_device rd;
     std::mt19937 engine(rd());
 
@@ -9,54 +9,12 @@ void generate(double *x, int *y, int n, int m){
     std::uniform_int_distribution<int> dist_u(0, 1);
 
     for (int i = 0; i < n; i++) {
-        y[i] = dist_u(engine);
+        if (y != nullptr) y[i] = dist_u(engine);
         for (int j = 0; j < m; j++) {
             x[i*m+j] = dist_n(engine);
         }
     }
 }
-
-// namespace boost {
-//     namespace serialization {
-//         // When the class Archive corresponds to an output archive, the
-//         // & operator is defined similar to <<.  Likewise, when the class Archive
-//         // is a type of input archive the & operator is defined similar to >>.
-//         template<class Archive>
-//         void serialize(Archive & a, 
-//             logistic_regression & lr, const unsigned int version)
-//         {
-//             // & operator acts as input/output to/from archive a
-//             for (int i = 0; i < lr.num_features; i++) {
-//                 a & lr.weights[i];
-//             }
-//             a
-//             & lr.bias
-//             & lr.learning_rate
-//             & lr.num_epochs 
-//             & lr.batch_size
-//             & lr.num_features
-//             & lr.l1_reg
-//             & lr.l2_reg
-//             & lr.model_save_location;
-//         }
-//     }
-// }
-
-// void save_model(logistic_regression &lr, std::string model_path) {
-//     std::ofstream outfile(model_path);
-//     boost::archive::text_oarchive archive(outfile);
-
-//     // write lr to archive
-//     archive << lr;
-// }
-
-// void load_model(logistic_regression &lr, std::string model_path) {
-//     std::ifstream infile(model_path);
-//     boost::archive::text_iarchive archive(infile);
-
-//     // read from archive to cmlog
-//     archive >> lr;
-// }
 
 logistic_regression::logistic_regression(){}
 
@@ -66,8 +24,7 @@ logistic_regression::logistic_regression(
                 int batch_size, 
                 int num_features, 
                 double l1_reg,
-                double l2_reg,
-                std::string model_save_location){
+                double l2_reg){
     
     this->learning_rate = learning_rate;
     this->num_epochs = num_epochs;
@@ -75,7 +32,6 @@ logistic_regression::logistic_regression(
     this->num_features = num_features;
     this->l1_reg = l1_reg;
     this->l2_reg = l2_reg;
-    this->model_save_location = model_save_location;
 }
 
 logistic_regression::~logistic_regression(){}
@@ -244,6 +200,8 @@ void save_model_weights(logistic_regression &lr, std::string path) {
 }
 
 void load_model_weights(logistic_regression &lr, std::string path) {
+    lr.weights = new double[lr.num_features];
+
     std::ifstream infile(path);
     if (infile.is_open()) {
         for (int i = 0; i < lr.num_features; i++) infile >> lr.weights[i];
@@ -252,7 +210,13 @@ void load_model_weights(logistic_regression &lr, std::string path) {
     infile.close();
 }
 
-void distribute_data(double *x, int *y, int n, int n_features, int n_process) {
+void distribute_data(
+        double *x, 
+        int *y, 
+        int n, 
+        int n_features, 
+        int n_process) {
+
     MPI_Request request = MPI_REQUEST_NULL;
 
     int h = n/n_process;
@@ -262,24 +226,35 @@ void distribute_data(double *x, int *y, int n, int n_features, int n_process) {
         if (p+1 <= m) {
             int u = h+1;
             MPI_Isend(x+p*u*n_features, u*n_features, MPI_DOUBLE, p, p, MPI_COMM_WORLD, &request);
-            MPI_Isend(y+p*u, u, MPI_INT, p, p, MPI_COMM_WORLD, &request);
+            if (y != nullptr) MPI_Isend(y+p*u, u, MPI_INT, p, p, MPI_COMM_WORLD, &request);
         }
         else {
             if (p <= m) {
                 int u = h+1;
                 MPI_Isend(x+p*u*n_features, h*n_features, MPI_DOUBLE, p, p, MPI_COMM_WORLD, &request);
-                MPI_Isend(y+p*u, h, MPI_INT, p, p, MPI_COMM_WORLD, &request);
+                if (y != nullptr) MPI_Isend(y+p*u, h, MPI_INT, p, p, MPI_COMM_WORLD, &request);
             }
             else {
                 int u = h;
                 MPI_Isend(x+p*u*n_features, u*n_features, MPI_DOUBLE, p, p, MPI_COMM_WORLD, &request);
-                MPI_Isend(y+p*u, u, MPI_INT, p, p, MPI_COMM_WORLD, &request);
+                if (y != nullptr) MPI_Isend(y+p*u, u, MPI_INT, p, p, MPI_COMM_WORLD, &request);
             }
         }
     }
 }
 
-void lr_train(int n, int n_features, int rank, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg) {
+void lr_train(
+        int n, 
+        int n_features, 
+        int rank, 
+        int n_process, 
+        double learning_rate, 
+        int epochs, 
+        int batch_size, 
+        double l1_reg, 
+        double l2_reg, 
+        std::string model_path) {
+
     int h = n/n_process;
     int m = n % n_process;
     int g = (rank+1 <= m)?h+1:h;
@@ -290,7 +265,7 @@ void lr_train(int n, int n_features, int rank, int n_process, double learning_ra
     MPI_Recv(x, g*n_features, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Recv(y, g, MPI_INT, 0, rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    logistic_regression lr(learning_rate, epochs, batch_size, n_features, 0.0, 0.0, "model.dat");
+    logistic_regression lr(learning_rate, epochs, batch_size, n_features, 0.0, 0.0);
 
     lr.initialize_weights(n);
 
@@ -325,16 +300,30 @@ void lr_train(int n, int n_features, int rank, int n_process, double learning_ra
         MPI_Send(wb, n_features+2, MPI_DOUBLE, (rank+1)%n_process, 1, MPI_COMM_WORLD);
         epochs--;
     }
+
+    save_model_weights(lr, model_path + "." + std::to_string(rank));
 }
 
-void lr_train_root(double *x, int *y, int n, int n_features, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg) {
+void lr_train_root(
+        double *x, 
+        int *y, 
+        int n, 
+        int n_features, 
+        int n_process, 
+        double learning_rate, 
+        int epochs, 
+        int batch_size, 
+        double l1_reg, 
+        double l2_reg, 
+        std::string model_path) {
+
     int h = n/n_process;
     int m = n % n_process;
     int g = (m == 0)?h:h+1;
 
     distribute_data(x, y, n, n_features, n_process);
 
-    logistic_regression lr(learning_rate, epochs, batch_size, n_features, 0.0, 0.0, "model.dat");
+    logistic_regression lr(learning_rate, epochs, batch_size, n_features, 0.0, 0.0);
 
     lr.initialize_weights(n);
 
@@ -368,6 +357,63 @@ void lr_train_root(double *x, int *y, int n, int n_features, int n_process, doub
         std::cout << "Current Loss = " << l/n << std::endl;
         epochs--;
     }
+
+    save_model_weights(lr, model_path + ".0");
+}
+
+void lr_predict(
+        int n, 
+        int n_features, 
+        int rank, 
+        int n_process, 
+        std::string model_path) {
+
+    int h = n/n_process;
+    int m = n % n_process;
+    int g = (rank+1 <= m)?h+1:h;
+
+    double *x = new double[g*n_features];
+    MPI_Recv(x, g*n_features, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    logistic_regression lr(0.0, 0, 0, n_features, 0.0, 0.0);
+    load_model_weights(lr, model_path + "." + std::to_string(rank));
+
+    int *out = lr.predict(x, g);
+    MPI_Send(out, g, MPI_INT, 0, rank, MPI_COMM_WORLD);
+}
+
+int *lr_predict_root(
+        double *x, 
+        int n, 
+        int n_features, 
+        int n_process, 
+        std::string model_path) {
+
+    int h = n/n_process;
+    int m = n % n_process;
+    int g = (m == 0)?h:h+1;
+
+    distribute_data(x, nullptr, n, n_features, n_process);
+
+    logistic_regression lr(0.0, 0, 0, n_features, 0.0, 0.0);
+    load_model_weights(lr, model_path + ".0");
+
+    int *out = new int[n];
+    int k = 0;
+
+    int *out_self = lr.predict(x, g);
+    std::copy(out_self, out_self+g, out);
+    k += g;
+
+    for(int p = 1; p < n_process; p++) {
+        int gp = (p+1 < m)?h+1:h;
+        int *out_p = new int[gp];
+        MPI_Recv(out_p, gp, MPI_INT, p, p, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        std::copy(out_p, out_p+gp, out+k);
+        k += gp;
+    }
+
+    return out;
 }
 
 template <typename T>
@@ -393,7 +439,8 @@ void build_model(
             int epochs, 
             int batch_size, 
             double l1_reg, 
-            double l2_reg) {
+            double l2_reg, 
+            std::string model_path) {
 
     MPI_Init(NULL, NULL);
 
@@ -410,12 +457,47 @@ void build_model(
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    if (rank == 0) lr_train_root(x, y, n, n_features, size, learning_rate, epochs, batch_size, l1_reg, l2_reg);
-    else lr_train(n, n_features, rank, size, learning_rate, epochs, batch_size, l1_reg, l2_reg);
+    if (rank == 0) lr_train_root(x, y, n, n_features, size, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path);
+    else lr_train(n, n_features, rank, size, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path);
     auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+    std::cout << "Training duration = " << duration.count() << " ms" << std::endl;
+    MPI_Finalize();
+}
+
+int *predict_model(
+            double *x, 
+            int n, 
+            int n_features,
+            std::string model_path) {
+
+    MPI_Init(NULL, NULL);
+
+    int size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if (rank == 0 && x == nullptr) {
+        x = new double[n*n_features];
+        generate(x, nullptr, n, n_features);
+    }
+
+    int *out;
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    if (rank == 0) out = lr_predict_root(x, n, n_features, size, model_path);
+    else lr_predict(n, n_features, rank, size, model_path);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+    std::cout << "Prediction duration = " << duration.count() << " ms" << std::endl;
+    if (rank == 0) print_arr(out, n, 1);
 
     MPI_Finalize();
+    return out;
 }
 
 int main(int argc, char *argv[]) {
@@ -424,11 +506,17 @@ int main(int argc, char *argv[]) {
     double learning_rate = atof(argv[3]);
     int epochs = atoi(argv[4]);
     int batch_size = atoi(argv[5]);
+    double l1_reg = atof(argv[6]);
+    double l2_reg = atof(argv[7]);
+    std::string model_path = argv[8];
 
     double *x;
     int *y;
 
-    build_model(x, y, n, n_features, learning_rate, epochs, batch_size);
+    build_model(x, y, n, n_features, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path);
+    
+    int m = 100;
+    int *res = predict_model(x, m, n_features, model_path);
 
     return 0;
 }
