@@ -1,6 +1,20 @@
 #include "logistic_regression.h"
 using namespace std;
 
+template <typename T>
+void print_arr(const T *arr, const int n, const int m) {
+    std::cout << "[";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            std::cout << arr[i*m+j] << ",";
+        }
+    }
+    std::cout << "]";
+
+    std::cout << std::endl;
+    std::cout << std::endl;
+}
+
 void generate(double *x, int *y, int n, int m) {
     std::random_device rd;
     std::mt19937 engine(rd());
@@ -215,7 +229,8 @@ void distribute_data(
         int *y, 
         int n, 
         int n_features, 
-        int n_process) {
+        int n_process, 
+        MPI_Comm comm) {
 
     MPI_Request request = MPI_REQUEST_NULL;
 
@@ -225,19 +240,19 @@ void distribute_data(
     for (int p = 1; p < n_process; p++) {
         if (p+1 <= m) {
             int u = h+1;
-            MPI_Isend(x+p*u*n_features, u*n_features, MPI_DOUBLE, p, p, MPI_COMM_WORLD, &request);
-            if (y != nullptr) MPI_Isend(y+p*u, u, MPI_INT, p, p, MPI_COMM_WORLD, &request);
+            MPI_Isend(x+p*u*n_features, u*n_features, MPI_DOUBLE, p, p, comm, &request);
+            if (y != nullptr) MPI_Isend(y+p*u, u, MPI_INT, p, p, comm, &request);
         }
         else {
             if (p <= m) {
                 int u = h+1;
-                MPI_Isend(x+p*u*n_features, h*n_features, MPI_DOUBLE, p, p, MPI_COMM_WORLD, &request);
-                if (y != nullptr) MPI_Isend(y+p*u, h, MPI_INT, p, p, MPI_COMM_WORLD, &request);
+                MPI_Isend(x+p*u*n_features, h*n_features, MPI_DOUBLE, p, p, comm, &request);
+                if (y != nullptr) MPI_Isend(y+p*u, h, MPI_INT, p, p, comm, &request);
             }
             else {
                 int u = h;
-                MPI_Isend(x+p*u*n_features, u*n_features, MPI_DOUBLE, p, p, MPI_COMM_WORLD, &request);
-                if (y != nullptr) MPI_Isend(y+p*u, u, MPI_INT, p, p, MPI_COMM_WORLD, &request);
+                MPI_Isend(x+p*u*n_features, u*n_features, MPI_DOUBLE, p, p, comm, &request);
+                if (y != nullptr) MPI_Isend(y+p*u, u, MPI_INT, p, p, comm, &request);
             }
         }
     }
@@ -253,7 +268,8 @@ void lr_train(
         int batch_size, 
         double l1_reg, 
         double l2_reg, 
-        std::string model_path) {
+        std::string model_path, 
+        MPI_Comm comm) {
 
     int h = n/n_process;
     int m = n % n_process;
@@ -262,8 +278,8 @@ void lr_train(
     double *x = new double[g*n_features];
     int *y = new int[g];
 
-    MPI_Recv(x, g*n_features, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(y, g, MPI_INT, 0, rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(x, g*n_features, MPI_DOUBLE, 0, rank, comm, MPI_STATUS_IGNORE);
+    MPI_Recv(y, g, MPI_INT, 0, rank, comm, MPI_STATUS_IGNORE);
 
     logistic_regression lr(learning_rate, epochs, batch_size, n_features, 0.0, 0.0);
 
@@ -274,7 +290,7 @@ void lr_train(
         double l = lr.loss(x, y, g)*g;
 
         double *wb1 = new double[n_features+2];
-        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, (rank-1)%n_process, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, (rank-1)%n_process, 0, comm, MPI_STATUS_IGNORE);
         for (int j = 0; j < n_features; j++) lr.weights[j] += wb1[j];
         lr.bias += wb1[n_features];
         l += wb1[n_features+1];
@@ -284,10 +300,10 @@ void lr_train(
         wb[n_features] = lr.bias;
         wb[n_features+1] = l;
 
-        MPI_Send(wb, n_features+2, MPI_DOUBLE, (rank+1)%n_process, 0, MPI_COMM_WORLD);
+        MPI_Send(wb, n_features+2, MPI_DOUBLE, (rank+1)%n_process, 0, comm);
         
         wb1 = new double[n_features+2];
-        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, (rank-1)%n_process, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, (rank-1)%n_process, 1, comm, MPI_STATUS_IGNORE);
         for (int j = 0; j < n_features; j++) lr.weights[j] = wb1[j];
         lr.bias = wb1[n_features];
         l = wb1[n_features+1];
@@ -297,7 +313,7 @@ void lr_train(
         wb[n_features] = lr.bias;
         wb[n_features+1] = l;
 
-        MPI_Send(wb, n_features+2, MPI_DOUBLE, (rank+1)%n_process, 1, MPI_COMM_WORLD);
+        MPI_Send(wb, n_features+2, MPI_DOUBLE, (rank+1)%n_process, 1, comm);
         epochs--;
     }
 
@@ -315,13 +331,14 @@ void lr_train_root(
         int batch_size, 
         double l1_reg, 
         double l2_reg, 
-        std::string model_path) {
+        std::string model_path, 
+        MPI_Comm comm) {
 
     int h = n/n_process;
     int m = n % n_process;
     int g = (m == 0)?h:h+1;
 
-    distribute_data(x, y, n, n_features, n_process);
+    distribute_data(x, y, n, n_features, n_process, comm);
 
     logistic_regression lr(learning_rate, epochs, batch_size, n_features, 0.0, 0.0);
 
@@ -336,10 +353,10 @@ void lr_train_root(
         wb[n_features] = lr.bias;
         wb[n_features+1] = l;
 
-        MPI_Send(wb, n_features+2, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+        MPI_Send(wb, n_features+2, MPI_DOUBLE, 1, 0, comm);
         
         double *wb1 = new double[n_features+2];
-        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, n_process-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, n_process-1, 0, comm, MPI_STATUS_IGNORE);
         for (int j = 0; j < n_features; j++) lr.weights[j] = wb1[j]/n_process;
         lr.bias = wb1[n_features]/n_process;
         l = wb1[n_features+1];
@@ -349,10 +366,10 @@ void lr_train_root(
         wb[n_features] = lr.bias;
         wb[n_features+1] = l;
 
-        MPI_Send(wb, n_features+2, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD);
+        MPI_Send(wb, n_features+2, MPI_DOUBLE, 1, 1, comm);
         
         wb1 = new double[n_features+2];
-        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, n_process-1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, n_process-1, 1, comm, MPI_STATUS_IGNORE);
 
         std::cout << "Current Loss = " << l/n << std::endl;
         epochs--;
@@ -366,20 +383,21 @@ void lr_predict(
         int n_features, 
         int rank, 
         int n_process, 
-        std::string model_path) {
+        std::string model_path, 
+        MPI_Comm comm) {
 
     int h = n/n_process;
     int m = n % n_process;
     int g = (rank+1 <= m)?h+1:h;
 
     double *x = new double[g*n_features];
-    MPI_Recv(x, g*n_features, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(x, g*n_features, MPI_DOUBLE, 0, rank, comm, MPI_STATUS_IGNORE);
 
     logistic_regression lr(0.0, 0, 0, n_features, 0.0, 0.0);
     load_model_weights(lr, model_path + "." + std::to_string(rank));
 
     int *out = lr.predict(x, g);
-    MPI_Send(out, g, MPI_INT, 0, rank, MPI_COMM_WORLD);
+    MPI_Send(out, g, MPI_INT, 0, rank, comm);
 }
 
 int *lr_predict_root(
@@ -387,13 +405,14 @@ int *lr_predict_root(
         int n, 
         int n_features, 
         int n_process, 
-        std::string model_path) {
+        std::string model_path, 
+        MPI_Comm comm) {
 
     int h = n/n_process;
     int m = n % n_process;
     int g = (m == 0)?h:h+1;
 
-    distribute_data(x, nullptr, n, n_features, n_process);
+    distribute_data(x, nullptr, n, n_features, n_process, comm);
 
     logistic_regression lr(0.0, 0, 0, n_features, 0.0, 0.0);
     load_model_weights(lr, model_path + ".0");
@@ -408,26 +427,12 @@ int *lr_predict_root(
     for(int p = 1; p < n_process; p++) {
         int gp = (p+1 < m)?h+1:h;
         int *out_p = new int[gp];
-        MPI_Recv(out_p, gp, MPI_INT, p, p, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(out_p, gp, MPI_INT, p, p, comm, MPI_STATUS_IGNORE);
         std::copy(out_p, out_p+gp, out+k);
         k += gp;
     }
 
     return out;
-}
-
-template <typename T>
-void print_arr(const T *arr, const int n, const int m) {
-    std::cout << "[";
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            std::cout << arr[i*m+j] << ",";
-        }
-    }
-    std::cout << "]";
-
-    std::cout << std::endl;
-    std::cout << std::endl;
 }
 
 void build_model(
@@ -457,8 +462,8 @@ void build_model(
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    if (rank == 0) lr_train_root(x, y, n, n_features, size, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path);
-    else lr_train(n, n_features, rank, size, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path);
+    if (rank == 0) lr_train_root(x, y, n, n_features, size, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI_COMM_WORLD);
+    else lr_train(n, n_features, rank, size, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI_COMM_WORLD);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
@@ -488,8 +493,8 @@ int *predict_model(
     int *out;
     
     auto start = std::chrono::high_resolution_clock::now();
-    if (rank == 0) out = lr_predict_root(x, n, n_features, size, model_path);
-    else lr_predict(n, n_features, rank, size, model_path);
+    if (rank == 0) out = lr_predict_root(x, n, n_features, size, model_path, MPI_COMM_WORLD);
+    else lr_predict(n, n_features, rank, size, model_path, MPI_COMM_WORLD);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 

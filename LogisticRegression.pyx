@@ -1,6 +1,23 @@
 # cython: language_level=3
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
+cdef extern from *:
+    """
+    #include <mpi.h>
+    
+    #if (MPI_VERSION < 3) && !defined(PyMPI_HAVE_MPI_Message)
+    typedef void *PyMPI_MPI_Message;
+    #define MPI_Message PyMPI_MPI_Message
+    #endif
+    
+    #if (MPI_VERSION < 4) && !defined(PyMPI_HAVE_MPI_Session)
+    typedef void *PyMPI_MPI_Session;
+    #define MPI_Session PyMPI_MPI_Session
+    #endif"
+    """
+
+cimport mpi4py.MPI as MPI
+from mpi4py.libmpi cimport *
 from libcpp.string cimport string
 from cpython cimport array
 
@@ -25,6 +42,10 @@ cdef extern from "logistic_regression.h":
     
     void build_model(double *x, int *y, int n, int n_features, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, string model_path)
     int *predict_model(double *x, int n, int n_features, string model_path)
+    void lr_train(int n, int n_features, int rank, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, string model_path, MPI_Comm comm)
+    void lr_train_root(double *x, int *y, int n, int n_features, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, string model_path, MPI_Comm comm)
+    void lr_predict(int n, int n_features, int rank, int n_process, string model_path, MPI_Comm comm)
+    int *lr_predict_root(double *x, int n, int n_features, int n_process, string model_path, MPI_Comm comm)
 
 
 cdef convert_double_ptr_to_python(double *ptr, int n):
@@ -68,5 +89,21 @@ def py_train(x, y, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, mode
 def py_predict(x, n, m, model_path):
     cdef array.array x_arr = array.array('d', x)
     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)
+
+def py_lr_train_root(x, y, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):
+    cdef array.array x_arr = array.array('d', x)
+    cdef array.array y_arr = array.array('i', y)
+    lr_train_root(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+
+def py_lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):
+    lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+
+def py_lr_predict_root(x, n, m, n_process, model_path, MPI.Comm comm):
+    cdef array.array x_arr = array.array('d', x)
+    lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+
+def py_lr_predict(n, m, rank, n_process, model_path, MPI.Comm comm):
+    lr_predict(n, m, rank, n_process, model_path, comm.ob_mpi)
+
 
 

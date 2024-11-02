@@ -1269,6 +1269,20 @@ static CYTHON_INLINE float __PYX_NAN() {
 #define __PYX_HAVE__LogisticRegression
 #define __PYX_HAVE_API__LogisticRegression
 /* Early includes */
+
+    #include <mpi.h>
+    
+    #if (MPI_VERSION < 3) && !defined(PyMPI_HAVE_MPI_Message)
+    typedef void *PyMPI_MPI_Message;
+    #define MPI_Message PyMPI_MPI_Message
+    #endif
+    
+    #if (MPI_VERSION < 4) && !defined(PyMPI_HAVE_MPI_Session)
+    typedef void *PyMPI_MPI_Session;
+    #define MPI_Session PyMPI_MPI_Session
+    #endif"
+    
+#include <mpi.h>
 #include <string.h>
 #include <string>
 #include "ios"
@@ -1540,6 +1554,7 @@ static const char *__pyx_f[] = {
   "<stringsource>",
   "contextvars.pxd",
   "array.pxd",
+  "MPI.pxd",
   "type.pxd",
   "bool.pxd",
   "complex.pxd",
@@ -1559,6 +1574,26 @@ static const char *__pyx_f[] = {
 struct arrayobject;
 typedef struct arrayobject arrayobject;
 #endif
+struct PyMPIDatatypeObject;
+struct PyMPIStatusObject;
+struct PyMPIRequestObject;
+struct PyMPIPrequestObject;
+struct PyMPIGrequestObject;
+struct PyMPIMessageObject;
+struct PyMPIOpObject;
+struct PyMPIGroupObject;
+struct PyMPIInfoObject;
+struct PyMPIErrhandlerObject;
+struct PyMPISessionObject;
+struct PyMPICommObject;
+struct PyMPIIntracommObject;
+struct PyMPITopocommObject;
+struct PyMPICartcommObject;
+struct PyMPIGraphcommObject;
+struct PyMPIDistgraphcommObject;
+struct PyMPIIntercommObject;
+struct PyMPIWinObject;
+struct PyMPIFileObject;
 struct __pyx_obj_18LogisticRegression_LogisticRegression;
 struct __pyx_opt_args_7cpython_11contextvars_get_value;
 struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default;
@@ -1587,7 +1622,307 @@ struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default {
   PyObject *default_value;
 };
 
-/* "LogisticRegression.pyx":44
+/* "mpi4py/MPI.pxd":29
+ *     ctypedef MPI_Count  Count  "MPI_Count"
+ * 
+ * ctypedef api class Datatype [             # <<<<<<<<<<<<<<
+ *     type   PyMPIDatatype_Type,
+ *     object PyMPIDatatypeObject,
+ */
+struct PyMPIDatatypeObject {
+  PyObject_HEAD
+  MPI_Datatype ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIDatatypeObject PyMPIDatatypeObject;
+
+
+/* "mpi4py/MPI.pxd":37
+ *     cdef object     __weakref__
+ * 
+ * ctypedef api class Status [             # <<<<<<<<<<<<<<
+ *     type   PyMPIStatus_Type,
+ *     object PyMPIStatusObject,
+ */
+struct PyMPIStatusObject {
+  PyObject_HEAD
+  MPI_Status ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIStatusObject PyMPIStatusObject;
+
+
+/* "mpi4py/MPI.pxd":45
+ *     cdef object   __weakref__
+ * 
+ * ctypedef api class Request [             # <<<<<<<<<<<<<<
+ *     type   PyMPIRequest_Type,
+ *     object PyMPIRequestObject,
+ */
+struct PyMPIRequestObject {
+  PyObject_HEAD
+  MPI_Request ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+  PyObject *ob_buf;
+};
+typedef struct PyMPIRequestObject PyMPIRequestObject;
+
+
+/* "mpi4py/MPI.pxd":54
+ *     cdef object      ob_buf
+ * 
+ * ctypedef api class Prequest(Request) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIPrequest_Type,
+ *     object PyMPIPrequestObject,
+ */
+struct PyMPIPrequestObject {
+  struct PyMPIRequestObject __pyx_base;
+};
+typedef struct PyMPIPrequestObject PyMPIPrequestObject;
+
+
+/* "mpi4py/MPI.pxd":60
+ *     pass
+ * 
+ * ctypedef api class Grequest(Request) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIGrequest_Type,
+ *     object PyMPIGrequestObject,
+ */
+struct PyMPIGrequestObject {
+  struct PyMPIRequestObject __pyx_base;
+  MPI_Request ob_grequest;
+};
+typedef struct PyMPIGrequestObject PyMPIGrequestObject;
+
+
+/* "mpi4py/MPI.pxd":66
+ *     cdef MPI_Request ob_grequest
+ * 
+ * ctypedef api class Message [             # <<<<<<<<<<<<<<
+ *     type   PyMPIMessage_Type,
+ *     object PyMPIMessageObject,
+ */
+struct PyMPIMessageObject {
+  PyObject_HEAD
+  MPI_Message ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+  PyObject *ob_buf;
+};
+typedef struct PyMPIMessageObject PyMPIMessageObject;
+
+
+/* "mpi4py/MPI.pxd":75
+ *     cdef object      ob_buf
+ * 
+ * ctypedef api class Op [             # <<<<<<<<<<<<<<
+ *     type   PyMPIOp_Type,
+ *     object PyMPIOpObject,
+ */
+struct PyMPIOpObject {
+  PyObject_HEAD
+  MPI_Op ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIOpObject PyMPIOpObject;
+
+
+/* "mpi4py/MPI.pxd":83
+ *     cdef object __weakref__
+ * 
+ * ctypedef api class Group [             # <<<<<<<<<<<<<<
+ *     type   PyMPIGroup_Type,
+ *     object PyMPIGroupObject,
+ */
+struct PyMPIGroupObject {
+  PyObject_HEAD
+  MPI_Group ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIGroupObject PyMPIGroupObject;
+
+
+/* "mpi4py/MPI.pxd":91
+ *     cdef object  __weakref__
+ * 
+ * ctypedef api class Info [             # <<<<<<<<<<<<<<
+ *     type   PyMPIInfo_Type,
+ *     object PyMPIInfoObject,
+ */
+struct PyMPIInfoObject {
+  PyObject_HEAD
+  MPI_Info ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIInfoObject PyMPIInfoObject;
+
+
+/* "mpi4py/MPI.pxd":99
+ *     cdef object __weakref__
+ * 
+ * ctypedef api class Errhandler [             # <<<<<<<<<<<<<<
+ *     type   PyMPIErrhandler_Type,
+ *     object PyMPIErrhandlerObject,
+ */
+struct PyMPIErrhandlerObject {
+  PyObject_HEAD
+  MPI_Errhandler ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIErrhandlerObject PyMPIErrhandlerObject;
+
+
+/* "mpi4py/MPI.pxd":107
+ *     cdef object       __weakref__
+ * 
+ * ctypedef api class Session [             # <<<<<<<<<<<<<<
+ *     type   PyMPISession_Type,
+ *     object PyMPISessionObject,
+ */
+struct PyMPISessionObject {
+  PyObject_HEAD
+  MPI_Session ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPISessionObject PyMPISessionObject;
+
+
+/* "mpi4py/MPI.pxd":115
+ *     cdef object     __weakref__
+ * 
+ * ctypedef api class Comm [             # <<<<<<<<<<<<<<
+ *     type   PyMPIComm_Type,
+ *     object PyMPICommObject,
+ */
+struct PyMPICommObject {
+  PyObject_HEAD
+  MPI_Comm ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPICommObject PyMPICommObject;
+
+
+/* "mpi4py/MPI.pxd":123
+ *     cdef object __weakref__
+ * 
+ * ctypedef api class Intracomm(Comm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIIntracomm_Type,
+ *     object PyMPIIntracommObject,
+ */
+struct PyMPIIntracommObject {
+  struct PyMPICommObject __pyx_base;
+};
+typedef struct PyMPIIntracommObject PyMPIIntracommObject;
+
+
+/* "mpi4py/MPI.pxd":129
+ *     pass
+ * 
+ * ctypedef api class Topocomm(Intracomm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPITopocomm_Type,
+ *     object PyMPITopocommObject,
+ */
+struct PyMPITopocommObject {
+  struct PyMPIIntracommObject __pyx_base;
+};
+typedef struct PyMPITopocommObject PyMPITopocommObject;
+
+
+/* "mpi4py/MPI.pxd":135
+ *     pass
+ * 
+ * ctypedef api class Cartcomm(Topocomm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPICartcomm_Type,
+ *     object PyMPICartcommObject,
+ */
+struct PyMPICartcommObject {
+  struct PyMPITopocommObject __pyx_base;
+};
+typedef struct PyMPICartcommObject PyMPICartcommObject;
+
+
+/* "mpi4py/MPI.pxd":141
+ *     pass
+ * 
+ * ctypedef api class Graphcomm(Topocomm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIGraphcomm_Type,
+ *     object PyMPIGraphcommObject,
+ */
+struct PyMPIGraphcommObject {
+  struct PyMPITopocommObject __pyx_base;
+};
+typedef struct PyMPIGraphcommObject PyMPIGraphcommObject;
+
+
+/* "mpi4py/MPI.pxd":147
+ *     pass
+ * 
+ * ctypedef api class Distgraphcomm(Topocomm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIDistgraphcomm_Type,
+ *     object PyMPIDistgraphcommObject,
+ */
+struct PyMPIDistgraphcommObject {
+  struct PyMPITopocommObject __pyx_base;
+};
+typedef struct PyMPIDistgraphcommObject PyMPIDistgraphcommObject;
+
+
+/* "mpi4py/MPI.pxd":153
+ *     pass
+ * 
+ * ctypedef api class Intercomm(Comm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIIntercomm_Type,
+ *     object PyMPIIntercommObject,
+ */
+struct PyMPIIntercommObject {
+  struct PyMPICommObject __pyx_base;
+};
+typedef struct PyMPIIntercommObject PyMPIIntercommObject;
+
+
+/* "mpi4py/MPI.pxd":159
+ *     pass
+ * 
+ * ctypedef api class Win [             # <<<<<<<<<<<<<<
+ *     type   PyMPIWin_Type,
+ *     object PyMPIWinObject,
+ */
+struct PyMPIWinObject {
+  PyObject_HEAD
+  MPI_Win ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+  PyObject *ob_mem;
+};
+typedef struct PyMPIWinObject PyMPIWinObject;
+
+
+/* "mpi4py/MPI.pxd":168
+ *     cdef object   ob_mem
+ * 
+ * ctypedef api class File [             # <<<<<<<<<<<<<<
+ *     type   PyMPIFile_Type,
+ *     object PyMPIFileObject,
+ */
+struct PyMPIFileObject {
+  PyObject_HEAD
+  MPI_File ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIFileObject PyMPIFileObject;
+
+
+/* "LogisticRegression.pyx":65
  *     return lst
  * 
  * cdef class LogisticRegression(object):             # <<<<<<<<<<<<<<
@@ -1863,6 +2198,12 @@ static int __Pyx_CheckKeywordStrings(PyObject *kw, const char* function_name, in
 
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
+
+/* ArgTypeTest.proto */
+#define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
+    ((likely(__Pyx_IS_TYPE(obj, type) | (none_allowed && (obj == Py_None)))) ? 1 :\
+        __Pyx__ArgTypeTest(obj, type, name, exact))
+static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
 
 /* IncludeStructmemberH.proto */
 #include <structmember.h>
@@ -2386,6 +2727,10 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4real_real(PyComplexObject *__pyx_v_self); /* proto*/
 static CYTHON_INLINE double __pyx_f_7cpython_7complex_7complex_4imag_imag(PyComplexObject *__pyx_v_self); /* proto*/
 
+/* Module declarations from "mpi4py.libmpi" */
+
+/* Module declarations from "mpi4py.MPI" */
+
 /* Module declarations from "libc.string" */
 
 /* Module declarations from "libcpp.string" */
@@ -2502,10 +2847,12 @@ static const char __pyx_k_n[] = "n";
 static const char __pyx_k_x[] = "x";
 static const char __pyx_k_y[] = "y";
 static const char __pyx_k_gc[] = "gc";
-static const char __pyx_k__14[] = "?";
+static const char __pyx_k__22[] = "?";
 static const char __pyx_k_fit[] = "fit";
+static const char __pyx_k_comm[] = "comm";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
+static const char __pyx_k_rank[] = "rank";
 static const char __pyx_k_self[] = "self";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_range[] = "range";
@@ -2526,6 +2873,7 @@ static const char __pyx_k_py_train[] = "py_train";
 static const char __pyx_k_setstate[] = "__setstate__";
 static const char __pyx_k_TypeError[] = "TypeError";
 static const char __pyx_k_isenabled[] = "isenabled";
+static const char __pyx_k_n_process[] = "n_process";
 static const char __pyx_k_pyx_state[] = "__pyx_state";
 static const char __pyx_k_reduce_ex[] = "__reduce_ex__";
 static const char __pyx_k_batch_size[] = "batch_size";
@@ -2533,16 +2881,20 @@ static const char __pyx_k_model_path[] = "model_path";
 static const char __pyx_k_num_epochs[] = "num_epochs";
 static const char __pyx_k_py_predict[] = "py_predict";
 static const char __pyx_k_MemoryError[] = "MemoryError";
+static const char __pyx_k_py_lr_train[] = "py_lr_train";
 static const char __pyx_k_is_coroutine[] = "_is_coroutine";
 static const char __pyx_k_num_features[] = "num_features";
 static const char __pyx_k_stringsource[] = "<stringsource>";
 static const char __pyx_k_learning_rate[] = "learning_rate";
 static const char __pyx_k_predict_proba[] = "predict_proba";
+static const char __pyx_k_py_lr_predict[] = "py_lr_predict";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
+static const char __pyx_k_py_lr_train_root[] = "py_lr_train_root";
 static const char __pyx_k_LogisticRegression[] = "LogisticRegression";
 static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
+static const char __pyx_k_py_lr_predict_root[] = "py_lr_predict_root";
 static const char __pyx_k_LogisticRegression_fit[] = "LogisticRegression.fit";
 static const char __pyx_k_LogisticRegression_pyx[] = "LogisticRegression.pyx";
 static const char __pyx_k_LogisticRegression_predict[] = "LogisticRegression.predict";
@@ -2561,6 +2913,10 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_8__reduce_cy
 static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_10__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_18LogisticRegression_LogisticRegression *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_18LogisticRegression_py_train(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_learning_rate, PyObject *__pyx_v_epochs, PyObject *__pyx_v_batch_size, PyObject *__pyx_v_l1_reg, PyObject *__pyx_v_l2_reg, PyObject *__pyx_v_model_path); /* proto */
 static PyObject *__pyx_pf_18LogisticRegression_2py_predict(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_model_path); /* proto */
+static PyObject *__pyx_pf_18LogisticRegression_4py_lr_train_root(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_n_process, PyObject *__pyx_v_learning_rate, PyObject *__pyx_v_epochs, PyObject *__pyx_v_batch_size, PyObject *__pyx_v_l1_reg, PyObject *__pyx_v_l2_reg, PyObject *__pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm); /* proto */
+static PyObject *__pyx_pf_18LogisticRegression_6py_lr_train(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_rank, PyObject *__pyx_v_n_process, PyObject *__pyx_v_learning_rate, PyObject *__pyx_v_epochs, PyObject *__pyx_v_batch_size, PyObject *__pyx_v_l1_reg, PyObject *__pyx_v_l2_reg, PyObject *__pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm); /* proto */
+static PyObject *__pyx_pf_18LogisticRegression_8py_lr_predict_root(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_n_process, PyObject *__pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm); /* proto */
+static PyObject *__pyx_pf_18LogisticRegression_10py_lr_predict(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_rank, PyObject *__pyx_v_n_process, PyObject *__pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm); /* proto */
 static PyObject *__pyx_tp_new_18LogisticRegression_LogisticRegression(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
@@ -2589,6 +2945,50 @@ typedef struct {
   #ifdef __Pyx_Coroutine_USED
   PyTypeObject *__pyx_CoroutineType;
   #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  PyObject *PyMPIDatatype_Type;
+  PyObject *PyMPIStatus_Type;
+  PyObject *PyMPIRequest_Type;
+  PyObject *PyMPIPrequest_Type;
+  PyObject *PyMPIGrequest_Type;
+  PyObject *PyMPIMessage_Type;
+  PyObject *PyMPIOp_Type;
+  PyObject *PyMPIGroup_Type;
+  PyObject *PyMPIInfo_Type;
+  PyObject *PyMPIErrhandler_Type;
+  PyObject *PyMPISession_Type;
+  PyObject *PyMPIComm_Type;
+  PyObject *PyMPIIntracomm_Type;
+  PyObject *PyMPITopocomm_Type;
+  PyObject *PyMPICartcomm_Type;
+  PyObject *PyMPIGraphcomm_Type;
+  PyObject *PyMPIDistgraphcomm_Type;
+  PyObject *PyMPIIntercomm_Type;
+  PyObject *PyMPIWin_Type;
+  PyObject *PyMPIFile_Type;
+  #endif
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Datatype;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Status;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Request;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Prequest;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Grequest;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Message;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Op;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Group;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Info;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Errhandler;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Session;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Comm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Intracomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Topocomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Cartcomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Graphcomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Distgraphcomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Intercomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Win;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_File;
   #if CYTHON_USE_MODULE_STATE
   #endif
   #if CYTHON_USE_MODULE_STATE
@@ -2698,10 +3098,11 @@ typedef struct {
   PyObject *__pyx_kp_s_LogisticRegression_pyx;
   PyObject *__pyx_n_s_MemoryError;
   PyObject *__pyx_n_s_TypeError;
-  PyObject *__pyx_n_s__14;
+  PyObject *__pyx_n_s__22;
   PyObject *__pyx_n_s_asyncio_coroutines;
   PyObject *__pyx_n_s_batch_size;
   PyObject *__pyx_n_s_cline_in_traceback;
+  PyObject *__pyx_n_s_comm;
   PyObject *__pyx_n_u_d;
   PyObject *__pyx_kp_u_disable;
   PyObject *__pyx_kp_u_enable;
@@ -2719,15 +3120,21 @@ typedef struct {
   PyObject *__pyx_n_s_main;
   PyObject *__pyx_n_s_model_path;
   PyObject *__pyx_n_s_n;
+  PyObject *__pyx_n_s_n_process;
   PyObject *__pyx_n_s_name;
   PyObject *__pyx_n_s_num_epochs;
   PyObject *__pyx_n_s_num_features;
   PyObject *__pyx_n_s_predict;
   PyObject *__pyx_n_s_predict_proba;
+  PyObject *__pyx_n_s_py_lr_predict;
+  PyObject *__pyx_n_s_py_lr_predict_root;
+  PyObject *__pyx_n_s_py_lr_train;
+  PyObject *__pyx_n_s_py_lr_train_root;
   PyObject *__pyx_n_s_py_predict;
   PyObject *__pyx_n_s_py_train;
   PyObject *__pyx_n_s_pyx_state;
   PyObject *__pyx_n_s_range;
+  PyObject *__pyx_n_s_rank;
   PyObject *__pyx_n_s_reduce;
   PyObject *__pyx_n_s_reduce_cython;
   PyObject *__pyx_n_s_reduce_ex;
@@ -2750,6 +3157,10 @@ typedef struct {
   PyObject *__pyx_tuple__8;
   PyObject *__pyx_tuple__10;
   PyObject *__pyx_tuple__12;
+  PyObject *__pyx_tuple__14;
+  PyObject *__pyx_tuple__16;
+  PyObject *__pyx_tuple__18;
+  PyObject *__pyx_tuple__20;
   PyObject *__pyx_codeobj__2;
   PyObject *__pyx_codeobj__4;
   PyObject *__pyx_codeobj__5;
@@ -2757,6 +3168,10 @@ typedef struct {
   PyObject *__pyx_codeobj__9;
   PyObject *__pyx_codeobj__11;
   PyObject *__pyx_codeobj__13;
+  PyObject *__pyx_codeobj__15;
+  PyObject *__pyx_codeobj__17;
+  PyObject *__pyx_codeobj__19;
+  PyObject *__pyx_codeobj__21;
 } __pyx_mstate;
 
 #if CYTHON_USE_MODULE_STATE
@@ -2799,6 +3214,46 @@ static int __pyx_m_clear(PyObject *m) {
   #ifdef __Pyx_FusedFunction_USED
   Py_CLEAR(clear_module_state->__pyx_FusedFunctionType);
   #endif
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Datatype);
+  Py_CLEAR(clear_module_state->PyMPIDatatype_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Status);
+  Py_CLEAR(clear_module_state->PyMPIStatus_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Request);
+  Py_CLEAR(clear_module_state->PyMPIRequest_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Prequest);
+  Py_CLEAR(clear_module_state->PyMPIPrequest_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Grequest);
+  Py_CLEAR(clear_module_state->PyMPIGrequest_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Message);
+  Py_CLEAR(clear_module_state->PyMPIMessage_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Op);
+  Py_CLEAR(clear_module_state->PyMPIOp_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Group);
+  Py_CLEAR(clear_module_state->PyMPIGroup_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Info);
+  Py_CLEAR(clear_module_state->PyMPIInfo_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Errhandler);
+  Py_CLEAR(clear_module_state->PyMPIErrhandler_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Session);
+  Py_CLEAR(clear_module_state->PyMPISession_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Comm);
+  Py_CLEAR(clear_module_state->PyMPIComm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Intracomm);
+  Py_CLEAR(clear_module_state->PyMPIIntracomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Topocomm);
+  Py_CLEAR(clear_module_state->PyMPITopocomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Cartcomm);
+  Py_CLEAR(clear_module_state->PyMPICartcomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Graphcomm);
+  Py_CLEAR(clear_module_state->PyMPIGraphcomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Distgraphcomm);
+  Py_CLEAR(clear_module_state->PyMPIDistgraphcomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Intercomm);
+  Py_CLEAR(clear_module_state->PyMPIIntercomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Win);
+  Py_CLEAR(clear_module_state->PyMPIWin_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_File);
+  Py_CLEAR(clear_module_state->PyMPIFile_Type);
   Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4type_type);
   Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4bool_bool);
   Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_7complex_complex);
@@ -2814,10 +3269,11 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_kp_s_LogisticRegression_pyx);
   Py_CLEAR(clear_module_state->__pyx_n_s_MemoryError);
   Py_CLEAR(clear_module_state->__pyx_n_s_TypeError);
-  Py_CLEAR(clear_module_state->__pyx_n_s__14);
+  Py_CLEAR(clear_module_state->__pyx_n_s__22);
   Py_CLEAR(clear_module_state->__pyx_n_s_asyncio_coroutines);
   Py_CLEAR(clear_module_state->__pyx_n_s_batch_size);
   Py_CLEAR(clear_module_state->__pyx_n_s_cline_in_traceback);
+  Py_CLEAR(clear_module_state->__pyx_n_s_comm);
   Py_CLEAR(clear_module_state->__pyx_n_u_d);
   Py_CLEAR(clear_module_state->__pyx_kp_u_disable);
   Py_CLEAR(clear_module_state->__pyx_kp_u_enable);
@@ -2835,15 +3291,21 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_main);
   Py_CLEAR(clear_module_state->__pyx_n_s_model_path);
   Py_CLEAR(clear_module_state->__pyx_n_s_n);
+  Py_CLEAR(clear_module_state->__pyx_n_s_n_process);
   Py_CLEAR(clear_module_state->__pyx_n_s_name);
   Py_CLEAR(clear_module_state->__pyx_n_s_num_epochs);
   Py_CLEAR(clear_module_state->__pyx_n_s_num_features);
   Py_CLEAR(clear_module_state->__pyx_n_s_predict);
   Py_CLEAR(clear_module_state->__pyx_n_s_predict_proba);
+  Py_CLEAR(clear_module_state->__pyx_n_s_py_lr_predict);
+  Py_CLEAR(clear_module_state->__pyx_n_s_py_lr_predict_root);
+  Py_CLEAR(clear_module_state->__pyx_n_s_py_lr_train);
+  Py_CLEAR(clear_module_state->__pyx_n_s_py_lr_train_root);
   Py_CLEAR(clear_module_state->__pyx_n_s_py_predict);
   Py_CLEAR(clear_module_state->__pyx_n_s_py_train);
   Py_CLEAR(clear_module_state->__pyx_n_s_pyx_state);
   Py_CLEAR(clear_module_state->__pyx_n_s_range);
+  Py_CLEAR(clear_module_state->__pyx_n_s_rank);
   Py_CLEAR(clear_module_state->__pyx_n_s_reduce);
   Py_CLEAR(clear_module_state->__pyx_n_s_reduce_cython);
   Py_CLEAR(clear_module_state->__pyx_n_s_reduce_ex);
@@ -2866,6 +3328,10 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_tuple__8);
   Py_CLEAR(clear_module_state->__pyx_tuple__10);
   Py_CLEAR(clear_module_state->__pyx_tuple__12);
+  Py_CLEAR(clear_module_state->__pyx_tuple__14);
+  Py_CLEAR(clear_module_state->__pyx_tuple__16);
+  Py_CLEAR(clear_module_state->__pyx_tuple__18);
+  Py_CLEAR(clear_module_state->__pyx_tuple__20);
   Py_CLEAR(clear_module_state->__pyx_codeobj__2);
   Py_CLEAR(clear_module_state->__pyx_codeobj__4);
   Py_CLEAR(clear_module_state->__pyx_codeobj__5);
@@ -2873,6 +3339,10 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_codeobj__9);
   Py_CLEAR(clear_module_state->__pyx_codeobj__11);
   Py_CLEAR(clear_module_state->__pyx_codeobj__13);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__15);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__17);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__19);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__21);
   return 0;
 }
 #endif
@@ -2893,6 +3363,46 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   #ifdef __Pyx_FusedFunction_USED
   Py_VISIT(traverse_module_state->__pyx_FusedFunctionType);
   #endif
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Datatype);
+  Py_VISIT(traverse_module_state->PyMPIDatatype_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Status);
+  Py_VISIT(traverse_module_state->PyMPIStatus_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Request);
+  Py_VISIT(traverse_module_state->PyMPIRequest_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Prequest);
+  Py_VISIT(traverse_module_state->PyMPIPrequest_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Grequest);
+  Py_VISIT(traverse_module_state->PyMPIGrequest_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Message);
+  Py_VISIT(traverse_module_state->PyMPIMessage_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Op);
+  Py_VISIT(traverse_module_state->PyMPIOp_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Group);
+  Py_VISIT(traverse_module_state->PyMPIGroup_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Info);
+  Py_VISIT(traverse_module_state->PyMPIInfo_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Errhandler);
+  Py_VISIT(traverse_module_state->PyMPIErrhandler_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Session);
+  Py_VISIT(traverse_module_state->PyMPISession_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Comm);
+  Py_VISIT(traverse_module_state->PyMPIComm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Intracomm);
+  Py_VISIT(traverse_module_state->PyMPIIntracomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Topocomm);
+  Py_VISIT(traverse_module_state->PyMPITopocomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Cartcomm);
+  Py_VISIT(traverse_module_state->PyMPICartcomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Graphcomm);
+  Py_VISIT(traverse_module_state->PyMPIGraphcomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Distgraphcomm);
+  Py_VISIT(traverse_module_state->PyMPIDistgraphcomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Intercomm);
+  Py_VISIT(traverse_module_state->PyMPIIntercomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Win);
+  Py_VISIT(traverse_module_state->PyMPIWin_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_File);
+  Py_VISIT(traverse_module_state->PyMPIFile_Type);
   Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4type_type);
   Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4bool_bool);
   Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_7complex_complex);
@@ -2908,10 +3418,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_kp_s_LogisticRegression_pyx);
   Py_VISIT(traverse_module_state->__pyx_n_s_MemoryError);
   Py_VISIT(traverse_module_state->__pyx_n_s_TypeError);
-  Py_VISIT(traverse_module_state->__pyx_n_s__14);
+  Py_VISIT(traverse_module_state->__pyx_n_s__22);
   Py_VISIT(traverse_module_state->__pyx_n_s_asyncio_coroutines);
   Py_VISIT(traverse_module_state->__pyx_n_s_batch_size);
   Py_VISIT(traverse_module_state->__pyx_n_s_cline_in_traceback);
+  Py_VISIT(traverse_module_state->__pyx_n_s_comm);
   Py_VISIT(traverse_module_state->__pyx_n_u_d);
   Py_VISIT(traverse_module_state->__pyx_kp_u_disable);
   Py_VISIT(traverse_module_state->__pyx_kp_u_enable);
@@ -2929,15 +3440,21 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_main);
   Py_VISIT(traverse_module_state->__pyx_n_s_model_path);
   Py_VISIT(traverse_module_state->__pyx_n_s_n);
+  Py_VISIT(traverse_module_state->__pyx_n_s_n_process);
   Py_VISIT(traverse_module_state->__pyx_n_s_name);
   Py_VISIT(traverse_module_state->__pyx_n_s_num_epochs);
   Py_VISIT(traverse_module_state->__pyx_n_s_num_features);
   Py_VISIT(traverse_module_state->__pyx_n_s_predict);
   Py_VISIT(traverse_module_state->__pyx_n_s_predict_proba);
+  Py_VISIT(traverse_module_state->__pyx_n_s_py_lr_predict);
+  Py_VISIT(traverse_module_state->__pyx_n_s_py_lr_predict_root);
+  Py_VISIT(traverse_module_state->__pyx_n_s_py_lr_train);
+  Py_VISIT(traverse_module_state->__pyx_n_s_py_lr_train_root);
   Py_VISIT(traverse_module_state->__pyx_n_s_py_predict);
   Py_VISIT(traverse_module_state->__pyx_n_s_py_train);
   Py_VISIT(traverse_module_state->__pyx_n_s_pyx_state);
   Py_VISIT(traverse_module_state->__pyx_n_s_range);
+  Py_VISIT(traverse_module_state->__pyx_n_s_rank);
   Py_VISIT(traverse_module_state->__pyx_n_s_reduce);
   Py_VISIT(traverse_module_state->__pyx_n_s_reduce_cython);
   Py_VISIT(traverse_module_state->__pyx_n_s_reduce_ex);
@@ -2960,6 +3477,10 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_tuple__8);
   Py_VISIT(traverse_module_state->__pyx_tuple__10);
   Py_VISIT(traverse_module_state->__pyx_tuple__12);
+  Py_VISIT(traverse_module_state->__pyx_tuple__14);
+  Py_VISIT(traverse_module_state->__pyx_tuple__16);
+  Py_VISIT(traverse_module_state->__pyx_tuple__18);
+  Py_VISIT(traverse_module_state->__pyx_tuple__20);
   Py_VISIT(traverse_module_state->__pyx_codeobj__2);
   Py_VISIT(traverse_module_state->__pyx_codeobj__4);
   Py_VISIT(traverse_module_state->__pyx_codeobj__5);
@@ -2967,6 +3488,10 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_codeobj__9);
   Py_VISIT(traverse_module_state->__pyx_codeobj__11);
   Py_VISIT(traverse_module_state->__pyx_codeobj__13);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__15);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__17);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__19);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__21);
   return 0;
 }
 #endif
@@ -2995,6 +3520,50 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #ifdef __Pyx_Coroutine_USED
 #define __pyx_CoroutineType __pyx_mstate_global->__pyx_CoroutineType
 #endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#define PyMPIDatatype_Type __pyx_mstate_global->PyMPIDatatype_Type
+#define PyMPIStatus_Type __pyx_mstate_global->PyMPIStatus_Type
+#define PyMPIRequest_Type __pyx_mstate_global->PyMPIRequest_Type
+#define PyMPIPrequest_Type __pyx_mstate_global->PyMPIPrequest_Type
+#define PyMPIGrequest_Type __pyx_mstate_global->PyMPIGrequest_Type
+#define PyMPIMessage_Type __pyx_mstate_global->PyMPIMessage_Type
+#define PyMPIOp_Type __pyx_mstate_global->PyMPIOp_Type
+#define PyMPIGroup_Type __pyx_mstate_global->PyMPIGroup_Type
+#define PyMPIInfo_Type __pyx_mstate_global->PyMPIInfo_Type
+#define PyMPIErrhandler_Type __pyx_mstate_global->PyMPIErrhandler_Type
+#define PyMPISession_Type __pyx_mstate_global->PyMPISession_Type
+#define PyMPIComm_Type __pyx_mstate_global->PyMPIComm_Type
+#define PyMPIIntracomm_Type __pyx_mstate_global->PyMPIIntracomm_Type
+#define PyMPITopocomm_Type __pyx_mstate_global->PyMPITopocomm_Type
+#define PyMPICartcomm_Type __pyx_mstate_global->PyMPICartcomm_Type
+#define PyMPIGraphcomm_Type __pyx_mstate_global->PyMPIGraphcomm_Type
+#define PyMPIDistgraphcomm_Type __pyx_mstate_global->PyMPIDistgraphcomm_Type
+#define PyMPIIntercomm_Type __pyx_mstate_global->PyMPIIntercomm_Type
+#define PyMPIWin_Type __pyx_mstate_global->PyMPIWin_Type
+#define PyMPIFile_Type __pyx_mstate_global->PyMPIFile_Type
+#endif
+#define __pyx_ptype_6mpi4py_3MPI_Datatype __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Datatype
+#define __pyx_ptype_6mpi4py_3MPI_Status __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Status
+#define __pyx_ptype_6mpi4py_3MPI_Request __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Request
+#define __pyx_ptype_6mpi4py_3MPI_Prequest __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Prequest
+#define __pyx_ptype_6mpi4py_3MPI_Grequest __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Grequest
+#define __pyx_ptype_6mpi4py_3MPI_Message __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Message
+#define __pyx_ptype_6mpi4py_3MPI_Op __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Op
+#define __pyx_ptype_6mpi4py_3MPI_Group __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Group
+#define __pyx_ptype_6mpi4py_3MPI_Info __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Info
+#define __pyx_ptype_6mpi4py_3MPI_Errhandler __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Errhandler
+#define __pyx_ptype_6mpi4py_3MPI_Session __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Session
+#define __pyx_ptype_6mpi4py_3MPI_Comm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Comm
+#define __pyx_ptype_6mpi4py_3MPI_Intracomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Intracomm
+#define __pyx_ptype_6mpi4py_3MPI_Topocomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Topocomm
+#define __pyx_ptype_6mpi4py_3MPI_Cartcomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Cartcomm
+#define __pyx_ptype_6mpi4py_3MPI_Graphcomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Graphcomm
+#define __pyx_ptype_6mpi4py_3MPI_Distgraphcomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Distgraphcomm
+#define __pyx_ptype_6mpi4py_3MPI_Intercomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Intercomm
+#define __pyx_ptype_6mpi4py_3MPI_Win __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Win
+#define __pyx_ptype_6mpi4py_3MPI_File __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_File
 #if CYTHON_USE_MODULE_STATE
 #endif
 #if CYTHON_USE_MODULE_STATE
@@ -3104,10 +3673,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_kp_s_LogisticRegression_pyx __pyx_mstate_global->__pyx_kp_s_LogisticRegression_pyx
 #define __pyx_n_s_MemoryError __pyx_mstate_global->__pyx_n_s_MemoryError
 #define __pyx_n_s_TypeError __pyx_mstate_global->__pyx_n_s_TypeError
-#define __pyx_n_s__14 __pyx_mstate_global->__pyx_n_s__14
+#define __pyx_n_s__22 __pyx_mstate_global->__pyx_n_s__22
 #define __pyx_n_s_asyncio_coroutines __pyx_mstate_global->__pyx_n_s_asyncio_coroutines
 #define __pyx_n_s_batch_size __pyx_mstate_global->__pyx_n_s_batch_size
 #define __pyx_n_s_cline_in_traceback __pyx_mstate_global->__pyx_n_s_cline_in_traceback
+#define __pyx_n_s_comm __pyx_mstate_global->__pyx_n_s_comm
 #define __pyx_n_u_d __pyx_mstate_global->__pyx_n_u_d
 #define __pyx_kp_u_disable __pyx_mstate_global->__pyx_kp_u_disable
 #define __pyx_kp_u_enable __pyx_mstate_global->__pyx_kp_u_enable
@@ -3125,15 +3695,21 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_main __pyx_mstate_global->__pyx_n_s_main
 #define __pyx_n_s_model_path __pyx_mstate_global->__pyx_n_s_model_path
 #define __pyx_n_s_n __pyx_mstate_global->__pyx_n_s_n
+#define __pyx_n_s_n_process __pyx_mstate_global->__pyx_n_s_n_process
 #define __pyx_n_s_name __pyx_mstate_global->__pyx_n_s_name
 #define __pyx_n_s_num_epochs __pyx_mstate_global->__pyx_n_s_num_epochs
 #define __pyx_n_s_num_features __pyx_mstate_global->__pyx_n_s_num_features
 #define __pyx_n_s_predict __pyx_mstate_global->__pyx_n_s_predict
 #define __pyx_n_s_predict_proba __pyx_mstate_global->__pyx_n_s_predict_proba
+#define __pyx_n_s_py_lr_predict __pyx_mstate_global->__pyx_n_s_py_lr_predict
+#define __pyx_n_s_py_lr_predict_root __pyx_mstate_global->__pyx_n_s_py_lr_predict_root
+#define __pyx_n_s_py_lr_train __pyx_mstate_global->__pyx_n_s_py_lr_train
+#define __pyx_n_s_py_lr_train_root __pyx_mstate_global->__pyx_n_s_py_lr_train_root
 #define __pyx_n_s_py_predict __pyx_mstate_global->__pyx_n_s_py_predict
 #define __pyx_n_s_py_train __pyx_mstate_global->__pyx_n_s_py_train
 #define __pyx_n_s_pyx_state __pyx_mstate_global->__pyx_n_s_pyx_state
 #define __pyx_n_s_range __pyx_mstate_global->__pyx_n_s_range
+#define __pyx_n_s_rank __pyx_mstate_global->__pyx_n_s_rank
 #define __pyx_n_s_reduce __pyx_mstate_global->__pyx_n_s_reduce
 #define __pyx_n_s_reduce_cython __pyx_mstate_global->__pyx_n_s_reduce_cython
 #define __pyx_n_s_reduce_ex __pyx_mstate_global->__pyx_n_s_reduce_ex
@@ -3156,6 +3732,10 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_tuple__8 __pyx_mstate_global->__pyx_tuple__8
 #define __pyx_tuple__10 __pyx_mstate_global->__pyx_tuple__10
 #define __pyx_tuple__12 __pyx_mstate_global->__pyx_tuple__12
+#define __pyx_tuple__14 __pyx_mstate_global->__pyx_tuple__14
+#define __pyx_tuple__16 __pyx_mstate_global->__pyx_tuple__16
+#define __pyx_tuple__18 __pyx_mstate_global->__pyx_tuple__18
+#define __pyx_tuple__20 __pyx_mstate_global->__pyx_tuple__20
 #define __pyx_codeobj__2 __pyx_mstate_global->__pyx_codeobj__2
 #define __pyx_codeobj__4 __pyx_mstate_global->__pyx_codeobj__4
 #define __pyx_codeobj__5 __pyx_mstate_global->__pyx_codeobj__5
@@ -3163,6 +3743,10 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_codeobj__9 __pyx_mstate_global->__pyx_codeobj__9
 #define __pyx_codeobj__11 __pyx_mstate_global->__pyx_codeobj__11
 #define __pyx_codeobj__13 __pyx_mstate_global->__pyx_codeobj__13
+#define __pyx_codeobj__15 __pyx_mstate_global->__pyx_codeobj__15
+#define __pyx_codeobj__17 __pyx_mstate_global->__pyx_codeobj__17
+#define __pyx_codeobj__19 __pyx_mstate_global->__pyx_codeobj__19
+#define __pyx_codeobj__21 __pyx_mstate_global->__pyx_codeobj__21
 /* #### Code section: module_code ### */
 
 /* "string.from_py":13
@@ -4168,7 +4752,7 @@ static CYTHON_INLINE void __pyx_f_7cpython_5array_zero(arrayobject *__pyx_v_self
   /* function exit code */
 }
 
-/* "LogisticRegression.pyx":30
+/* "LogisticRegression.pyx":51
  * 
  * 
  * cdef convert_double_ptr_to_python(double *ptr, int n):             # <<<<<<<<<<<<<<
@@ -4191,19 +4775,19 @@ static PyObject *__pyx_f_18LogisticRegression_convert_double_ptr_to_python(doubl
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("convert_double_ptr_to_python", 1);
 
-  /* "LogisticRegression.pyx":32
+  /* "LogisticRegression.pyx":53
  * cdef convert_double_ptr_to_python(double *ptr, int n):
  *     cdef int i
  *     lst=[]             # <<<<<<<<<<<<<<
  *     for i in range(n):
  *         lst.append(ptr[i])
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_lst = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "LogisticRegression.pyx":33
+  /* "LogisticRegression.pyx":54
  *     cdef int i
  *     lst=[]
  *     for i in range(n):             # <<<<<<<<<<<<<<
@@ -4215,20 +4799,20 @@ static PyObject *__pyx_f_18LogisticRegression_convert_double_ptr_to_python(doubl
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "LogisticRegression.pyx":34
+    /* "LogisticRegression.pyx":55
  *     lst=[]
  *     for i in range(n):
  *         lst.append(ptr[i])             # <<<<<<<<<<<<<<
  *     return lst
  * 
  */
-    __pyx_t_1 = PyFloat_FromDouble((__pyx_v_ptr[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
+    __pyx_t_1 = PyFloat_FromDouble((__pyx_v_ptr[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = __Pyx_PyList_Append(__pyx_v_lst, __pyx_t_1); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 34, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyList_Append(__pyx_v_lst, __pyx_t_1); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "LogisticRegression.pyx":35
+  /* "LogisticRegression.pyx":56
  *     for i in range(n):
  *         lst.append(ptr[i])
  *     return lst             # <<<<<<<<<<<<<<
@@ -4240,7 +4824,7 @@ static PyObject *__pyx_f_18LogisticRegression_convert_double_ptr_to_python(doubl
   __pyx_r = __pyx_v_lst;
   goto __pyx_L0;
 
-  /* "LogisticRegression.pyx":30
+  /* "LogisticRegression.pyx":51
  * 
  * 
  * cdef convert_double_ptr_to_python(double *ptr, int n):             # <<<<<<<<<<<<<<
@@ -4260,7 +4844,7 @@ static PyObject *__pyx_f_18LogisticRegression_convert_double_ptr_to_python(doubl
   return __pyx_r;
 }
 
-/* "LogisticRegression.pyx":37
+/* "LogisticRegression.pyx":58
  *     return lst
  * 
  * cdef convert_int_ptr_to_python(int *ptr, int n):             # <<<<<<<<<<<<<<
@@ -4283,19 +4867,19 @@ static PyObject *__pyx_f_18LogisticRegression_convert_int_ptr_to_python(int *__p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("convert_int_ptr_to_python", 1);
 
-  /* "LogisticRegression.pyx":39
+  /* "LogisticRegression.pyx":60
  * cdef convert_int_ptr_to_python(int *ptr, int n):
  *     cdef int i
  *     lst=[]             # <<<<<<<<<<<<<<
  *     for i in range(n):
  *         lst.append(ptr[i])
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_lst = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "LogisticRegression.pyx":40
+  /* "LogisticRegression.pyx":61
  *     cdef int i
  *     lst=[]
  *     for i in range(n):             # <<<<<<<<<<<<<<
@@ -4307,20 +4891,20 @@ static PyObject *__pyx_f_18LogisticRegression_convert_int_ptr_to_python(int *__p
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "LogisticRegression.pyx":41
+    /* "LogisticRegression.pyx":62
  *     lst=[]
  *     for i in range(n):
  *         lst.append(ptr[i])             # <<<<<<<<<<<<<<
  *     return lst
  * 
  */
-    __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_ptr[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_ptr[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 62, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = __Pyx_PyList_Append(__pyx_v_lst, __pyx_t_1); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 41, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyList_Append(__pyx_v_lst, __pyx_t_1); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 62, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "LogisticRegression.pyx":42
+  /* "LogisticRegression.pyx":63
  *     for i in range(n):
  *         lst.append(ptr[i])
  *     return lst             # <<<<<<<<<<<<<<
@@ -4332,7 +4916,7 @@ static PyObject *__pyx_f_18LogisticRegression_convert_int_ptr_to_python(int *__p
   __pyx_r = __pyx_v_lst;
   goto __pyx_L0;
 
-  /* "LogisticRegression.pyx":37
+  /* "LogisticRegression.pyx":58
  *     return lst
  * 
  * cdef convert_int_ptr_to_python(int *ptr, int n):             # <<<<<<<<<<<<<<
@@ -4352,7 +4936,7 @@ static PyObject *__pyx_f_18LogisticRegression_convert_int_ptr_to_python(int *__p
   return __pyx_r;
 }
 
-/* "LogisticRegression.pyx":47
+/* "LogisticRegression.pyx":68
  *     cdef logistic_regression lr
  * 
  *     def __init__(self, learning_rate, num_epochs, batch_size, num_features, l1_reg, l2_reg):             # <<<<<<<<<<<<<<
@@ -4411,7 +4995,7 @@ static int __pyx_pw_18LogisticRegression_18LogisticRegression_1__init__(PyObject
           (void)__Pyx_Arg_NewRef_VARARGS(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -4419,9 +5003,9 @@ static int __pyx_pw_18LogisticRegression_18LogisticRegression_1__init__(PyObject
           (void)__Pyx_Arg_NewRef_VARARGS(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 1); __PYX_ERR(0, 47, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 1); __PYX_ERR(0, 68, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -4429,9 +5013,9 @@ static int __pyx_pw_18LogisticRegression_18LogisticRegression_1__init__(PyObject
           (void)__Pyx_Arg_NewRef_VARARGS(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 2); __PYX_ERR(0, 47, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 2); __PYX_ERR(0, 68, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -4439,9 +5023,9 @@ static int __pyx_pw_18LogisticRegression_18LogisticRegression_1__init__(PyObject
           (void)__Pyx_Arg_NewRef_VARARGS(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 3); __PYX_ERR(0, 47, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 3); __PYX_ERR(0, 68, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -4449,9 +5033,9 @@ static int __pyx_pw_18LogisticRegression_18LogisticRegression_1__init__(PyObject
           (void)__Pyx_Arg_NewRef_VARARGS(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 4); __PYX_ERR(0, 47, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 4); __PYX_ERR(0, 68, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -4459,14 +5043,14 @@ static int __pyx_pw_18LogisticRegression_18LogisticRegression_1__init__(PyObject
           (void)__Pyx_Arg_NewRef_VARARGS(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 5); __PYX_ERR(0, 47, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, 5); __PYX_ERR(0, 68, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "__init__") < 0)) __PYX_ERR(0, 47, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "__init__") < 0)) __PYX_ERR(0, 68, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 6)) {
       goto __pyx_L5_argtuple_error;
@@ -4487,7 +5071,7 @@ static int __pyx_pw_18LogisticRegression_18LogisticRegression_1__init__(PyObject
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 47, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 68, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4527,28 +5111,28 @@ static int __pyx_pf_18LogisticRegression_18LogisticRegression___init__(struct __
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
 
-  /* "LogisticRegression.pyx":48
+  /* "LogisticRegression.pyx":69
  * 
  *     def __init__(self, learning_rate, num_epochs, batch_size, num_features, l1_reg, l2_reg):
  *         self.lr = logistic_regression(learning_rate, num_epochs, batch_size, num_features, l1_reg, l2_reg)             # <<<<<<<<<<<<<<
  * 
  *     def fit(self, x_train, y_train, n):
  */
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_learning_rate); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_num_epochs); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_batch_size); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_num_features); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
-  __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_v_l1_reg); if (unlikely((__pyx_t_5 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
-  __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_v_l2_reg); if (unlikely((__pyx_t_6 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_learning_rate); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_num_epochs); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_batch_size); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_num_features); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_v_l1_reg); if (unlikely((__pyx_t_5 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_v_l2_reg); if (unlikely((__pyx_t_6 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L1_error)
   try {
     __pyx_t_7 = logistic_regression(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 48, __pyx_L1_error)
+    __PYX_ERR(0, 69, __pyx_L1_error)
   }
   __pyx_v_self->lr = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_7);
 
-  /* "LogisticRegression.pyx":47
+  /* "LogisticRegression.pyx":68
  *     cdef logistic_regression lr
  * 
  *     def __init__(self, learning_rate, num_epochs, batch_size, num_features, l1_reg, l2_reg):             # <<<<<<<<<<<<<<
@@ -4566,7 +5150,7 @@ static int __pyx_pf_18LogisticRegression_18LogisticRegression___init__(struct __
   return __pyx_r;
 }
 
-/* "LogisticRegression.pyx":50
+/* "LogisticRegression.pyx":71
  *         self.lr = logistic_regression(learning_rate, num_epochs, batch_size, num_features, l1_reg, l2_reg)
  * 
  *     def fit(self, x_train, y_train, n):             # <<<<<<<<<<<<<<
@@ -4633,7 +5217,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -4641,9 +5225,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, 1); __PYX_ERR(0, 50, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, 1); __PYX_ERR(0, 71, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -4651,14 +5235,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, 2); __PYX_ERR(0, 50, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, 2); __PYX_ERR(0, 71, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "fit") < 0)) __PYX_ERR(0, 50, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "fit") < 0)) __PYX_ERR(0, 71, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -4673,7 +5257,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 50, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 71, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4713,59 +5297,59 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_2fit(struct 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("fit", 1);
 
-  /* "LogisticRegression.pyx":51
+  /* "LogisticRegression.pyx":72
  * 
  *     def fit(self, x_train, y_train, n):
  *         cdef array.array x_arr = array.array('d', x_train)             # <<<<<<<<<<<<<<
  *         cdef array.array y_arr = array.array('i', y_train)
  *         self.lr.fit(x_arr.data.as_doubles, y_arr.data.as_ints, n)
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_u_d);
   __Pyx_GIVEREF(__pyx_n_u_d);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 51, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 72, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_x_train);
   __Pyx_GIVEREF(__pyx_v_x_train);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x_train)) __PYX_ERR(0, 51, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x_train)) __PYX_ERR(0, 72, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_x_arr = ((arrayobject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "LogisticRegression.pyx":52
+  /* "LogisticRegression.pyx":73
  *     def fit(self, x_train, y_train, n):
  *         cdef array.array x_arr = array.array('d', x_train)
  *         cdef array.array y_arr = array.array('i', y_train)             # <<<<<<<<<<<<<<
  *         self.lr.fit(x_arr.data.as_doubles, y_arr.data.as_ints, n)
  * 
  */
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_u_i);
   __Pyx_GIVEREF(__pyx_n_u_i);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_n_u_i)) __PYX_ERR(0, 52, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_n_u_i)) __PYX_ERR(0, 73, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_y_train);
   __Pyx_GIVEREF(__pyx_v_y_train);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_y_train)) __PYX_ERR(0, 52, __pyx_L1_error);
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_y_train)) __PYX_ERR(0, 73, __pyx_L1_error);
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_y_arr = ((arrayobject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "LogisticRegression.pyx":53
+  /* "LogisticRegression.pyx":74
  *         cdef array.array x_arr = array.array('d', x_train)
  *         cdef array.array y_arr = array.array('i', y_train)
  *         self.lr.fit(x_arr.data.as_doubles, y_arr.data.as_ints, n)             # <<<<<<<<<<<<<<
  * 
  *     def predict(self, x_test, n):
  */
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 74, __pyx_L1_error)
   __pyx_v_self->lr.fit(__pyx_v_x_arr->data.as_doubles, __pyx_v_y_arr->data.as_ints, __pyx_t_3);
 
-  /* "LogisticRegression.pyx":50
+  /* "LogisticRegression.pyx":71
  *         self.lr = logistic_regression(learning_rate, num_epochs, batch_size, num_features, l1_reg, l2_reg)
  * 
  *     def fit(self, x_train, y_train, n):             # <<<<<<<<<<<<<<
@@ -4789,7 +5373,7 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_2fit(struct 
   return __pyx_r;
 }
 
-/* "LogisticRegression.pyx":55
+/* "LogisticRegression.pyx":76
  *         self.lr.fit(x_arr.data.as_doubles, y_arr.data.as_ints, n)
  * 
  *     def predict(self, x_test, n):             # <<<<<<<<<<<<<<
@@ -4853,7 +5437,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 55, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 76, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -4861,14 +5445,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 55, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 76, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, 1); __PYX_ERR(0, 55, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, 1); __PYX_ERR(0, 76, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict") < 0)) __PYX_ERR(0, 55, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict") < 0)) __PYX_ERR(0, 76, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -4881,7 +5465,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 55, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 76, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4921,28 +5505,28 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_4predict(str
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("predict", 1);
 
-  /* "LogisticRegression.pyx":56
+  /* "LogisticRegression.pyx":77
  * 
  *     def predict(self, x_test, n):
  *         cdef array.array x_arr = array.array('d', x_test)             # <<<<<<<<<<<<<<
  *         return convert_int_ptr_to_python(self.lr.predict(x_arr.data.as_doubles, n), n)
  * 
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_u_d);
   __Pyx_GIVEREF(__pyx_n_u_d);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 56, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 77, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_x_test);
   __Pyx_GIVEREF(__pyx_v_x_test);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x_test)) __PYX_ERR(0, 56, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 56, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x_test)) __PYX_ERR(0, 77, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_x_arr = ((arrayobject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "LogisticRegression.pyx":57
+  /* "LogisticRegression.pyx":78
  *     def predict(self, x_test, n):
  *         cdef array.array x_arr = array.array('d', x_test)
  *         return convert_int_ptr_to_python(self.lr.predict(x_arr.data.as_doubles, n), n)             # <<<<<<<<<<<<<<
@@ -4950,15 +5534,15 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_4predict(str
  *     def predict_proba(self, x_test, n):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L1_error)
-  __pyx_t_2 = __pyx_f_18LogisticRegression_convert_int_ptr_to_python(__pyx_v_self->lr.predict(__pyx_v_x_arr->data.as_doubles, __pyx_t_3), __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_18LogisticRegression_convert_int_ptr_to_python(__pyx_v_self->lr.predict(__pyx_v_x_arr->data.as_doubles, __pyx_t_3), __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "LogisticRegression.pyx":55
+  /* "LogisticRegression.pyx":76
  *         self.lr.fit(x_arr.data.as_doubles, y_arr.data.as_ints, n)
  * 
  *     def predict(self, x_test, n):             # <<<<<<<<<<<<<<
@@ -4979,7 +5563,7 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_4predict(str
   return __pyx_r;
 }
 
-/* "LogisticRegression.pyx":59
+/* "LogisticRegression.pyx":80
  *         return convert_int_ptr_to_python(self.lr.predict(x_arr.data.as_doubles, n), n)
  * 
  *     def predict_proba(self, x_test, n):             # <<<<<<<<<<<<<<
@@ -5043,7 +5627,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 80, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -5051,14 +5635,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 80, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("predict_proba", 1, 2, 2, 1); __PYX_ERR(0, 59, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("predict_proba", 1, 2, 2, 1); __PYX_ERR(0, 80, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict_proba") < 0)) __PYX_ERR(0, 59, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict_proba") < 0)) __PYX_ERR(0, 80, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -5071,7 +5655,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("predict_proba", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 59, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("predict_proba", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 80, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5111,28 +5695,28 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_6predict_pro
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("predict_proba", 1);
 
-  /* "LogisticRegression.pyx":60
+  /* "LogisticRegression.pyx":81
  * 
  *     def predict_proba(self, x_test, n):
  *         cdef array.array x_arr = array.array('d', x_test)             # <<<<<<<<<<<<<<
  *         return convert_double_ptr_to_python(self.lr.predict_proba(x_arr.data.as_doubles, n), n)
  * 
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_u_d);
   __Pyx_GIVEREF(__pyx_n_u_d);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 60, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 81, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_x_test);
   __Pyx_GIVEREF(__pyx_v_x_test);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x_test)) __PYX_ERR(0, 60, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x_test)) __PYX_ERR(0, 81, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_x_arr = ((arrayobject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "LogisticRegression.pyx":61
+  /* "LogisticRegression.pyx":82
  *     def predict_proba(self, x_test, n):
  *         cdef array.array x_arr = array.array('d', x_test)
  *         return convert_double_ptr_to_python(self.lr.predict_proba(x_arr.data.as_doubles, n), n)             # <<<<<<<<<<<<<<
@@ -5140,15 +5724,15 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_6predict_pro
  * def py_train(x, y, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 61, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 61, __pyx_L1_error)
-  __pyx_t_2 = __pyx_f_18LogisticRegression_convert_double_ptr_to_python(__pyx_v_self->lr.predict_proba(__pyx_v_x_arr->data.as_doubles, __pyx_t_3), __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_18LogisticRegression_convert_double_ptr_to_python(__pyx_v_self->lr.predict_proba(__pyx_v_x_arr->data.as_doubles, __pyx_t_3), __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "LogisticRegression.pyx":59
+  /* "LogisticRegression.pyx":80
  *         return convert_int_ptr_to_python(self.lr.predict(x_arr.data.as_doubles, n), n)
  * 
  *     def predict_proba(self, x_test, n):             # <<<<<<<<<<<<<<
@@ -5383,7 +5967,7 @@ static PyObject *__pyx_pf_18LogisticRegression_18LogisticRegression_10__setstate
   return __pyx_r;
 }
 
-/* "LogisticRegression.pyx":63
+/* "LogisticRegression.pyx":84
  *         return convert_double_ptr_to_python(self.lr.predict_proba(x_arr.data.as_doubles, n), n)
  * 
  * def py_train(x, y, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path):             # <<<<<<<<<<<<<<
@@ -5471,7 +6055,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -5479,9 +6063,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 1); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 1); __PYX_ERR(0, 84, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -5489,9 +6073,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 2); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 2); __PYX_ERR(0, 84, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -5499,9 +6083,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 3); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 3); __PYX_ERR(0, 84, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -5509,9 +6093,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 4); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 4); __PYX_ERR(0, 84, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -5519,9 +6103,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 5); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 5); __PYX_ERR(0, 84, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
@@ -5529,9 +6113,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[6]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 6); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 6); __PYX_ERR(0, 84, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
@@ -5539,9 +6123,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[7]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 7); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 7); __PYX_ERR(0, 84, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
@@ -5549,9 +6133,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[8]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 8); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 8); __PYX_ERR(0, 84, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  9:
@@ -5559,14 +6143,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[9]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 9); __PYX_ERR(0, 63, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, 9); __PYX_ERR(0, 84, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "py_train") < 0)) __PYX_ERR(0, 63, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "py_train") < 0)) __PYX_ERR(0, 84, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 10)) {
       goto __pyx_L5_argtuple_error;
@@ -5595,7 +6179,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, __pyx_nargs); __PYX_ERR(0, 63, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("py_train", 1, 10, 10, __pyx_nargs); __PYX_ERR(0, 84, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5642,66 +6226,66 @@ static PyObject *__pyx_pf_18LogisticRegression_py_train(CYTHON_UNUSED PyObject *
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("py_train", 1);
 
-  /* "LogisticRegression.pyx":64
+  /* "LogisticRegression.pyx":85
  * 
  * def py_train(x, y, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path):
  *     cdef array.array x_arr = array.array('d', x)             # <<<<<<<<<<<<<<
  *     cdef array.array y_arr = array.array('i', y)
  *     build_model(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path)
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_u_d);
   __Pyx_GIVEREF(__pyx_n_u_d);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 64, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 85, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x)) __PYX_ERR(0, 64, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x)) __PYX_ERR(0, 85, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 85, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_x_arr = ((arrayobject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "LogisticRegression.pyx":65
+  /* "LogisticRegression.pyx":86
  * def py_train(x, y, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path):
  *     cdef array.array x_arr = array.array('d', x)
  *     cdef array.array y_arr = array.array('i', y)             # <<<<<<<<<<<<<<
  *     build_model(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path)
  * 
  */
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_u_i);
   __Pyx_GIVEREF(__pyx_n_u_i);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_n_u_i)) __PYX_ERR(0, 65, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_n_u_i)) __PYX_ERR(0, 86, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_y)) __PYX_ERR(0, 65, __pyx_L1_error);
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_y)) __PYX_ERR(0, 86, __pyx_L1_error);
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_y_arr = ((arrayobject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "LogisticRegression.pyx":66
+  /* "LogisticRegression.pyx":87
  *     cdef array.array x_arr = array.array('d', x)
  *     cdef array.array y_arr = array.array('i', y)
  *     build_model(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path)             # <<<<<<<<<<<<<<
  * 
  * def py_predict(x, n, m, model_path):
  */
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_m); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_v_learning_rate); if (unlikely((__pyx_t_5 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_epochs); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_v_batch_size); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_v_l1_reg); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_l2_reg); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_t_10 = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(__pyx_v_model_path); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_m); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_v_learning_rate); if (unlikely((__pyx_t_5 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_epochs); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_v_batch_size); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_v_l1_reg); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_l2_reg); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_10 = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(__pyx_v_model_path); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
   build_model(__pyx_v_x_arr->data.as_doubles, __pyx_v_y_arr->data.as_ints, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_10));
 
-  /* "LogisticRegression.pyx":63
+  /* "LogisticRegression.pyx":84
  *         return convert_double_ptr_to_python(self.lr.predict_proba(x_arr.data.as_doubles, n), n)
  * 
  * def py_train(x, y, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path):             # <<<<<<<<<<<<<<
@@ -5725,7 +6309,7 @@ static PyObject *__pyx_pf_18LogisticRegression_py_train(CYTHON_UNUSED PyObject *
   return __pyx_r;
 }
 
-/* "LogisticRegression.pyx":68
+/* "LogisticRegression.pyx":89
  *     build_model(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path)
  * 
  * def py_predict(x, n, m, model_path):             # <<<<<<<<<<<<<<
@@ -5795,7 +6379,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 89, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -5803,9 +6387,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 89, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_predict", 1, 4, 4, 1); __PYX_ERR(0, 68, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_predict", 1, 4, 4, 1); __PYX_ERR(0, 89, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -5813,9 +6397,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 89, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_predict", 1, 4, 4, 2); __PYX_ERR(0, 68, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_predict", 1, 4, 4, 2); __PYX_ERR(0, 89, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -5823,14 +6407,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 89, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("py_predict", 1, 4, 4, 3); __PYX_ERR(0, 68, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_predict", 1, 4, 4, 3); __PYX_ERR(0, 89, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "py_predict") < 0)) __PYX_ERR(0, 68, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "py_predict") < 0)) __PYX_ERR(0, 89, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 4)) {
       goto __pyx_L5_argtuple_error;
@@ -5847,7 +6431,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("py_predict", 1, 4, 4, __pyx_nargs); __PYX_ERR(0, 68, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("py_predict", 1, 4, 4, __pyx_nargs); __PYX_ERR(0, 89, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5889,46 +6473,46 @@ static PyObject *__pyx_pf_18LogisticRegression_2py_predict(CYTHON_UNUSED PyObjec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("py_predict", 1);
 
-  /* "LogisticRegression.pyx":69
+  /* "LogisticRegression.pyx":90
  * 
  * def py_predict(x, n, m, model_path):
  *     cdef array.array x_arr = array.array('d', x)             # <<<<<<<<<<<<<<
  *     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)
  * 
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 90, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_u_d);
   __Pyx_GIVEREF(__pyx_n_u_d);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 69, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 90, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x)) __PYX_ERR(0, 69, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 69, __pyx_L1_error)
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x)) __PYX_ERR(0, 90, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 90, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_x_arr = ((arrayobject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "LogisticRegression.pyx":70
+  /* "LogisticRegression.pyx":91
  * def py_predict(x, n, m, model_path):
  *     cdef array.array x_arr = array.array('d', x)
  *     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)             # <<<<<<<<<<<<<<
  * 
- * 
+ * def py_lr_train_root(x, y, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_m); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L1_error)
-  __pyx_t_5 = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(__pyx_v_model_path); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L1_error)
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L1_error)
-  __pyx_t_2 = __pyx_f_18LogisticRegression_convert_int_ptr_to_python(predict_model(__pyx_v_x_arr->data.as_doubles, __pyx_t_3, __pyx_t_4, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_5)), __pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_m); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_5 = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(__pyx_v_model_path); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_18LogisticRegression_convert_int_ptr_to_python(predict_model(__pyx_v_x_arr->data.as_doubles, __pyx_t_3, __pyx_t_4, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_5)), __pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "LogisticRegression.pyx":68
+  /* "LogisticRegression.pyx":89
  *     build_model(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path)
  * 
  * def py_predict(x, n, m, model_path):             # <<<<<<<<<<<<<<
@@ -5944,6 +6528,1188 @@ static PyObject *__pyx_pf_18LogisticRegression_2py_predict(CYTHON_UNUSED PyObjec
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF((PyObject *)__pyx_v_x_arr);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "LogisticRegression.pyx":93
+ *     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)
+ * 
+ * def py_lr_train_root(x, y, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     cdef array.array x_arr = array.array('d', x)
+ *     cdef array.array y_arr = array.array('i', y)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_18LogisticRegression_5py_lr_train_root(PyObject *__pyx_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+); /*proto*/
+static PyMethodDef __pyx_mdef_18LogisticRegression_5py_lr_train_root = {"py_lr_train_root", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_18LogisticRegression_5py_lr_train_root, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18LogisticRegression_5py_lr_train_root(PyObject *__pyx_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+) {
+  PyObject *__pyx_v_x = 0;
+  PyObject *__pyx_v_y = 0;
+  PyObject *__pyx_v_n = 0;
+  PyObject *__pyx_v_m = 0;
+  PyObject *__pyx_v_n_process = 0;
+  PyObject *__pyx_v_learning_rate = 0;
+  PyObject *__pyx_v_epochs = 0;
+  PyObject *__pyx_v_batch_size = 0;
+  PyObject *__pyx_v_l1_reg = 0;
+  PyObject *__pyx_v_l2_reg = 0;
+  PyObject *__pyx_v_model_path = 0;
+  struct PyMPICommObject *__pyx_v_comm = 0;
+  #if !CYTHON_METH_FASTCALL
+  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
+  #endif
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject* values[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("py_lr_train_root (wrapper)", 0);
+  #if !CYTHON_METH_FASTCALL
+  #if CYTHON_ASSUME_SAFE_MACROS
+  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
+  #else
+  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
+  #endif
+  #endif
+  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
+  {
+    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_x,&__pyx_n_s_y,&__pyx_n_s_n,&__pyx_n_s_m,&__pyx_n_s_n_process,&__pyx_n_s_learning_rate,&__pyx_n_s_epochs,&__pyx_n_s_batch_size,&__pyx_n_s_l1_reg,&__pyx_n_s_l2_reg,&__pyx_n_s_model_path,&__pyx_n_s_comm,0};
+    if (__pyx_kwds) {
+      Py_ssize_t kw_args;
+      switch (__pyx_nargs) {
+        case 12: values[11] = __Pyx_Arg_FASTCALL(__pyx_args, 11);
+        CYTHON_FALLTHROUGH;
+        case 11: values[10] = __Pyx_Arg_FASTCALL(__pyx_args, 10);
+        CYTHON_FALLTHROUGH;
+        case 10: values[9] = __Pyx_Arg_FASTCALL(__pyx_args, 9);
+        CYTHON_FALLTHROUGH;
+        case  9: values[8] = __Pyx_Arg_FASTCALL(__pyx_args, 8);
+        CYTHON_FALLTHROUGH;
+        case  8: values[7] = __Pyx_Arg_FASTCALL(__pyx_args, 7);
+        CYTHON_FALLTHROUGH;
+        case  7: values[6] = __Pyx_Arg_FASTCALL(__pyx_args, 6);
+        CYTHON_FALLTHROUGH;
+        case  6: values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = __Pyx_NumKwargs_FASTCALL(__pyx_kwds);
+      switch (__pyx_nargs) {
+        case  0:
+        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_x)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_y)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 1); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_n)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 2); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_m)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 3); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_n_process)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 4); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_learning_rate)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 5); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  6:
+        if (likely((values[6] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_epochs)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[6]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 6); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  7:
+        if (likely((values[7] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_batch_size)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[7]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 7); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  8:
+        if (likely((values[8] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_l1_reg)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[8]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 8); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  9:
+        if (likely((values[9] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_l2_reg)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[9]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 9); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case 10:
+        if (likely((values[10] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_model_path)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[10]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 10); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case 11:
+        if (likely((values[11] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_comm)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[11]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, 11); __PYX_ERR(0, 93, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        const Py_ssize_t kwd_pos_args = __pyx_nargs;
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "py_lr_train_root") < 0)) __PYX_ERR(0, 93, __pyx_L3_error)
+      }
+    } else if (unlikely(__pyx_nargs != 12)) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+      values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+      values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+      values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+      values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+      values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+      values[6] = __Pyx_Arg_FASTCALL(__pyx_args, 6);
+      values[7] = __Pyx_Arg_FASTCALL(__pyx_args, 7);
+      values[8] = __Pyx_Arg_FASTCALL(__pyx_args, 8);
+      values[9] = __Pyx_Arg_FASTCALL(__pyx_args, 9);
+      values[10] = __Pyx_Arg_FASTCALL(__pyx_args, 10);
+      values[11] = __Pyx_Arg_FASTCALL(__pyx_args, 11);
+    }
+    __pyx_v_x = values[0];
+    __pyx_v_y = values[1];
+    __pyx_v_n = values[2];
+    __pyx_v_m = values[3];
+    __pyx_v_n_process = values[4];
+    __pyx_v_learning_rate = values[5];
+    __pyx_v_epochs = values[6];
+    __pyx_v_batch_size = values[7];
+    __pyx_v_l1_reg = values[8];
+    __pyx_v_l2_reg = values[9];
+    __pyx_v_model_path = values[10];
+    __pyx_v_comm = ((struct PyMPICommObject *)values[11]);
+  }
+  goto __pyx_L6_skip;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("py_lr_train_root", 1, 12, 12, __pyx_nargs); __PYX_ERR(0, 93, __pyx_L3_error)
+  __pyx_L6_skip:;
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_AddTraceback("LogisticRegression.py_lr_train_root", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_comm), __pyx_ptype_6mpi4py_3MPI_Comm, 1, "comm", 0))) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_r = __pyx_pf_18LogisticRegression_4py_lr_train_root(__pyx_self, __pyx_v_x, __pyx_v_y, __pyx_v_n, __pyx_v_m, __pyx_v_n_process, __pyx_v_learning_rate, __pyx_v_epochs, __pyx_v_batch_size, __pyx_v_l1_reg, __pyx_v_l2_reg, __pyx_v_model_path, __pyx_v_comm);
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_18LogisticRegression_4py_lr_train_root(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_n_process, PyObject *__pyx_v_learning_rate, PyObject *__pyx_v_epochs, PyObject *__pyx_v_batch_size, PyObject *__pyx_v_l1_reg, PyObject *__pyx_v_l2_reg, PyObject *__pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm) {
+  arrayobject *__pyx_v_x_arr = 0;
+  arrayobject *__pyx_v_y_arr = 0;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_3;
+  int __pyx_t_4;
+  int __pyx_t_5;
+  double __pyx_t_6;
+  int __pyx_t_7;
+  int __pyx_t_8;
+  double __pyx_t_9;
+  double __pyx_t_10;
+  std::string __pyx_t_11;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("py_lr_train_root", 1);
+
+  /* "LogisticRegression.pyx":94
+ * 
+ * def py_lr_train_root(x, y, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):
+ *     cdef array.array x_arr = array.array('d', x)             # <<<<<<<<<<<<<<
+ *     cdef array.array y_arr = array.array('i', y)
+ *     lr_train_root(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ */
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 94, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_n_u_d);
+  __Pyx_GIVEREF(__pyx_n_u_d);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 94, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_v_x);
+  __Pyx_GIVEREF(__pyx_v_x);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x)) __PYX_ERR(0, 94, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 94, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_x_arr = ((arrayobject *)__pyx_t_2);
+  __pyx_t_2 = 0;
+
+  /* "LogisticRegression.pyx":95
+ * def py_lr_train_root(x, y, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):
+ *     cdef array.array x_arr = array.array('d', x)
+ *     cdef array.array y_arr = array.array('i', y)             # <<<<<<<<<<<<<<
+ *     lr_train_root(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ */
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_INCREF(__pyx_n_u_i);
+  __Pyx_GIVEREF(__pyx_n_u_i);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_n_u_i)) __PYX_ERR(0, 95, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_v_y);
+  __Pyx_GIVEREF(__pyx_v_y);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_y)) __PYX_ERR(0, 95, __pyx_L1_error);
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_v_y_arr = ((arrayobject *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "LogisticRegression.pyx":96
+ *     cdef array.array x_arr = array.array('d', x)
+ *     cdef array.array y_arr = array.array('i', y)
+ *     lr_train_root(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)             # <<<<<<<<<<<<<<
+ * 
+ * def py_lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):
+ */
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_m); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_n_process); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_v_learning_rate); if (unlikely((__pyx_t_6 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_v_epochs); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_v_batch_size); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_l1_reg); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_l2_reg); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_11 = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(__pyx_v_model_path); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+  lr_train_root(__pyx_v_x_arr->data.as_doubles, __pyx_v_y_arr->data.as_ints, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9, __pyx_t_10, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_11), __pyx_v_comm->ob_mpi);
+
+  /* "LogisticRegression.pyx":93
+ *     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)
+ * 
+ * def py_lr_train_root(x, y, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     cdef array.array x_arr = array.array('d', x)
+ *     cdef array.array y_arr = array.array('i', y)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("LogisticRegression.py_lr_train_root", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF((PyObject *)__pyx_v_x_arr);
+  __Pyx_XDECREF((PyObject *)__pyx_v_y_arr);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "LogisticRegression.pyx":98
+ *     lr_train_root(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_18LogisticRegression_7py_lr_train(PyObject *__pyx_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+); /*proto*/
+static PyMethodDef __pyx_mdef_18LogisticRegression_7py_lr_train = {"py_lr_train", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_18LogisticRegression_7py_lr_train, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18LogisticRegression_7py_lr_train(PyObject *__pyx_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+) {
+  PyObject *__pyx_v_n = 0;
+  PyObject *__pyx_v_m = 0;
+  PyObject *__pyx_v_rank = 0;
+  PyObject *__pyx_v_n_process = 0;
+  PyObject *__pyx_v_learning_rate = 0;
+  PyObject *__pyx_v_epochs = 0;
+  PyObject *__pyx_v_batch_size = 0;
+  PyObject *__pyx_v_l1_reg = 0;
+  PyObject *__pyx_v_l2_reg = 0;
+  PyObject *__pyx_v_model_path = 0;
+  struct PyMPICommObject *__pyx_v_comm = 0;
+  #if !CYTHON_METH_FASTCALL
+  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
+  #endif
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject* values[11] = {0,0,0,0,0,0,0,0,0,0,0};
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("py_lr_train (wrapper)", 0);
+  #if !CYTHON_METH_FASTCALL
+  #if CYTHON_ASSUME_SAFE_MACROS
+  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
+  #else
+  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
+  #endif
+  #endif
+  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
+  {
+    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_n,&__pyx_n_s_m,&__pyx_n_s_rank,&__pyx_n_s_n_process,&__pyx_n_s_learning_rate,&__pyx_n_s_epochs,&__pyx_n_s_batch_size,&__pyx_n_s_l1_reg,&__pyx_n_s_l2_reg,&__pyx_n_s_model_path,&__pyx_n_s_comm,0};
+    if (__pyx_kwds) {
+      Py_ssize_t kw_args;
+      switch (__pyx_nargs) {
+        case 11: values[10] = __Pyx_Arg_FASTCALL(__pyx_args, 10);
+        CYTHON_FALLTHROUGH;
+        case 10: values[9] = __Pyx_Arg_FASTCALL(__pyx_args, 9);
+        CYTHON_FALLTHROUGH;
+        case  9: values[8] = __Pyx_Arg_FASTCALL(__pyx_args, 8);
+        CYTHON_FALLTHROUGH;
+        case  8: values[7] = __Pyx_Arg_FASTCALL(__pyx_args, 7);
+        CYTHON_FALLTHROUGH;
+        case  7: values[6] = __Pyx_Arg_FASTCALL(__pyx_args, 6);
+        CYTHON_FALLTHROUGH;
+        case  6: values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = __Pyx_NumKwargs_FASTCALL(__pyx_kwds);
+      switch (__pyx_nargs) {
+        case  0:
+        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_n)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_m)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 1); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_rank)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 2); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_n_process)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 3); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_learning_rate)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 4); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_epochs)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 5); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  6:
+        if (likely((values[6] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_batch_size)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[6]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 6); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  7:
+        if (likely((values[7] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_l1_reg)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[7]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 7); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  8:
+        if (likely((values[8] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_l2_reg)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[8]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 8); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  9:
+        if (likely((values[9] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_model_path)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[9]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 9); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case 10:
+        if (likely((values[10] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_comm)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[10]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, 10); __PYX_ERR(0, 98, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        const Py_ssize_t kwd_pos_args = __pyx_nargs;
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "py_lr_train") < 0)) __PYX_ERR(0, 98, __pyx_L3_error)
+      }
+    } else if (unlikely(__pyx_nargs != 11)) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+      values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+      values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+      values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+      values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+      values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+      values[6] = __Pyx_Arg_FASTCALL(__pyx_args, 6);
+      values[7] = __Pyx_Arg_FASTCALL(__pyx_args, 7);
+      values[8] = __Pyx_Arg_FASTCALL(__pyx_args, 8);
+      values[9] = __Pyx_Arg_FASTCALL(__pyx_args, 9);
+      values[10] = __Pyx_Arg_FASTCALL(__pyx_args, 10);
+    }
+    __pyx_v_n = values[0];
+    __pyx_v_m = values[1];
+    __pyx_v_rank = values[2];
+    __pyx_v_n_process = values[3];
+    __pyx_v_learning_rate = values[4];
+    __pyx_v_epochs = values[5];
+    __pyx_v_batch_size = values[6];
+    __pyx_v_l1_reg = values[7];
+    __pyx_v_l2_reg = values[8];
+    __pyx_v_model_path = values[9];
+    __pyx_v_comm = ((struct PyMPICommObject *)values[10]);
+  }
+  goto __pyx_L6_skip;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("py_lr_train", 1, 11, 11, __pyx_nargs); __PYX_ERR(0, 98, __pyx_L3_error)
+  __pyx_L6_skip:;
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_AddTraceback("LogisticRegression.py_lr_train", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_comm), __pyx_ptype_6mpi4py_3MPI_Comm, 1, "comm", 0))) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_r = __pyx_pf_18LogisticRegression_6py_lr_train(__pyx_self, __pyx_v_n, __pyx_v_m, __pyx_v_rank, __pyx_v_n_process, __pyx_v_learning_rate, __pyx_v_epochs, __pyx_v_batch_size, __pyx_v_l1_reg, __pyx_v_l2_reg, __pyx_v_model_path, __pyx_v_comm);
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_18LogisticRegression_6py_lr_train(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_rank, PyObject *__pyx_v_n_process, PyObject *__pyx_v_learning_rate, PyObject *__pyx_v_epochs, PyObject *__pyx_v_batch_size, PyObject *__pyx_v_l1_reg, PyObject *__pyx_v_l2_reg, PyObject *__pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  int __pyx_t_2;
+  int __pyx_t_3;
+  int __pyx_t_4;
+  double __pyx_t_5;
+  int __pyx_t_6;
+  int __pyx_t_7;
+  double __pyx_t_8;
+  double __pyx_t_9;
+  std::string __pyx_t_10;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("py_lr_train", 1);
+
+  /* "LogisticRegression.pyx":99
+ * 
+ * def py_lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)             # <<<<<<<<<<<<<<
+ * 
+ * def py_lr_predict_root(x, n, m, n_process, model_path, MPI.Comm comm):
+ */
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_m); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_rank); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_n_process); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_v_learning_rate); if (unlikely((__pyx_t_5 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_epochs); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_v_batch_size); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_v_l1_reg); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_l2_reg); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_10 = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(__pyx_v_model_path); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  lr_train(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_10), __pyx_v_comm->ob_mpi);
+
+  /* "LogisticRegression.pyx":98
+ *     lr_train_root(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("LogisticRegression.py_lr_train", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "LogisticRegression.pyx":101
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_predict_root(x, n, m, n_process, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     cdef array.array x_arr = array.array('d', x)
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_18LogisticRegression_9py_lr_predict_root(PyObject *__pyx_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+); /*proto*/
+static PyMethodDef __pyx_mdef_18LogisticRegression_9py_lr_predict_root = {"py_lr_predict_root", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_18LogisticRegression_9py_lr_predict_root, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18LogisticRegression_9py_lr_predict_root(PyObject *__pyx_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+) {
+  PyObject *__pyx_v_x = 0;
+  PyObject *__pyx_v_n = 0;
+  PyObject *__pyx_v_m = 0;
+  PyObject *__pyx_v_n_process = 0;
+  PyObject *__pyx_v_model_path = 0;
+  struct PyMPICommObject *__pyx_v_comm = 0;
+  #if !CYTHON_METH_FASTCALL
+  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
+  #endif
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject* values[6] = {0,0,0,0,0,0};
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("py_lr_predict_root (wrapper)", 0);
+  #if !CYTHON_METH_FASTCALL
+  #if CYTHON_ASSUME_SAFE_MACROS
+  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
+  #else
+  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
+  #endif
+  #endif
+  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
+  {
+    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_x,&__pyx_n_s_n,&__pyx_n_s_m,&__pyx_n_s_n_process,&__pyx_n_s_model_path,&__pyx_n_s_comm,0};
+    if (__pyx_kwds) {
+      Py_ssize_t kw_args;
+      switch (__pyx_nargs) {
+        case  6: values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = __Pyx_NumKwargs_FASTCALL(__pyx_kwds);
+      switch (__pyx_nargs) {
+        case  0:
+        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_x)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_n)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict_root", 1, 6, 6, 1); __PYX_ERR(0, 101, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_m)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict_root", 1, 6, 6, 2); __PYX_ERR(0, 101, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_n_process)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict_root", 1, 6, 6, 3); __PYX_ERR(0, 101, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_model_path)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict_root", 1, 6, 6, 4); __PYX_ERR(0, 101, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_comm)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict_root", 1, 6, 6, 5); __PYX_ERR(0, 101, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        const Py_ssize_t kwd_pos_args = __pyx_nargs;
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "py_lr_predict_root") < 0)) __PYX_ERR(0, 101, __pyx_L3_error)
+      }
+    } else if (unlikely(__pyx_nargs != 6)) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+      values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+      values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+      values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+      values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+      values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+    }
+    __pyx_v_x = values[0];
+    __pyx_v_n = values[1];
+    __pyx_v_m = values[2];
+    __pyx_v_n_process = values[3];
+    __pyx_v_model_path = values[4];
+    __pyx_v_comm = ((struct PyMPICommObject *)values[5]);
+  }
+  goto __pyx_L6_skip;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("py_lr_predict_root", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 101, __pyx_L3_error)
+  __pyx_L6_skip:;
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_AddTraceback("LogisticRegression.py_lr_predict_root", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_comm), __pyx_ptype_6mpi4py_3MPI_Comm, 1, "comm", 0))) __PYX_ERR(0, 101, __pyx_L1_error)
+  __pyx_r = __pyx_pf_18LogisticRegression_8py_lr_predict_root(__pyx_self, __pyx_v_x, __pyx_v_n, __pyx_v_m, __pyx_v_n_process, __pyx_v_model_path, __pyx_v_comm);
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_18LogisticRegression_8py_lr_predict_root(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_n_process, PyObject *__pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm) {
+  arrayobject *__pyx_v_x_arr = 0;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_3;
+  int __pyx_t_4;
+  int __pyx_t_5;
+  std::string __pyx_t_6;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("py_lr_predict_root", 1);
+
+  /* "LogisticRegression.pyx":102
+ * 
+ * def py_lr_predict_root(x, n, m, n_process, model_path, MPI.Comm comm):
+ *     cdef array.array x_arr = array.array('d', x)             # <<<<<<<<<<<<<<
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ * 
+ */
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_n_u_d);
+  __Pyx_GIVEREF(__pyx_n_u_d);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_d)) __PYX_ERR(0, 102, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_v_x);
+  __Pyx_GIVEREF(__pyx_v_x);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x)) __PYX_ERR(0, 102, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_x_arr = ((arrayobject *)__pyx_t_2);
+  __pyx_t_2 = 0;
+
+  /* "LogisticRegression.pyx":103
+ * def py_lr_predict_root(x, n, m, n_process, model_path, MPI.Comm comm):
+ *     cdef array.array x_arr = array.array('d', x)
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)             # <<<<<<<<<<<<<<
+ * 
+ * def py_lr_predict(n, m, rank, n_process, model_path, MPI.Comm comm):
+ */
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_m); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_n_process); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_6 = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(__pyx_v_model_path); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  (void)(lr_predict_root(__pyx_v_x_arr->data.as_doubles, __pyx_t_3, __pyx_t_4, __pyx_t_5, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_6), __pyx_v_comm->ob_mpi));
+
+  /* "LogisticRegression.pyx":101
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_predict_root(x, n, m, n_process, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     cdef array.array x_arr = array.array('d', x)
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("LogisticRegression.py_lr_predict_root", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF((PyObject *)__pyx_v_x_arr);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "LogisticRegression.pyx":105
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_predict(n, m, rank, n_process, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     lr_predict(n, m, rank, n_process, model_path, comm.ob_mpi)
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_18LogisticRegression_11py_lr_predict(PyObject *__pyx_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+); /*proto*/
+static PyMethodDef __pyx_mdef_18LogisticRegression_11py_lr_predict = {"py_lr_predict", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_18LogisticRegression_11py_lr_predict, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18LogisticRegression_11py_lr_predict(PyObject *__pyx_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+) {
+  PyObject *__pyx_v_n = 0;
+  PyObject *__pyx_v_m = 0;
+  PyObject *__pyx_v_rank = 0;
+  PyObject *__pyx_v_n_process = 0;
+  PyObject *__pyx_v_model_path = 0;
+  struct PyMPICommObject *__pyx_v_comm = 0;
+  #if !CYTHON_METH_FASTCALL
+  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
+  #endif
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject* values[6] = {0,0,0,0,0,0};
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("py_lr_predict (wrapper)", 0);
+  #if !CYTHON_METH_FASTCALL
+  #if CYTHON_ASSUME_SAFE_MACROS
+  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
+  #else
+  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
+  #endif
+  #endif
+  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
+  {
+    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_n,&__pyx_n_s_m,&__pyx_n_s_rank,&__pyx_n_s_n_process,&__pyx_n_s_model_path,&__pyx_n_s_comm,0};
+    if (__pyx_kwds) {
+      Py_ssize_t kw_args;
+      switch (__pyx_nargs) {
+        case  6: values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = __Pyx_NumKwargs_FASTCALL(__pyx_kwds);
+      switch (__pyx_nargs) {
+        case  0:
+        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_n)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L3_error)
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_m)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict", 1, 6, 6, 1); __PYX_ERR(0, 105, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_rank)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict", 1, 6, 6, 2); __PYX_ERR(0, 105, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_n_process)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict", 1, 6, 6, 3); __PYX_ERR(0, 105, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_model_path)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict", 1, 6, 6, 4); __PYX_ERR(0, 105, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_comm)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("py_lr_predict", 1, 6, 6, 5); __PYX_ERR(0, 105, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        const Py_ssize_t kwd_pos_args = __pyx_nargs;
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "py_lr_predict") < 0)) __PYX_ERR(0, 105, __pyx_L3_error)
+      }
+    } else if (unlikely(__pyx_nargs != 6)) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+      values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+      values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+      values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+      values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+      values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+    }
+    __pyx_v_n = values[0];
+    __pyx_v_m = values[1];
+    __pyx_v_rank = values[2];
+    __pyx_v_n_process = values[3];
+    __pyx_v_model_path = values[4];
+    __pyx_v_comm = ((struct PyMPICommObject *)values[5]);
+  }
+  goto __pyx_L6_skip;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("py_lr_predict", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 105, __pyx_L3_error)
+  __pyx_L6_skip:;
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_AddTraceback("LogisticRegression.py_lr_predict", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_comm), __pyx_ptype_6mpi4py_3MPI_Comm, 1, "comm", 0))) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_r = __pyx_pf_18LogisticRegression_10py_lr_predict(__pyx_self, __pyx_v_n, __pyx_v_m, __pyx_v_rank, __pyx_v_n_process, __pyx_v_model_path, __pyx_v_comm);
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_18LogisticRegression_10py_lr_predict(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_n, PyObject *__pyx_v_m, PyObject *__pyx_v_rank, PyObject *__pyx_v_n_process, PyObject *__pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  int __pyx_t_2;
+  int __pyx_t_3;
+  int __pyx_t_4;
+  std::string __pyx_t_5;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("py_lr_predict", 1);
+
+  /* "LogisticRegression.pyx":106
+ * 
+ * def py_lr_predict(n, m, rank, n_process, model_path, MPI.Comm comm):
+ *     lr_predict(n, m, rank, n_process, model_path, comm.ob_mpi)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_m); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_rank); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_n_process); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_5 = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(__pyx_v_model_path); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+  lr_predict(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_5), __pyx_v_comm->ob_mpi);
+
+  /* "LogisticRegression.pyx":105
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_predict(n, m, rank, n_process, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     lr_predict(n, m, rank, n_process, model_path, comm.ob_mpi)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("LogisticRegression.py_lr_predict", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -6123,10 +7889,11 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_kp_s_LogisticRegression_pyx, __pyx_k_LogisticRegression_pyx, sizeof(__pyx_k_LogisticRegression_pyx), 0, 0, 1, 0},
     {&__pyx_n_s_MemoryError, __pyx_k_MemoryError, sizeof(__pyx_k_MemoryError), 0, 0, 1, 1},
     {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
-    {&__pyx_n_s__14, __pyx_k__14, sizeof(__pyx_k__14), 0, 0, 1, 1},
+    {&__pyx_n_s__22, __pyx_k__22, sizeof(__pyx_k__22), 0, 0, 1, 1},
     {&__pyx_n_s_asyncio_coroutines, __pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 0, 1, 1},
     {&__pyx_n_s_batch_size, __pyx_k_batch_size, sizeof(__pyx_k_batch_size), 0, 0, 1, 1},
     {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
+    {&__pyx_n_s_comm, __pyx_k_comm, sizeof(__pyx_k_comm), 0, 0, 1, 1},
     {&__pyx_n_u_d, __pyx_k_d, sizeof(__pyx_k_d), 0, 1, 0, 1},
     {&__pyx_kp_u_disable, __pyx_k_disable, sizeof(__pyx_k_disable), 0, 1, 0, 0},
     {&__pyx_kp_u_enable, __pyx_k_enable, sizeof(__pyx_k_enable), 0, 1, 0, 0},
@@ -6144,15 +7911,21 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
     {&__pyx_n_s_model_path, __pyx_k_model_path, sizeof(__pyx_k_model_path), 0, 0, 1, 1},
     {&__pyx_n_s_n, __pyx_k_n, sizeof(__pyx_k_n), 0, 0, 1, 1},
+    {&__pyx_n_s_n_process, __pyx_k_n_process, sizeof(__pyx_k_n_process), 0, 0, 1, 1},
     {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
     {&__pyx_n_s_num_epochs, __pyx_k_num_epochs, sizeof(__pyx_k_num_epochs), 0, 0, 1, 1},
     {&__pyx_n_s_num_features, __pyx_k_num_features, sizeof(__pyx_k_num_features), 0, 0, 1, 1},
     {&__pyx_n_s_predict, __pyx_k_predict, sizeof(__pyx_k_predict), 0, 0, 1, 1},
     {&__pyx_n_s_predict_proba, __pyx_k_predict_proba, sizeof(__pyx_k_predict_proba), 0, 0, 1, 1},
+    {&__pyx_n_s_py_lr_predict, __pyx_k_py_lr_predict, sizeof(__pyx_k_py_lr_predict), 0, 0, 1, 1},
+    {&__pyx_n_s_py_lr_predict_root, __pyx_k_py_lr_predict_root, sizeof(__pyx_k_py_lr_predict_root), 0, 0, 1, 1},
+    {&__pyx_n_s_py_lr_train, __pyx_k_py_lr_train, sizeof(__pyx_k_py_lr_train), 0, 0, 1, 1},
+    {&__pyx_n_s_py_lr_train_root, __pyx_k_py_lr_train_root, sizeof(__pyx_k_py_lr_train_root), 0, 0, 1, 1},
     {&__pyx_n_s_py_predict, __pyx_k_py_predict, sizeof(__pyx_k_py_predict), 0, 0, 1, 1},
     {&__pyx_n_s_py_train, __pyx_k_py_train, sizeof(__pyx_k_py_train), 0, 0, 1, 1},
     {&__pyx_n_s_pyx_state, __pyx_k_pyx_state, sizeof(__pyx_k_pyx_state), 0, 0, 1, 1},
     {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
+    {&__pyx_n_s_rank, __pyx_k_rank, sizeof(__pyx_k_rank), 0, 0, 1, 1},
     {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
     {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
     {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
@@ -6175,7 +7948,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 54, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(3, 120, __pyx_L1_error)
   return 0;
@@ -6188,38 +7961,38 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "LogisticRegression.pyx":50
+  /* "LogisticRegression.pyx":71
  *         self.lr = logistic_regression(learning_rate, num_epochs, batch_size, num_features, l1_reg, l2_reg)
  * 
  *     def fit(self, x_train, y_train, n):             # <<<<<<<<<<<<<<
  *         cdef array.array x_arr = array.array('d', x_train)
  *         cdef array.array y_arr = array.array('i', y_train)
  */
-  __pyx_tuple_ = PyTuple_Pack(6, __pyx_n_s_self, __pyx_n_s_x_train, __pyx_n_s_y_train, __pyx_n_s_n, __pyx_n_s_x_arr, __pyx_n_s_y_arr); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(6, __pyx_n_s_self, __pyx_n_s_x_train, __pyx_n_s_y_train, __pyx_n_s_n, __pyx_n_s_x_arr, __pyx_n_s_y_arr); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_fit, 50, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_fit, 71, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 71, __pyx_L1_error)
 
-  /* "LogisticRegression.pyx":55
+  /* "LogisticRegression.pyx":76
  *         self.lr.fit(x_arr.data.as_doubles, y_arr.data.as_ints, n)
  * 
  *     def predict(self, x_test, n):             # <<<<<<<<<<<<<<
  *         cdef array.array x_arr = array.array('d', x_test)
  *         return convert_int_ptr_to_python(self.lr.predict(x_arr.data.as_doubles, n), n)
  */
-  __pyx_tuple__3 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_x_test, __pyx_n_s_n, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_x_test, __pyx_n_s_n, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_predict, 55, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_predict, 76, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 76, __pyx_L1_error)
 
-  /* "LogisticRegression.pyx":59
+  /* "LogisticRegression.pyx":80
  *         return convert_int_ptr_to_python(self.lr.predict(x_arr.data.as_doubles, n), n)
  * 
  *     def predict_proba(self, x_test, n):             # <<<<<<<<<<<<<<
  *         cdef array.array x_arr = array.array('d', x_test)
  *         return convert_double_ptr_to_python(self.lr.predict_proba(x_arr.data.as_doubles, n), n)
  */
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_predict_proba, 59, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_predict_proba, 80, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 80, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -6242,29 +8015,77 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__8);
   __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_setstate_cython, 3, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(1, 3, __pyx_L1_error)
 
-  /* "LogisticRegression.pyx":63
+  /* "LogisticRegression.pyx":84
  *         return convert_double_ptr_to_python(self.lr.predict_proba(x_arr.data.as_doubles, n), n)
  * 
  * def py_train(x, y, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path):             # <<<<<<<<<<<<<<
  *     cdef array.array x_arr = array.array('d', x)
  *     cdef array.array y_arr = array.array('i', y)
  */
-  __pyx_tuple__10 = PyTuple_Pack(12, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_n, __pyx_n_s_m, __pyx_n_s_learning_rate, __pyx_n_s_epochs, __pyx_n_s_batch_size, __pyx_n_s_l1_reg, __pyx_n_s_l2_reg, __pyx_n_s_model_path, __pyx_n_s_x_arr, __pyx_n_s_y_arr); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_tuple__10 = PyTuple_Pack(12, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_n, __pyx_n_s_m, __pyx_n_s_learning_rate, __pyx_n_s_epochs, __pyx_n_s_batch_size, __pyx_n_s_l1_reg, __pyx_n_s_l2_reg, __pyx_n_s_model_path, __pyx_n_s_x_arr, __pyx_n_s_y_arr); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(10, 0, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_py_train, 63, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(10, 0, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_py_train, 84, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 84, __pyx_L1_error)
 
-  /* "LogisticRegression.pyx":68
+  /* "LogisticRegression.pyx":89
  *     build_model(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path)
  * 
  * def py_predict(x, n, m, model_path):             # <<<<<<<<<<<<<<
  *     cdef array.array x_arr = array.array('d', x)
  *     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)
  */
-  __pyx_tuple__12 = PyTuple_Pack(5, __pyx_n_s_x, __pyx_n_s_n, __pyx_n_s_m, __pyx_n_s_model_path, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(5, __pyx_n_s_x, __pyx_n_s_n, __pyx_n_s_m, __pyx_n_s_model_path, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
-  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_py_predict, 68, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_py_predict, 89, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 89, __pyx_L1_error)
+
+  /* "LogisticRegression.pyx":93
+ *     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)
+ * 
+ * def py_lr_train_root(x, y, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     cdef array.array x_arr = array.array('d', x)
+ *     cdef array.array y_arr = array.array('i', y)
+ */
+  __pyx_tuple__14 = PyTuple_Pack(14, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_n, __pyx_n_s_m, __pyx_n_s_n_process, __pyx_n_s_learning_rate, __pyx_n_s_epochs, __pyx_n_s_batch_size, __pyx_n_s_l1_reg, __pyx_n_s_l2_reg, __pyx_n_s_model_path, __pyx_n_s_comm, __pyx_n_s_x_arr, __pyx_n_s_y_arr); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__14);
+  __Pyx_GIVEREF(__pyx_tuple__14);
+  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(12, 0, 0, 14, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_py_lr_train_root, 93, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 93, __pyx_L1_error)
+
+  /* "LogisticRegression.pyx":98
+ *     lr_train_root(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ */
+  __pyx_tuple__16 = PyTuple_Pack(11, __pyx_n_s_n, __pyx_n_s_m, __pyx_n_s_rank, __pyx_n_s_n_process, __pyx_n_s_learning_rate, __pyx_n_s_epochs, __pyx_n_s_batch_size, __pyx_n_s_l1_reg, __pyx_n_s_l2_reg, __pyx_n_s_model_path, __pyx_n_s_comm); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__16);
+  __Pyx_GIVEREF(__pyx_tuple__16);
+  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(11, 0, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_py_lr_train, 98, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(0, 98, __pyx_L1_error)
+
+  /* "LogisticRegression.pyx":101
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_predict_root(x, n, m, n_process, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     cdef array.array x_arr = array.array('d', x)
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ */
+  __pyx_tuple__18 = PyTuple_Pack(7, __pyx_n_s_x, __pyx_n_s_n, __pyx_n_s_m, __pyx_n_s_n_process, __pyx_n_s_model_path, __pyx_n_s_comm, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__18);
+  __Pyx_GIVEREF(__pyx_tuple__18);
+  __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_py_lr_predict_root, 101, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(0, 101, __pyx_L1_error)
+
+  /* "LogisticRegression.pyx":105
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_predict(n, m, rank, n_process, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     lr_predict(n, m, rank, n_process, model_path, comm.ob_mpi)
+ * 
+ */
+  __pyx_tuple__20 = PyTuple_Pack(6, __pyx_n_s_n, __pyx_n_s_m, __pyx_n_s_rank, __pyx_n_s_n_process, __pyx_n_s_model_path, __pyx_n_s_comm); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__20);
+  __Pyx_GIVEREF(__pyx_tuple__20);
+  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_LogisticRegression_pyx, __pyx_n_s_py_lr_predict, 105, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(0, 105, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -6326,15 +8147,15 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_18LogisticRegression_LogisticRegression = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_18LogisticRegression_LogisticRegression_spec, NULL); if (unlikely(!__pyx_ptype_18LogisticRegression_LogisticRegression)) __PYX_ERR(0, 44, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_18LogisticRegression_LogisticRegression_spec, __pyx_ptype_18LogisticRegression_LogisticRegression) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  __pyx_ptype_18LogisticRegression_LogisticRegression = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_18LogisticRegression_LogisticRegression_spec, NULL); if (unlikely(!__pyx_ptype_18LogisticRegression_LogisticRegression)) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_18LogisticRegression_LogisticRegression_spec, __pyx_ptype_18LogisticRegression_LogisticRegression) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
   #else
   __pyx_ptype_18LogisticRegression_LogisticRegression = &__pyx_type_18LogisticRegression_LogisticRegression;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_18LogisticRegression_LogisticRegression) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_18LogisticRegression_LogisticRegression) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
   __pyx_ptype_18LogisticRegression_LogisticRegression->tp_print = 0;
@@ -6344,9 +8165,9 @@ static int __Pyx_modinit_type_init_code(void) {
     __pyx_ptype_18LogisticRegression_LogisticRegression->tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
   #endif
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_LogisticRegression, (PyObject *) __pyx_ptype_18LogisticRegression_LogisticRegression) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_LogisticRegression, (PyObject *) __pyx_ptype_18LogisticRegression_LogisticRegression) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if (__Pyx_setup_reduce((PyObject *) __pyx_ptype_18LogisticRegression_LogisticRegression) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_ptype_18LogisticRegression_LogisticRegression) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
   #endif
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -6363,7 +8184,30 @@ static int __Pyx_modinit_type_import_code(void) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 9, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("mpi4py.MPI"); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 29, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_6mpi4py_3MPI_Datatype = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Datatype", sizeof(struct PyMPIDatatypeObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIDatatypeObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Datatype) __PYX_ERR(4, 29, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Status = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Status", sizeof(struct PyMPIStatusObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIStatusObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Status) __PYX_ERR(4, 37, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Request = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Request", sizeof(struct PyMPIRequestObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIRequestObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Request) __PYX_ERR(4, 45, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Prequest = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Prequest", sizeof(struct PyMPIPrequestObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIPrequestObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Prequest) __PYX_ERR(4, 54, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Grequest = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Grequest", sizeof(struct PyMPIGrequestObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIGrequestObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Grequest) __PYX_ERR(4, 60, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Message = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Message", sizeof(struct PyMPIMessageObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIMessageObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Message) __PYX_ERR(4, 66, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Op = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Op", sizeof(struct PyMPIOpObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIOpObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Op) __PYX_ERR(4, 75, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Group = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Group", sizeof(struct PyMPIGroupObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIGroupObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Group) __PYX_ERR(4, 83, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Info = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Info", sizeof(struct PyMPIInfoObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIInfoObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Info) __PYX_ERR(4, 91, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Errhandler = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Errhandler", sizeof(struct PyMPIErrhandlerObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIErrhandlerObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Errhandler) __PYX_ERR(4, 99, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Session = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Session", sizeof(struct PyMPISessionObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPISessionObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Session) __PYX_ERR(4, 107, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Comm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Comm", sizeof(struct PyMPICommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPICommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Comm) __PYX_ERR(4, 115, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Intracomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Intracomm", sizeof(struct PyMPIIntracommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIIntracommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Intracomm) __PYX_ERR(4, 123, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Topocomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Topocomm", sizeof(struct PyMPITopocommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPITopocommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Topocomm) __PYX_ERR(4, 129, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Cartcomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Cartcomm", sizeof(struct PyMPICartcommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPICartcommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Cartcomm) __PYX_ERR(4, 135, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Graphcomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Graphcomm", sizeof(struct PyMPIGraphcommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIGraphcommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Graphcomm) __PYX_ERR(4, 141, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Distgraphcomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Distgraphcomm", sizeof(struct PyMPIDistgraphcommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIDistgraphcommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Distgraphcomm) __PYX_ERR(4, 147, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Intercomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Intercomm", sizeof(struct PyMPIIntercommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIIntercommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Intercomm) __PYX_ERR(4, 153, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Win = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Win", sizeof(struct PyMPIWinObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIWinObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Win) __PYX_ERR(4, 159, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_File = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "File", sizeof(struct PyMPIFileObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIFileObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_File) __PYX_ERR(4, 168, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_7cpython_4type_type = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "type", 
   #if defined(PYPY_VERSION_NUM) && PYPY_VERSION_NUM < 0x050B0000
@@ -6373,15 +8217,15 @@ static int __Pyx_modinit_type_import_code(void) {
   #else
   sizeof(PyHeapTypeObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyHeapTypeObject),
   #endif
-  __Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_4type_type) __PYX_ERR(4, 9, __pyx_L1_error)
+  __Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_4type_type) __PYX_ERR(5, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 8, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_7cpython_4bool_bool = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "bool", sizeof(PyBoolObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyBoolObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_4bool_bool) __PYX_ERR(5, 8, __pyx_L1_error)
+  __pyx_ptype_7cpython_4bool_bool = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "bool", sizeof(PyBoolObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyBoolObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_4bool_bool) __PYX_ERR(6, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 15, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_7cpython_7complex_complex = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "complex", sizeof(PyComplexObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyComplexObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_7complex_complex) __PYX_ERR(6, 15, __pyx_L1_error)
+  __pyx_ptype_7cpython_7complex_complex = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "complex", sizeof(PyComplexObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyComplexObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_7complex_complex) __PYX_ERR(7, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyImport_ImportModule("array"); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 69, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -6689,42 +8533,42 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "LogisticRegression.pyx":50
+  /* "LogisticRegression.pyx":71
  *         self.lr = logistic_regression(learning_rate, num_epochs, batch_size, num_features, l1_reg, l2_reg)
  * 
  *     def fit(self, x_train, y_train, n):             # <<<<<<<<<<<<<<
  *         cdef array.array x_arr = array.array('d', x_train)
  *         cdef array.array y_arr = array.array('i', y_train)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_18LogisticRegression_3fit, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_LogisticRegression_fit, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_18LogisticRegression_3fit, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_LogisticRegression_fit, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_18LogisticRegression_LogisticRegression, __pyx_n_s_fit, __pyx_t_2) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_18LogisticRegression_LogisticRegression, __pyx_n_s_fit, __pyx_t_2) < 0) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_18LogisticRegression_LogisticRegression);
 
-  /* "LogisticRegression.pyx":55
+  /* "LogisticRegression.pyx":76
  *         self.lr.fit(x_arr.data.as_doubles, y_arr.data.as_ints, n)
  * 
  *     def predict(self, x_test, n):             # <<<<<<<<<<<<<<
  *         cdef array.array x_arr = array.array('d', x_test)
  *         return convert_int_ptr_to_python(self.lr.predict(x_arr.data.as_doubles, n), n)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_18LogisticRegression_5predict, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_LogisticRegression_predict, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_18LogisticRegression_5predict, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_LogisticRegression_predict, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_18LogisticRegression_LogisticRegression, __pyx_n_s_predict, __pyx_t_2) < 0) __PYX_ERR(0, 55, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_18LogisticRegression_LogisticRegression, __pyx_n_s_predict, __pyx_t_2) < 0) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_18LogisticRegression_LogisticRegression);
 
-  /* "LogisticRegression.pyx":59
+  /* "LogisticRegression.pyx":80
  *         return convert_int_ptr_to_python(self.lr.predict(x_arr.data.as_doubles, n), n)
  * 
  *     def predict_proba(self, x_test, n):             # <<<<<<<<<<<<<<
  *         cdef array.array x_arr = array.array('d', x_test)
  *         return convert_double_ptr_to_python(self.lr.predict_proba(x_arr.data.as_doubles, n), n)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_18LogisticRegression_7predict_proba, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_LogisticRegression_predict_proba, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_18LogisticRegression_7predict_proba, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_LogisticRegression_predict_proba, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_18LogisticRegression_LogisticRegression, __pyx_n_s_predict_proba, __pyx_t_2) < 0) __PYX_ERR(0, 59, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_18LogisticRegression_LogisticRegression, __pyx_n_s_predict_proba, __pyx_t_2) < 0) __PYX_ERR(0, 80, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_18LogisticRegression_LogisticRegression);
 
@@ -6749,28 +8593,76 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_setstate_cython, __pyx_t_2) < 0) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "LogisticRegression.pyx":63
+  /* "LogisticRegression.pyx":84
  *         return convert_double_ptr_to_python(self.lr.predict_proba(x_arr.data.as_doubles, n), n)
  * 
  * def py_train(x, y, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path):             # <<<<<<<<<<<<<<
  *     cdef array.array x_arr = array.array('d', x)
  *     cdef array.array y_arr = array.array('i', y)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_1py_train, 0, __pyx_n_s_py_train, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_1py_train, 0, __pyx_n_s_py_train, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_train, __pyx_t_2) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_train, __pyx_t_2) < 0) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "LogisticRegression.pyx":68
+  /* "LogisticRegression.pyx":89
  *     build_model(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path)
  * 
  * def py_predict(x, n, m, model_path):             # <<<<<<<<<<<<<<
  *     cdef array.array x_arr = array.array('d', x)
  *     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_3py_predict, 0, __pyx_n_s_py_predict, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_3py_predict, 0, __pyx_n_s_py_predict, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_predict, __pyx_t_2) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_predict, __pyx_t_2) < 0) __PYX_ERR(0, 89, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "LogisticRegression.pyx":93
+ *     return convert_int_ptr_to_python(predict_model(x_arr.data.as_doubles, n, m, model_path), n)
+ * 
+ * def py_lr_train_root(x, y, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     cdef array.array x_arr = array.array('d', x)
+ *     cdef array.array y_arr = array.array('i', y)
+ */
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_5py_lr_train_root, 0, __pyx_n_s_py_lr_train_root, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__15)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_lr_train_root, __pyx_t_2) < 0) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "LogisticRegression.pyx":98
+ *     lr_train_root(x_arr.data.as_doubles, y_arr.data.as_ints, n, m, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ */
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_7py_lr_train, 0, __pyx_n_s_py_lr_train, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__17)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_lr_train, __pyx_t_2) < 0) __PYX_ERR(0, 98, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "LogisticRegression.pyx":101
+ *     lr_train(n, m, rank, n_process, learning_rate, epochs, batch_size, l1_reg, l2_reg, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_predict_root(x, n, m, n_process, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     cdef array.array x_arr = array.array('d', x)
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ */
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_9py_lr_predict_root, 0, __pyx_n_s_py_lr_predict_root, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__19)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_lr_predict_root, __pyx_t_2) < 0) __PYX_ERR(0, 101, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "LogisticRegression.pyx":105
+ *     lr_predict_root(x_arr.data.as_doubles, n, m, n_process, model_path, comm.ob_mpi)
+ * 
+ * def py_lr_predict(n, m, rank, n_process, model_path, MPI.Comm comm):             # <<<<<<<<<<<<<<
+ *     lr_predict(n, m, rank, n_process, model_path, comm.ob_mpi)
+ * 
+ */
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18LogisticRegression_11py_lr_predict, 0, __pyx_n_s_py_lr_predict, NULL, __pyx_n_s_LogisticRegression, __pyx_d, ((PyObject *)__pyx_codeobj__21)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_lr_predict, __pyx_t_2) < 0) __PYX_ERR(0, 105, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "LogisticRegression.pyx":1
@@ -7690,6 +9582,33 @@ bad:
     return;
 }
 #endif
+
+/* ArgTypeTest */
+static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact)
+{
+    __Pyx_TypeName type_name;
+    __Pyx_TypeName obj_type_name;
+    if (unlikely(!type)) {
+        PyErr_SetString(PyExc_SystemError, "Missing type object");
+        return 0;
+    }
+    else if (exact) {
+        #if PY_MAJOR_VERSION == 2
+        if ((type == &PyBaseString_Type) && likely(__Pyx_PyBaseString_CheckExact(obj))) return 1;
+        #endif
+    }
+    else {
+        if (likely(__Pyx_TypeCheck(obj, type))) return 1;
+    }
+    type_name = __Pyx_PyType_GetName(type);
+    obj_type_name = __Pyx_PyType_GetName(Py_TYPE(obj));
+    PyErr_Format(PyExc_TypeError,
+        "Argument '%.200s' has incorrect type (expected " __Pyx_FMT_TYPENAME
+        ", got " __Pyx_FMT_TYPENAME ")", name, type_name, obj_type_name);
+    __Pyx_DECREF_TypeName(type_name);
+    __Pyx_DECREF_TypeName(obj_type_name);
+    return 0;
+}
 
 /* FixUpExtensionType */
 #if CYTHON_USE_TYPE_SPECS
@@ -10422,7 +12341,7 @@ __Pyx_PyType_GetName(PyTypeObject* tp)
     if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) {
         PyErr_Clear();
         Py_XDECREF(name);
-        name = __Pyx_NewRef(__pyx_n_s__14);
+        name = __Pyx_NewRef(__pyx_n_s__22);
     }
     return name;
 }

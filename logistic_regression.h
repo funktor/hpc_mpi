@@ -81,11 +81,11 @@ class logistic_regression {
 void generate(double *x, int *y, int n, int m);
 void save_model_weights(logistic_regression &lr, std::string path);
 void load_model_weights(logistic_regression &lr, std::string path);
-void distribute_data(double *x, int *y, int n, int n_features, int n_process);
-void lr_train(int n, int n_features, int rank, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path);
-void lr_train_root(double *x, int *y, int n, int n_features, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path);
-void lr_predict(int n, int n_features, int rank, int n_process, std::string model_path);
-int *lr_predict_root(double *x, int n, int n_features, int n_process, std::string model_path);
+void distribute_data(double *x, int *y, int n, int n_features, int n_process, MPI_Comm comm);
+void lr_train(int n, int n_features, int rank, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path, MPI_Comm comm);
+void lr_train_root(double *x, int *y, int n, int n_features, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path, MPI_Comm comm);
+void lr_predict(int n, int n_features, int rank, int n_process, std::string model_path, MPI_Comm comm);
+int *lr_predict_root(double *x, int n, int n_features, int n_process, std::string model_path, MPI_Comm comm);
 void build_model(double *x, int *y, int n, int n_features, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path);
 int *predict_model(double *x, int n, int n_features, std::string model_path);
 
