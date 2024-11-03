@@ -29,6 +29,7 @@
 #include <ctime> 
 #include <stdbool.h>    // bool type
 #include <fstream>
+#include <cmath>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
@@ -43,50 +44,45 @@ class logistic_regression {
         double *weights;
         double bias;
         double learning_rate;
-        int num_epochs;
+        int epochs;
         int batch_size;
-        int num_features;
+        int n_features;
         double l1_reg;
         double l2_reg;
+        std::string model_path;
+        int rank;
+        int n_process;
+        MPI_Comm comm;
 
         logistic_regression();
         logistic_regression(
                 double learning_rate, 
-                int num_epochs, 
+                int epochs, 
                 int batch_size, 
-                int num_features, 
+                int n_features, 
                 double l1_reg,
-                double l2_reg);
+                double l2_reg, 
+                std::string model_path,
+                MPI_Comm comm);
 
         ~logistic_regression();
 
-        void fit(
-                double *x_train, 
-                int *y_train, 
-                int n);
-
-        int *predict(double *x_test, int n);
-        double *predict_proba(double *x_test, int n);
+        void distribute_data(double *x, unsigned int *y, int n);
+        void fit_root(double *x, unsigned int *y, int n);
+        void fit_non_root(int n);
+        unsigned int *predict(double *x, int n);
+        unsigned int *predict_root(double *x, int n);
+        void predict_non_root(int n);
+        double *predict_proba(double *x, int n);
         void initialize_weights(int n);
-        void update_weights_and_biases(
-                double *x_train, 
-                int *y_train, 
-                int n);
-        double loss(
-                double *x_train, 
-                int *y_train, 
-                int n);
+        void update_weights_and_biases(double *x, unsigned int *y, int n);
+        double loss(double *x, unsigned int *y, int n);
 };
 
-void generate(double *x, int *y, int n, int m);
+void generate(double *x, unsigned int *y, int n, int m);
 void save_model_weights(logistic_regression &lr, std::string path);
 void load_model_weights(logistic_regression &lr, std::string path);
-void distribute_data(double *x, int *y, int n, int n_features, int n_process, MPI_Comm comm);
-void lr_train(int n, int n_features, int rank, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path, MPI_Comm comm);
-void lr_train_root(double *x, int *y, int n, int n_features, int n_process, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path, MPI_Comm comm);
-void lr_predict(int n, int n_features, int rank, int n_process, std::string model_path, MPI_Comm comm);
-int *lr_predict_root(double *x, int n, int n_features, int n_process, std::string model_path, MPI_Comm comm);
-void build_model(double *x, int *y, int n, int n_features, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path);
-int *predict_model(double *x, int n, int n_features, std::string model_path);
+void build_model(double *x, unsigned int *y, int n, int n_features, double learning_rate, int epochs, int batch_size, double l1_reg, double l2_reg, std::string model_path);
+unsigned int *predict_model(double *x, int n, int n_features, std::string model_path);
 
 #endif
