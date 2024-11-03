@@ -1,30 +1,4 @@
-#include <mpi.h> 
-#include <unistd.h>
-#include <stdio.h>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <array>
-#include <map>
-#include <unordered_map>
-#include <deque>
-#include <tuple>
-#include <map>
-#include <fcntl.h>
-#include <functional>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
-#include <string>
-#include <random>
-#include <algorithm>
-#include <chrono>
-#include <mutex>
-#include <thread>
-#include <ctime> 
-#include <stdbool.h>    // bool type
-
+#include "matrix_multiplication.h"
 using namespace std;
 
 void generate(double *inp, int n, int m){
@@ -81,8 +55,20 @@ void dot_mpi(const int n, const int m, const int p, const int rank, const int si
 
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < n; j++) {
-            for (int k = 0; k < p; k++) {
-                out[j*p+k] += a_r[i*n+j]*b_r[i*p+k];
+            __m512d c = _mm512_set1_pd(a_r[i*n+j]);
+            for (int k = 0; k < p; k+=8) {
+                if (k+8 > p) {
+                    for (int h = k; h < p; h++) {
+                        out[j*p+h] += a_r[i*n+j]*b_r[i*p+h];
+                    }
+                }
+                else {
+                    __m512d x = _mm512_loadu_pd(&b_r[i*p+k]);
+                    __m512d y = _mm512_loadu_pd(&out[j*p+k]);
+                    x = _mm512_mul_pd(x, c);
+                    y = _mm512_add_pd(y, x);
+                    _mm512_storeu_pd(&out[j*p+k], y);
+                }
             }
         }
     }
@@ -119,8 +105,20 @@ double *dot_mpi_root(const double *a, const double *b, const int n, const int m,
 
     for (int i1 = 0; i1 < h; i1++) {
         for (int j = 0; j < n; j++) {
-            for (int k = 0; k < p; k++) {
-                out[j*p+k] += aT[i1*n+j]*b[i1*p+k];
+            __m512d c = _mm512_set1_pd(aT[i1*n+j]);
+            for (int k = 0; k < p; k+=8) {
+                if (k+8 > p) {
+                    for (int h = k; h < p; h++) {
+                        out[j*p+h] += aT[i1*n+j]*b[i1*p+h];
+                    }
+                }
+                else {
+                    __m512d x = _mm512_loadu_pd(&b[i1*p+k]);
+                    __m512d y = _mm512_loadu_pd(&out[j*p+k]);
+                    x = _mm512_mul_pd(x, c);
+                    y = _mm512_add_pd(y, x);
+                    _mm512_storeu_pd(&out[j*p+k], y);
+                }
             }
         }
     }
@@ -182,9 +180,6 @@ int main(int argc, char *argv[]) {
     auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
     if (rank == 0) {
-        // print_arr(a, n, m);
-        // print_arr(b, m, p);
-        // print_arr(out, n, p);
         std::cout << duration.count() << std::endl;
 
         start = std::chrono::high_resolution_clock::now();
@@ -192,7 +187,6 @@ int main(int argc, char *argv[]) {
         stop = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
-        // print_arr(out, n, p);
         std::cout << duration.count() << std::endl;
     }
 

@@ -1,33 +1,7 @@
-#include <mpi.h> 
-#include <unistd.h>
-#include <stdio.h>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <array>
-#include <map>
-#include <unordered_map>
-#include <deque>
-#include <tuple>
-#include <map>
-#include <fcntl.h>
-#include <functional>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
-#include <string>
-#include <random>
-#include <algorithm>
-#include <chrono>
-#include <mutex>
-#include <thread>
-#include <ctime> 
-#include <stdbool.h>    // bool type
-
+#include "single_source_shortest_path_graph.h"
 using namespace std;
 
-std::vector<std::tuple<int, int, double>> generate_random_graph(int num_nodes, double prob, int source){
+std::vector<std::tuple<int, int, double>> generate_random_graph(const int num_nodes, const double prob, const int source){
     std::vector<std::tuple<int, int, double>> out;
     std::random_device rd;
     std::mt19937 engine(rd());
@@ -64,7 +38,7 @@ std::vector<std::tuple<int, int, double>> generate_random_graph(int num_nodes, d
     return out;
 }
 
-void distribute_edges(int *src, int *dst, double *dists, int num_nodes, int num_edges, int n_process) {
+void distribute_edges(const int *src, const int *dst, const double *dists, const int num_nodes, const int num_edges, const int n_process) {
     MPI_Request request = MPI_REQUEST_NULL;
 
     int h = num_edges/n_process;
@@ -100,7 +74,7 @@ void distribute_edges(int *src, int *dst, double *dists, int num_nodes, int num_
     }
 }
 
-void bellman_ford_mpi(int source, int num_nodes, int num_edges, int rank, int n_process) {
+void bellman_ford_mpi(const int source, const int num_nodes, const int num_edges, const int rank, const int n_process) {
     double *distance = new double[num_nodes];
     for (int i = 0; i < num_nodes; i++) distance[i] = __DBL_MAX__;
     distance[source] = 0.0;
@@ -156,7 +130,7 @@ void bellman_ford_mpi(int source, int num_nodes, int num_edges, int rank, int n_
     }
 }
 
-double *bellman_ford_mpi_root(int source, std::vector<std::tuple<int, int, double>> edges, int num_nodes, int num_edges, int n_process) {
+double *bellman_ford_mpi_root(const int source, const std::vector<std::tuple<int, int, double>> edges, const int num_nodes, const int num_edges, const int n_process) {
     double *distance = new double[num_nodes];
     for (int i = 0; i < num_nodes; i++) distance[i] = __DBL_MAX__;
     distance[source] = 0.0;
@@ -201,7 +175,7 @@ double *bellman_ford_mpi_root(int source, std::vector<std::tuple<int, int, doubl
     return distance;
 }
 
-double *bellman_ford(int source, std::vector<std::tuple<int, int, double>> edges, int num_nodes) {
+double *bellman_ford(const int source, const std::vector<std::tuple<int, int, double>> edges, const int num_nodes) {
     double *distance = new double[num_nodes];
     for (int i = 0; i < num_nodes; i++) distance[i] = __DBL_MAX__;
     distance[source] = 0.0;
@@ -248,9 +222,6 @@ int main(int argc, char *argv[]) {
     auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
     if (rank == 0) {
-        // for (int i = 0; i < num_nodes; i++) std::cout << out[i] << " ";
-        // std::cout << std::endl;
-
         std::cout << duration.count() << std::endl;
 
         start = std::chrono::high_resolution_clock::now();
@@ -258,8 +229,6 @@ int main(int argc, char *argv[]) {
         stop = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
-        // for (int i = 0; i < num_nodes; i++) std::cout << out[i] << " ";
-        // std::cout << std::endl;
         std::cout << duration.count() << std::endl;
     }
 

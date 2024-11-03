@@ -1,30 +1,4 @@
-#include <mpi.h> 
-#include <unistd.h>
-#include <stdio.h>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <array>
-#include <map>
-#include <unordered_map>
-#include <deque>
-#include <tuple>
-#include <map>
-#include <fcntl.h>
-#include <functional>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
-#include <string>
-#include <random>
-#include <algorithm>
-#include <chrono>
-#include <mutex>
-#include <thread>
-#include <ctime> 
-#include <stdbool.h>    // bool type
-
+#include "matrix_multiplication.h"
 using namespace std;
 
 void generate(double *inp, int n, int m){
@@ -286,9 +260,6 @@ int main(int argc, char *argv[]) {
     auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
     if (rank == 0) {
-        // print_arr(a, n, m);
-        // print_arr(b, m, p);
-        // print_arr(out, n, p);
         std::cout << duration.count() << std::endl;
 
         start = std::chrono::high_resolution_clock::now();
@@ -296,7 +267,6 @@ int main(int argc, char *argv[]) {
         stop = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
-        // print_arr(out, n, p);
         std::cout << duration.count() << std::endl;
     }
 
