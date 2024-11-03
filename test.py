@@ -34,7 +34,7 @@ else:
 dims = comm.bcast(dims, root=0)
 
 n1, n2, m = dims
-lr = LogisticRegression(0.001, 100000, 512, m, 0.0, 0.02, "bcancer_model_py", comm)
+lr = LogisticRegression(0.001, 100000, 512, m, 0.0, 0.025, "bcancer_model_py", comm)
     
 if rank == 0:    
     x = X_train.reshape((n1*m,))

@@ -312,29 +312,31 @@ void logistic_regression::fit_root(double *x_train, unsigned int *y_train, int n
         update_weights_and_biases(x_train, y_train, g);
         double l = loss(x_train, y_train, g)*g;
 
-        double *wb = new double[n_features+2];
-        std::copy(weights, weights+n_features, wb);
-        wb[n_features] = bias;
-        wb[n_features+1] = l;
+        if (n_process > 1) {
+            double *wb = new double[n_features+2];
+            std::copy(weights, weights+n_features, wb);
+            wb[n_features] = bias;
+            wb[n_features+1] = l;
 
-        MPI_Send(wb, n_features+2, MPI_DOUBLE, 1, 0, comm);
+            MPI_Send(wb, n_features+2, MPI_DOUBLE, 1, 0, comm);
+            
+            double *wb1 = new double[n_features+2];
+            MPI_Recv(wb1, n_features+2, MPI_DOUBLE, n_process-1, 0, comm, MPI_STATUS_IGNORE);
+            for (int j = 0; j < n_features; j++) weights[j] = wb1[j]/n_process;
+            bias = wb1[n_features]/n_process;
+            l = wb1[n_features+1];
+
+            wb = new double[n_features+2];
+            std::copy(weights, weights+n_features, wb);
+            wb[n_features] = bias;
+            wb[n_features+1] = l;
+
+            MPI_Send(wb, n_features+2, MPI_DOUBLE, 1, 1, comm);
+            
+            wb1 = new double[n_features+2];
+            MPI_Recv(wb1, n_features+2, MPI_DOUBLE, n_process-1, 1, comm, MPI_STATUS_IGNORE);
+        }
         
-        double *wb1 = new double[n_features+2];
-        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, n_process-1, 0, comm, MPI_STATUS_IGNORE);
-        for (int j = 0; j < n_features; j++) weights[j] = wb1[j]/n_process;
-        bias = wb1[n_features]/n_process;
-        l = wb1[n_features+1];
-
-        wb = new double[n_features+2];
-        std::copy(weights, weights+n_features, wb);
-        wb[n_features] = bias;
-        wb[n_features+1] = l;
-
-        MPI_Send(wb, n_features+2, MPI_DOUBLE, 1, 1, comm);
-        
-        wb1 = new double[n_features+2];
-        MPI_Recv(wb1, n_features+2, MPI_DOUBLE, n_process-1, 1, comm, MPI_STATUS_IGNORE);
-
         std::cout << "Current Loss = " << l/n << std::endl;
         n_epochs--;
     }
