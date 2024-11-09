@@ -54,6 +54,9 @@ class svm {
         int n_support_vectors;
         std::string model_path;
         std::string kernel;
+        double *grad;
+        int *up_ind;
+        int *lo_ind;
 
         svm();
         svm(
@@ -75,7 +78,7 @@ class svm {
         // void predict_non_root(int n);
         double *predict_proba(double *x, int n);
         void initialize_alpha(int n);
-        void initialize_q_matrix(double *x, int n);
+        void initialize_q_matrix(double *x, int *y, int n);
         int update_alpha(double *x, int *y, int n);
         double loss(double *x, int *y, int n);
 };
