@@ -46,14 +46,11 @@ class svm {
         int max_iter;
         int n_features;
         double C;
-        int d_poly;
-        double gamma_rbf;
         double *support_vectors_xT;
         int *support_vectors_y;
         double *q_matrix;
         int n_support_vectors;
         std::string model_path;
-        std::string kernel;
         double *grad;
         int *up_ind;
         int *lo_ind;
@@ -66,19 +63,14 @@ class svm {
             int n_features,
             int max_iter, 
             double C, 
-            int d_poly,
-            double gamma_rbf,
             std::string model_path, 
-            std::string kernel,
             MPI_Comm comm);
 
         ~svm();
-        void distribute_data(double *x, int *y, int n);
         void fit(double *x, int *y, int n);
         int *predict(double *x, int n);
         double *predict_proba(double *x, int n);
         void initialize_alpha(int n);
-        void initialize_q_matrix(double *x, int *y, int n);
         int update_alpha(double *x, int *y, int n);
         double loss(double *x, int *y, int n);
 };

@@ -30,10 +30,7 @@ cdef extern from "svm.h":
             int n_features,
             int max_iter, 
             double C, 
-            int d_poly,
-            double gamma_rbf,
             string model_path, 
-            string kernel, 
             MPI_Comm comm) except +
 
         void fit(double *x, int *y, int n)
@@ -57,13 +54,10 @@ cdef class SupportVectorMachine(object):
             int n_features,
             int max_iter, 
             double C, 
-            int d_poly,
-            double gamma_rbf,
             string model_path, 
-            string kernel, 
             MPI.Comm comm):
 
-        self.v = svm(n_features, max_iter, C, d_poly, gamma_rbf, model_path, kernel, comm.ob_mpi)
+        self.v = svm(n_features, max_iter, C, model_path, comm.ob_mpi)
 
     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):   
         cdef double *x_arr = &x[0]
