@@ -52,8 +52,8 @@ if rank == 0:
     print(sum([out[i] == y[i] for i in range(n_test)])/n_test)
     
 else:
-    v.fit2(n_train)
-    v.predict2(n_test)
+    v.fit(np.empty(shape=(n_train*m,)), np.empty(shape=(n_train,), dtype=np.uint32), n_train)
+    v.predict(np.empty(shape=(n_train*m,)), n_test)
 
 
 

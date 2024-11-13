@@ -70,18 +70,9 @@ cdef class SupportVectorMachine(object):
                 y_arr_new[i] = 1
         self.v.fit(x_arr, y_arr_new, n)
         free(y_arr_new)
-
-    def fit2(self, int n):   
-        cdef double *x_arr
-        cdef int *y_arr
-        self.v.fit(x_arr, y_arr, n)
     
     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
         cdef double *x_arr = &x[0]
         return convert_int_ptr_to_python(self.v.predict(x_arr, n), n)
-
-    def predict2(self, n):
-        cdef double *x_arr
-        self.v.predict(x_arr, n)
 
 
