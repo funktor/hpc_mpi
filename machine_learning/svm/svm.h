@@ -1,7 +1,7 @@
 #ifndef SVM_H
 #define SVM_H
 
-// #include <mpi.h> 
+#include <mpi.h> 
 #include <immintrin.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -48,7 +48,7 @@ class svm {
         double C;
         int d_poly;
         double gamma_rbf;
-        double *support_vectors_x;
+        double *support_vectors_xT;
         int *support_vectors_y;
         double *q_matrix;
         int n_support_vectors;
@@ -57,6 +57,9 @@ class svm {
         double *grad;
         int *up_ind;
         int *lo_ind;
+        int rank;
+        int n_process;
+        MPI_Comm comm;
 
         svm();
         svm(
@@ -66,16 +69,13 @@ class svm {
             int d_poly,
             double gamma_rbf,
             std::string model_path, 
-            std::string kernel);
+            std::string kernel,
+            MPI_Comm comm);
 
         ~svm();
-        // void distribute_data(double *x, int *y, int n);
+        void distribute_data(double *x, int *y, int n);
         void fit(double *x, int *y, int n);
-        // void fit_root(double *x, int *y, int n);
-        // void fit_non_root(int n);
         int *predict(double *x, int n);
-        // int *predict_root(double *x, int n);
-        // void predict_non_root(int n);
         double *predict_proba(double *x, int n);
         void initialize_alpha(int n);
         void initialize_q_matrix(double *x, int *y, int n);
@@ -89,7 +89,5 @@ void load_model_alpha(svm &v, std::string path);
 double dot_product_vectors(double *a, double *b, int n);
 double *dot_product_matrices(double *a, double *b, int n, int m, int p);
 double sum_vector(double *a, int n);
-// void build_model(double *x, int *y, int n, int n_features, int max_iter, double C, std::string model_path, std::string kernel);
-// int *predict_model(double *x, int n, int n_features, std::string model_path);
 
 #endif

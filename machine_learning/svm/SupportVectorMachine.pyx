@@ -1,6 +1,23 @@
 # cython: language_level=3
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
+cdef extern from *:
+    """
+    #include <mpi.h>
+    
+    #if (MPI_VERSION < 3) && !defined(PyMPI_HAVE_MPI_Message)
+    typedef void *PyMPI_MPI_Message;
+    #define MPI_Message PyMPI_MPI_Message
+    #endif
+    
+    #if (MPI_VERSION < 4) && !defined(PyMPI_HAVE_MPI_Session)
+    typedef void *PyMPI_MPI_Session;
+    #define MPI_Session PyMPI_MPI_Session
+    #endif"
+    """
+
+cimport mpi4py.MPI as MPI
+from mpi4py.libmpi cimport *
 from libcpp.string cimport string
 from libc.stdlib cimport malloc, free
 from cpython cimport array
@@ -16,7 +33,8 @@ cdef extern from "svm.h":
             int d_poly,
             double gamma_rbf,
             string model_path, 
-            string kernel) except +
+            string kernel, 
+            MPI_Comm comm) except +
 
         void fit(double *x, int *y, int n)
         int *predict(double *x, int n)
@@ -41,10 +59,11 @@ cdef class SupportVectorMachine(object):
             double C, 
             int d_poly,
             double gamma_rbf,
-            model_path, 
-            kernel):
+            string model_path, 
+            string kernel, 
+            MPI.Comm comm):
 
-        self.v = svm(n_features, max_iter, C, d_poly, gamma_rbf, model_path, kernel)
+        self.v = svm(n_features, max_iter, C, d_poly, gamma_rbf, model_path, kernel, comm.ob_mpi)
 
     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):   
         cdef double *x_arr = &x[0]
@@ -57,8 +76,18 @@ cdef class SupportVectorMachine(object):
                 y_arr_new[i] = 1
         self.v.fit(x_arr, y_arr_new, n)
         free(y_arr_new)
+
+    def fit2(self, int n):   
+        cdef double *x_arr
+        cdef int *y_arr
+        self.v.fit(x_arr, y_arr, n)
     
     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
         cdef double *x_arr = &x[0]
         return convert_int_ptr_to_python(self.v.predict(x_arr, n), n)
+
+    def predict2(self, n):
+        cdef double *x_arr
+        self.v.predict(x_arr, n)
+
 
