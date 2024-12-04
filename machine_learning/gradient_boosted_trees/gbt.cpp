@@ -1,36 +1,4 @@
-#include <immintrin.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <array>
-#include <map>
-#include <unordered_map>
-#include <deque>
-#include <tuple>
-#include <map>
-#include <fcntl.h>
-#include <functional>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
-#include <string>
-#include <random>
-#include <algorithm>
-#include <chrono>
-#include <mutex>
-#include <thread>
-#include <ctime> 
-#include <stdbool.h>    // bool type
-#include <fstream>
-#include <cmath>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/array.hpp>
-
+#include "gbt.h"
 using namespace std;
 
 template <typename T>
@@ -47,50 +15,10 @@ void print_arr(const T *arr, const int n, const int m) {
     std::cout << std::endl;
 }
 
-struct TreeNode {
-    int split_feature_index;
-    double split_feature_value;
-    bool is_leaf;
-    int *indices;
-    int num_indices;
-    int depth;
-    double leaf_weight;
-    TreeNode *lt_node;
-    TreeNode *rt_node;
-};
-
-class GradientBoostedTrees {
-    private:
-
-    public:
-        std::vector<TreeNode*> all_trees;
-        int n_features;
-        int max_num_trees;
-        int max_depth_per_tree;
-        int min_samples_for_split;
-        double reg_const;
-        double gamma;
-        bool sample_features;
-        int num_features_to_sample_per_tree;
-        std::string model_path;
-
-        GradientBoostedTrees();
-        GradientBoostedTrees( 
-                int n_features, 
-                int max_num_trees,
-                int max_depth_per_tree,
-                int min_samples_for_split,
-                double reg_const,
-                double gamma,
-                bool sample_features,
-                int num_features_to_sample_per_tree,
-                std::string model_path);
-
-        ~GradientBoostedTrees();
-
-        void fit(double *x, double *y, int n);
-        double *predict(double *x, int n);
-};
+typedef std::pair<double, int> mypair;
+bool comparator ( const mypair& l, const mypair& r) { 
+    return l.first < r.first; 
+}
 
 GradientBoostedTrees::GradientBoostedTrees(){}
 
@@ -101,7 +29,7 @@ GradientBoostedTrees::GradientBoostedTrees(
                 int min_samples_for_split,
                 double reg_const,
                 double gamma,
-                bool sample_features,
+                int sample_features,
                 int num_features_to_sample_per_tree,
                 std::string model_path) {
 
@@ -117,11 +45,6 @@ GradientBoostedTrees::GradientBoostedTrees(
 }
 
 GradientBoostedTrees::~GradientBoostedTrees(){}
-
-typedef std::pair<double, int> mypair;
-bool comparator ( const mypair& l, const mypair& r) { 
-    return l.first < r.first; 
-}
 
 void GradientBoostedTrees::fit(double *x, double *y, int n) {
     int num_tree = 0;
@@ -222,11 +145,20 @@ void GradientBoostedTrees::fit(double *x, double *y, int n) {
                     int *lt_indices = new int[best_split_data_index+1];
                     int *rt_indices = new int[m-(best_split_data_index+1)];
 
+                    mypair *features = new mypair[m];
+                    for (int j = 0; j < m; j++) {
+                        int k = curr_indices[j];
+                        features[j] = std::make_pair(x[k*n_features+best_split_feature_index], k);
+                    }
+                    std::sort(features, features+m, comparator);
+
                     int p = 0;
                     int q = 0;
                     for (int j = 0; j < m; j++) {
-                        int k = curr_indices[j];
-                        if (x[k*n_features+best_split_feature_index] <= best_split_feature_value) {
+                        mypair z = features[j];
+                        int k = z.second;
+                        
+                        if (j <= best_split_data_index) {
                             lt_indices[p++] = k;
                         }
                         else {
@@ -345,7 +277,7 @@ int main(int argc, char *argv[]) {
 
     std::copy(y, y+n, y_copy);
 
-    GradientBoostedTrees gbt(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, false, -1, model_path);
+    GradientBoostedTrees gbt(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, 0, -1, model_path);
     gbt.fit(x, y, n);
     double *res = gbt.predict(x, n);
     print_arr(res, n, 1);
