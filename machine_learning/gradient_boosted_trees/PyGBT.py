@@ -22,7 +22,7 @@ n_test, m = X_test.shape
 
 print(n_train, n_test, m)
 
-v = GBT(m, 100, 10, 2, 0.0, 0.0, 0, -1, "models/gbt_model")
+v = GBT(m, 100, 5, 2, 0.0001, 0.03, 0, -1, "models/gbt_model")
 
 x = X_train.reshape((n_train*m,))
 y = Y_train
@@ -36,6 +36,7 @@ out = v.predict(x, n_test)
 print(y)
 print()
 print(out)
+print(np.sum((np.array(y)-np.array(out))**2))
     
 # if rank == 0:    
     

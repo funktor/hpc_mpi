@@ -99,6 +99,7 @@ void GradientBoostedTrees::fit(double *x, double *y, int n) {
                 int best_split_feature_index = -1;
                 int best_split_data_index = -1;
                 double best_split_feature_value = 0.0;
+                mypair *best_features = new mypair[m];
 
                 for (int i = 0; i < n_features; i++) {
                     mypair *features = new mypair[m];
@@ -128,6 +129,7 @@ void GradientBoostedTrees::fit(double *x, double *y, int n) {
                             best_split_feature_index = i;
                             best_split_data_index = j;
                             best_split_feature_value = p.first;
+                            best_features = features;
                             max_gain = gain;
                         }
                     }
@@ -145,19 +147,11 @@ void GradientBoostedTrees::fit(double *x, double *y, int n) {
                     int *lt_indices = new int[best_split_data_index+1];
                     int *rt_indices = new int[m-(best_split_data_index+1)];
 
-                    mypair *features = new mypair[m];
-                    for (int j = 0; j < m; j++) {
-                        int k = curr_indices[j];
-                        features[j] = std::make_pair(x[k*n_features+best_split_feature_index], k);
-                    }
-                    std::sort(features, features+m, comparator);
-
                     int p = 0;
                     int q = 0;
                     for (int j = 0; j < m; j++) {
-                        mypair z = features[j];
-                        int k = z.second;
-                        
+                        int k = best_features[j].second;
+
                         if (j <= best_split_data_index) {
                             lt_indices[p++] = k;
                         }
