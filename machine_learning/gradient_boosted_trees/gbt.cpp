@@ -64,27 +64,33 @@ NodeSplit GradientBoostedTrees::get_node_split_feature(TreeNode *node, int featu
 
         for (auto z : buckets) {
             if (z.size() > max_bucket_size) {
-                flag = true;
-
                 double a = INFINITY;
                 double b = -INFINITY;
                 for (auto w : z) {
                     a = min(a, w.first);
                     b = max(b, w.first);
                 }
-                double interval = (b-a)/(double)num_buckets;
 
-                std::vector<std::vector<mypair>> f(num_buckets);
-                for (auto w : z) {
-                    int p = (w.first-a)/interval;
-                    if (p == num_buckets) {
-                        f[p-1].push_back(w);
+                if (b > a) {
+                    flag = true;
+                    double interval = (b-a)/(double)num_buckets;
+
+                    std::vector<std::vector<mypair>> f(num_buckets);
+                    for (auto w : z) {
+                        int p = (w.first-a)/interval;
+                        if (p == num_buckets) {
+                            f[p-1].push_back(w);
+                        }
+                        else {
+                            f[p].push_back(w);
+                        }
                     }
-                    else {
-                        f[p].push_back(w);
-                    }
+                    new_buckets.insert(new_buckets.end(), f.begin(), f.end());
                 }
-                new_buckets.insert(new_buckets.end(), f.begin(), f.end());
+                else {
+                    new_buckets.push_back(z);
+                }
+                
             }
             else {
                 new_buckets.push_back(z);
@@ -236,7 +242,7 @@ void GradientBoostedTrees::fit(double *x, double *y, int n) {
 
             bool is_leaf = true;
             NodeSplit split = get_node_split(node, scores, g, h, x, y, n);
-
+            
             if (split.gain > 0) {
                 is_leaf = false;
 

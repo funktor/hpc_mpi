@@ -37,9 +37,9 @@
 using namespace std;
 
 typedef std::pair<double, int> mypair;
-bool comparator ( const mypair& l, const mypair& r) { 
-    return l.first < r.first; 
-}
+// bool comparator ( const mypair& l, const mypair& r) { 
+//     return l.first < r.first; 
+// }
 
 struct TreeNode {
     int split_feature_index;
