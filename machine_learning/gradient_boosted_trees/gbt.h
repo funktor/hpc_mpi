@@ -36,6 +36,11 @@
 
 using namespace std;
 
+typedef std::pair<double, int> mypair;
+bool comparator ( const mypair& l, const mypair& r) { 
+    return l.first < r.first; 
+}
+
 struct TreeNode {
     int split_feature_index;
     double split_feature_value;
@@ -46,6 +51,12 @@ struct TreeNode {
     double leaf_weight;
     TreeNode *lt_node;
     TreeNode *rt_node;
+};
+
+struct NodeSplit {
+    double gain;
+    int feature_index;
+    double split_value;
 };
 
 class GradientBoostedTrees {
@@ -79,6 +90,8 @@ class GradientBoostedTrees {
 
         void fit(double *x, double *y, int n);
         double *predict(double *x, int n);
+        NodeSplit get_node_split(TreeNode *node, double *scores, double *g, double *h, double *x, double *y, int n);
+        NodeSplit get_node_split_feature(TreeNode *node, int feature_index, double *g, double *h, double g_sum, double h_sum, double curr_node_val, double *x, double *y, int n);
 };
 
 #endif

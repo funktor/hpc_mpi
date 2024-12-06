@@ -15,11 +15,6 @@ void print_arr(const T *arr, const int n, const int m) {
     std::cout << std::endl;
 }
 
-typedef std::pair<double, int> mypair;
-bool comparator ( const mypair& l, const mypair& r) { 
-    return l.first < r.first; 
-}
-
 GradientBoostedTrees::GradientBoostedTrees(){}
 
 GradientBoostedTrees::GradientBoostedTrees(
@@ -45,6 +40,168 @@ GradientBoostedTrees::GradientBoostedTrees(
 }
 
 GradientBoostedTrees::~GradientBoostedTrees(){}
+
+NodeSplit GradientBoostedTrees::get_node_split_feature(TreeNode *node, int feature_index, double *g, double *h, double g_sum, double h_sum, double curr_node_val, double *x, double *y, int n) {
+    int m = node->num_indices;
+    int *curr_indices = node->indices;
+
+    std::vector<std::vector<mypair>> buckets;
+    std::vector<mypair> f;
+
+    for (int j = 0; j < m; j++) {
+        int k = curr_indices[j];
+        f.push_back(std::make_pair(x[k*n_features+feature_index], k));
+    }
+
+    buckets.push_back(f);
+    
+    int num_buckets = 10;
+    int max_bucket_size = 20;
+
+    while(1) {
+        std::vector<std::vector<mypair>> new_buckets;
+        bool flag = false;
+
+        for (auto z : buckets) {
+            if (z.size() > max_bucket_size) {
+                flag = true;
+
+                double a = INFINITY;
+                double b = -INFINITY;
+                for (auto w : z) {
+                    a = min(a, w.first);
+                    b = max(b, w.first);
+                }
+                double interval = (b-a)/(double)num_buckets;
+
+                std::vector<std::vector<mypair>> f(num_buckets);
+                for (auto w : z) {
+                    int p = (w.first-a)/interval;
+                    if (p == num_buckets) {
+                        f[p-1].push_back(w);
+                    }
+                    else {
+                        f[p].push_back(w);
+                    }
+                }
+                new_buckets.insert(new_buckets.end(), f.begin(), f.end());
+            }
+            else {
+                new_buckets.push_back(z);
+            }
+        }
+
+        buckets.clear();
+        buckets.assign(new_buckets.begin(), new_buckets.end());
+        if (!flag) break;
+    }
+
+    int curr_len = 0;
+    std::vector<std::vector<mypair>> merged_buckets;
+    std::vector<mypair> temp;
+
+    for (int i = 0; i < buckets.size(); i++) {
+        if (curr_len + buckets[i].size() > max_bucket_size && temp.size() > 0) {
+            merged_buckets.push_back(temp);
+            curr_len = 0;
+            temp.clear();
+        }
+
+        temp.insert(temp.end(), buckets[i].begin(), buckets[i].end());
+        curr_len += buckets[i].size();
+    }
+
+    if (temp.size() > 0) merged_buckets.push_back(temp);
+
+    double *g_buckets = new double[merged_buckets.size()];
+    double *h_buckets = new double[merged_buckets.size()];
+
+    for (int i = 0; i < merged_buckets.size(); i++) {
+        g_buckets[i] = 0.0;
+        h_buckets[i] = 0.0;
+
+        for (auto w : merged_buckets[i]) {
+            g_buckets[i] += g[w.second];
+            h_buckets[i] += h[w.second];
+        }
+    }
+
+    double max_gain = 0;
+    int best_split_feature_index = -1;
+    double best_split_feature_value = 0.0;
+
+    double g_lt = 0.0;
+    double g_rt = g_sum;
+    double h_lt = 0.0;
+    double h_rt = h_sum;
+
+    for (int i = 0; i < merged_buckets.size(); i++) {
+        g_lt += g_buckets[i];
+        h_lt += h_buckets[i];
+        g_rt -= g_buckets[i];
+        h_rt -= h_buckets[i];
+
+        double gain = 0.5*(g_lt*g_lt/(h_lt+reg_const) + g_rt*g_rt/(h_rt+reg_const) - curr_node_val)-gamma;
+
+        if (gain > max_gain) {
+            best_split_feature_value = merged_buckets[i].back().first;
+            max_gain = gain;
+        }
+    }
+
+    NodeSplit split;
+
+    split.gain = max_gain;
+    split.feature_index = feature_index;
+    split.split_value = best_split_feature_value;
+
+    return split;
+}
+
+NodeSplit GradientBoostedTrees::get_node_split(TreeNode *node, double *scores, double *g, double *h, double *x, double *y, int n) {
+    int m = node->num_indices;
+
+    double max_gain = 0;
+    int best_split_feature_index = -1;
+    double best_split_feature_value = 0.0;
+
+    if (m >= min_samples_for_split && node->depth < max_depth_per_tree) {
+        int *curr_indices = node->indices;
+
+        double g_sum = 0.0;
+        double h_sum = 0.0;
+
+        for (int i = 0; i < m; i++) {
+            int j = curr_indices[i];
+
+            g[j] = -2.0*(y[j]-scores[j]);
+            h[j] = 2.0;
+
+            g_sum += g[j];
+            h_sum += h[j];
+        }
+
+        double curr_node_val = g_sum*g_sum/(h_sum+reg_const);
+
+        for (int i = 0; i < n_features; i++) {
+            NodeSplit curr_split = get_node_split_feature(node, i, g, h, g_sum, h_sum, curr_node_val, x, y, n);
+
+            if (curr_split.gain > max_gain) {
+                best_split_feature_index = i;
+                best_split_feature_value = curr_split.split_value;
+                max_gain = curr_split.gain;
+            }
+        }
+    }
+
+    NodeSplit split;
+
+    split.gain = max_gain;
+    split.feature_index = best_split_feature_index;
+    split.split_value = best_split_feature_value;
+
+    return split;
+}
 
 void GradientBoostedTrees::fit(double *x, double *y, int n) {
     int num_tree = 0;
@@ -75,106 +232,64 @@ void GradientBoostedTrees::fit(double *x, double *y, int n) {
             nodes.pop_front();
 
             int m = node->num_indices;
+            int *curr_indices = node->indices;
+
             bool is_leaf = true;
+            NodeSplit split = get_node_split(node, scores, g, h, x, y, n);
 
-            if (m >= min_samples_for_split && node->depth < max_depth_per_tree) {
-                int *curr_indices = node->indices;
+            if (split.gain > 0) {
+                is_leaf = false;
 
-                double g_sum = 0.0;
-                double h_sum = 0.0;
+                node->split_feature_index = split.feature_index;
+                node->split_feature_value = split.split_value;
+                node->is_leaf = false;
 
-                for (int i = 0; i < m; i++) {
-                    int j = curr_indices[i];
+                TreeNode *lt = (TreeNode*) malloc(sizeof(TreeNode));
+                TreeNode *rt = (TreeNode*) malloc(sizeof(TreeNode));
+                
+                int num_lt = 0;
+                int num_rt = 0;
 
-                    g[j] = -2.0*(y[j]-scores[j]);
-                    h[j] = 2.0;
-
-                    g_sum += g[j];
-                    h_sum += h[j];
-                }
-
-                double curr_node_val = g_sum*g_sum/(h_sum+reg_const);
-
-                double max_gain = -INFINITY;
-                int best_split_feature_index = -1;
-                int best_split_data_index = -1;
-                double best_split_feature_value = 0.0;
-                mypair *best_features = new mypair[m];
-
-                for (int i = 0; i < n_features; i++) {
-                    mypair *features = new mypair[m];
-                    for (int j = 0; j < m; j++) {
-                        int k = curr_indices[j];
-                        features[j] = std::make_pair(x[k*n_features+i], k);
+                for (int j = 0; j < m; j++) {
+                    int k = curr_indices[j];
+                    if (x[k*n_features+split.feature_index] <= split.split_value) {
+                        num_lt += 1;
                     }
-                    std::sort(features, features+m, comparator);
-
-                    double g_lt = 0.0;
-                    double g_rt = g_sum;
-                    double h_lt = 0.0;
-                    double h_rt = h_sum;
-
-                    for (int j = 0; j < m; j++) {
-                        mypair p = features[j];
-                        int k = p.second;
-
-                        g_lt += g[k];
-                        h_lt += h[k];
-                        g_rt -= g[k];
-                        h_rt -= h[k];
-
-                        double gain = 0.5*(g_lt*g_lt/(h_lt+reg_const) + g_rt*g_rt/(h_rt+reg_const) - curr_node_val)-gamma;
-                        
-                        if (gain > max_gain) {
-                            best_split_feature_index = i;
-                            best_split_data_index = j;
-                            best_split_feature_value = p.first;
-                            best_features = features;
-                            max_gain = gain;
-                        }
+                    else {
+                        num_rt += 1;
                     }
                 }
 
-                if (max_gain > 0) {
-                    is_leaf = false;
+                int *lt_indices = new int[num_lt];
+                int *rt_indices = new int[num_rt];
 
-                    node->split_feature_index = best_split_feature_index;
-                    node->split_feature_value = best_split_feature_value;
-                    node->is_leaf = false;
+                int p = 0;
+                int q = 0;
 
-                    TreeNode *lt = (TreeNode*) malloc(sizeof(TreeNode));
-                    TreeNode *rt = (TreeNode*) malloc(sizeof(TreeNode));
-                    int *lt_indices = new int[best_split_data_index+1];
-                    int *rt_indices = new int[m-(best_split_data_index+1)];
-
-                    int p = 0;
-                    int q = 0;
-                    for (int j = 0; j < m; j++) {
-                        int k = best_features[j].second;
-
-                        if (j <= best_split_data_index) {
-                            lt_indices[p++] = k;
-                        }
-                        else {
-                            rt_indices[q++] = k;
-                        }
+                for (int j = 0; j < m; j++) {
+                    int k = curr_indices[j];
+                    if (x[k*n_features+split.feature_index] <= split.split_value) {
+                        lt_indices[p++] = k;
                     }
-
-                    lt->indices = lt_indices;
-                    rt->indices = rt_indices;
-
-                    lt->num_indices = best_split_data_index+1;
-                    rt->num_indices = m-(best_split_data_index+1);
-
-                    lt->depth = node->depth+1;
-                    rt->depth = node->depth+1;
-
-                    node->lt_node = lt;
-                    node->rt_node = rt;
-
-                    nodes.push_back(lt);
-                    nodes.push_back(rt);
+                    else {
+                        rt_indices[q++] = k;
+                    }
                 }
+
+                lt->indices = lt_indices;
+                rt->indices = rt_indices;
+
+                lt->num_indices = num_lt;
+                rt->num_indices = num_rt;
+
+                lt->depth = node->depth+1;
+                rt->depth = node->depth+1;
+
+                node->lt_node = lt;
+                node->rt_node = rt;
+
+                nodes.push_back(lt);
+                nodes.push_back(rt);
             }
 
             if (is_leaf) {
