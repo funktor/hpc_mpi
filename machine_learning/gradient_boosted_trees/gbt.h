@@ -29,17 +29,8 @@
 #include <stdbool.h>    // bool type
 #include <fstream>
 #include <cmath>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/array.hpp>
 
 using namespace std;
-
-typedef std::pair<double, int> mypair;
-// bool comparator ( const mypair& l, const mypair& r) { 
-//     return l.first < r.first; 
-// }
 
 struct TreeNode {
     int split_feature_index;
@@ -70,9 +61,15 @@ class GradientBoostedTrees {
         int min_samples_for_split;
         double reg_const;
         double gamma;
-        int sample_features;
-        int num_features_to_sample_per_tree;
+        double lr;
+        double feature_sample;
+        double data_sample;
+        std::string split_selection_algorithm;
         std::string model_path;
+        double bias;
+        double *curr_feature_importances;
+        double *grad;
+        double *hess;
 
         GradientBoostedTrees();
         GradientBoostedTrees( 
@@ -82,16 +79,20 @@ class GradientBoostedTrees {
                 int min_samples_for_split,
                 double reg_const,
                 double gamma,
-                int sample_features,
-                int num_features_to_sample_per_tree,
+                double lr,
+                double feature_sample,
+                double data_sample,
+                std::string split_selection_algorithm,
                 std::string model_path);
 
         ~GradientBoostedTrees();
 
         void fit(double *x, double *y, int n);
         double *predict(double *x, int n);
-        NodeSplit get_node_split(TreeNode *node, double *scores, double *g, double *h, double *x, double *y, int n);
-        NodeSplit get_node_split_feature(TreeNode *node, int feature_index, double *g, double *h, double g_sum, double h_sum, double curr_node_val, double *x, double *y, int n);
+        NodeSplit get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, double *y, int n);
+        NodeSplit get_node_split_feature(TreeNode *node, int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, double *y, int n);
+        int *sample_features();
+        int *sample_data(int n);
 };
 
 #endif

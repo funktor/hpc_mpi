@@ -16,8 +16,10 @@ cdef extern from "gbt.h":
                 int min_samples_for_split,
                 double reg_const,
                 double gamma,
-                int sample_features,
-                int num_features_to_sample_per_tree,
+                double lr,
+                double feature_sample,
+                double data_sample,
+                string split_selection_algorithm,
                 string model_path) except +
 
         void fit(double *x, double *y, int n)
@@ -41,11 +43,13 @@ cdef class GBT(object):
             int min_samples_for_split,
             double reg_const,
             double gamma,
-            int sample_features,
-            int num_features_to_sample_per_tree,
+            double lr,
+            double feature_sample,
+            double data_sample,
+            string split_selection_algorithm,
             string model_path):
 
-        self.g = GradientBoostedTrees(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, sample_features, num_features_to_sample_per_tree, model_path)
+        self.g = GradientBoostedTrees(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
 
     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):   
         cdef double *x_arr = &x[0]
