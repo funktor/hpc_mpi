@@ -1,7 +1,6 @@
 #include "gbt.h"
 using namespace std;
 
-typedef std::pair<double, int> mypair;
 bool custom_comparator ( const mypair& l, const mypair& r) { 
     return l.first < r.first; 
 }
@@ -79,11 +78,12 @@ int *GradientBoostedTrees::sample_features() {
     return res;
 }
 
-int *GradientBoostedTrees::sample_data(int n) {
+int *GradientBoostedTrees::sample_data(int *curr_indices, int n) {
     mypair *f = new mypair[n];
 
     for (int j = 0; j < n; j++) {
-        f[j] = std::make_pair(abs(grad[j]), j);
+        int k = curr_indices[j];
+        f[j] = std::make_pair(abs(grad[k]), k);
     }
 
     std::sort(f, f+n, custom_comparator);
@@ -101,10 +101,11 @@ int *GradientBoostedTrees::sample_data(int n) {
         if (h <= 0.99) res[j] = f[k--].second;
         else res[j] = f[q++].second;
     }
+
     return res;
 }
 
-NodeSplit GradientBoostedTrees::get_node_split_feature(TreeNode *node, int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, double *y, int n) {
+NodeSplit GradientBoostedTrees::get_node_split_feature(TreeNode *node, int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, int n) {
     double max_gain = 0;
     int best_split_feature_index = -1;
     double best_split_feature_value = 0.0;
@@ -155,8 +156,9 @@ NodeSplit GradientBoostedTrees::get_node_split_feature(TreeNode *node, int featu
         
         int num_buckets = 10;
         int max_bucket_size = 20;
+        int iters = 0;
 
-        while(1) {
+        while(iters < 1) {
             std::vector<std::vector<mypair>> new_buckets;
             bool flag = false;
 
@@ -198,6 +200,7 @@ NodeSplit GradientBoostedTrees::get_node_split_feature(TreeNode *node, int featu
             buckets.clear();
             buckets.assign(new_buckets.begin(), new_buckets.end());
             if (!flag) break;
+            iters++;
         }
 
         int curr_len = 0;
@@ -257,7 +260,7 @@ NodeSplit GradientBoostedTrees::get_node_split_feature(TreeNode *node, int featu
     return split;
 }
 
-NodeSplit GradientBoostedTrees::get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, double *y, int n) {
+NodeSplit GradientBoostedTrees::get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, int n) {
     int m = node->num_indices;
 
     double max_gain = 0;
@@ -269,7 +272,7 @@ NodeSplit GradientBoostedTrees::get_node_split(TreeNode *node, int *sampled_feat
         int n_samples = data_sample*m;
 
         if (n_samples > 10) {
-            curr_indices = sample_data(m);
+            curr_indices = sample_data(node->indices, m);
             m = n_samples;
         }
         else {
@@ -289,7 +292,7 @@ NodeSplit GradientBoostedTrees::get_node_split(TreeNode *node, int *sampled_feat
 
         for (int i = 0; i < f_samples; i++) {
             int j = sampled_feature_indices[i];
-            NodeSplit curr_split = get_node_split_feature(node, j, g_sum, h_sum, curr_node_val, curr_indices, m, x, y, n);
+            NodeSplit curr_split = get_node_split_feature(node, j, g_sum, h_sum, curr_node_val, curr_indices, m, x, n);
             curr_feature_importances[j] += curr_split.gain;
 
             if (curr_split.gain > max_gain) {
@@ -358,7 +361,7 @@ void GradientBoostedTrees::fit(double *x, double *y, int n) {
             int *curr_indices = node->indices;
 
             bool is_leaf = true;
-            NodeSplit split = get_node_split(node, sampled_feature_indices, f_samples, x, y, n);
+            NodeSplit split = get_node_split(node, sampled_feature_indices, f_samples, x, n);
 
             if (split.gain > 0) {
                 is_leaf = false;

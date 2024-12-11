@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <map>
+#include <set>
 #include <unordered_map>
 #include <deque>
 #include <tuple>
@@ -31,6 +32,8 @@
 #include <cmath>
 
 using namespace std;
+
+typedef std::pair<double, int> mypair;
 
 struct TreeNode {
     int split_feature_index;
@@ -89,10 +92,10 @@ class GradientBoostedTrees {
 
         void fit(double *x, double *y, int n);
         double *predict(double *x, int n);
-        NodeSplit get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, double *y, int n);
-        NodeSplit get_node_split_feature(TreeNode *node, int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, double *y, int n);
+        NodeSplit get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, int n);
+        NodeSplit get_node_split_feature(TreeNode *node, int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, int n);
         int *sample_features();
-        int *sample_data(int n);
+        int *sample_data(int *curr_indices, int n);
 };
 
 #endif
