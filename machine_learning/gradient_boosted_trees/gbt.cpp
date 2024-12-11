@@ -203,19 +203,21 @@ NodeSplit GradientBoostedTrees::get_node_split_feature(TreeNode *node, int featu
             iters++;
         }
 
-        int curr_len = 0;
         std::vector<std::vector<mypair>> merged_buckets;
+        int curr_len = 0;
         std::vector<mypair> temp;
 
         for (int i = 0; i < buckets.size(); i++) {
-            if (curr_len + buckets[i].size() > max_bucket_size && temp.size() > 0) {
-                merged_buckets.push_back(temp);
-                curr_len = 0;
-                temp.clear();
-            }
+            if (buckets[i].size() > 0) {
+                if (curr_len + buckets[i].size() > max_bucket_size && temp.size() > 0) {
+                    merged_buckets.push_back(temp);
+                    curr_len = 0;
+                    temp.clear();
+                }
 
-            temp.insert(temp.end(), buckets[i].begin(), buckets[i].end());
-            curr_len += buckets[i].size();
+                temp.insert(temp.end(), buckets[i].begin(), buckets[i].end());
+                curr_len += buckets[i].size();
+            }
         }
 
         if (temp.size() > 0) merged_buckets.push_back(temp);

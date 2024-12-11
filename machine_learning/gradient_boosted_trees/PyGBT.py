@@ -24,7 +24,7 @@ n_test, m = X_test.shape
 
 print(n_train, n_test, m)
 
-v = GBT(m, 100, 3, 2, 0.9, 0.0, 0.01, 0.3, 0.6, "sorting", "models/gbt_model")
+v = GBT(m, 100, 3, 2, 0.9, 0.0, 0.01, 0.3, 0.6, "histogram", "models/gbt_model")
 
 x = X_train.reshape((n_train*m,))
 y = Y_train
