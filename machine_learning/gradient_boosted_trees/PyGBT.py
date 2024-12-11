@@ -11,40 +11,46 @@ import os
 from sklearn.svm import SVC
 from sklearn.ensemble import GradientBoostingRegressor
 
-X, Y = load_diabetes(return_X_y=True)
-# X, Y = make_regression(random_state=0)
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state = 0)
+# X, Y = load_diabetes(return_X_y=True)
+# # X, Y = make_regression(random_state=0)
+# X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state = 0)
 
 # sc = RobustScaler()
 # X_train = sc.fit_transform(X_train)
 # X_test = sc.transform(X_test)
 
+X, Y = load_breast_cancer(return_X_y=True)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.40, stratify=Y, random_state = 17)
+
+sc = RobustScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
 n_train, m = X_train.shape
 n_test, m = X_test.shape
 
-print(n_train, n_test, m)
-
-v = GBT(m, 100, 3, 2, 0.9, 0.0, 0.01, 0.3, 0.6, "histogram", "models/gbt_model")
+v = GBT(m, 100, 3, 2, 0.1, 0.01, 0.1, 1.0, 0.8, "histogram", "models/gbt_model")
 
 x = X_train.reshape((n_train*m,))
-y = Y_train
+y = Y_train.astype(np.uint32)
 
 v.fit(x, y, n_train)
 
-reg = GradientBoostingRegressor(random_state=0)
-reg.fit(X_train, Y_train)
+# reg = GradientBoostingRegressor(random_state=0)
+# reg.fit(X_train, Y_train)
 
 x = X_test.reshape((n_test*m,))
-y = Y_test
+y = Y_test.astype(np.uint32)
 
 out = v.predict(x, n_test)
-out2 = reg.predict(X_test)
+# out2 = reg.predict(X_test)
 print(y)
 print()
 print(out)
-print(out2)
-print(np.sum((np.array(y)-np.array(out))**2))
-print(np.sum((np.array(y)-np.array(out2))**2))
+print(sum([out[i] == y[i] for i in range(n_test)])/n_test)
+# print(out2)
+# print(np.sum((np.array(y)-np.array(out))**2))
+# print(np.sum((np.array(y)-np.array(out2))**2))
     
 # if rank == 0:    
     

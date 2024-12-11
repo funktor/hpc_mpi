@@ -6,10 +6,10 @@ from libc.stdlib cimport malloc, free
 from cpython cimport array
 cimport numpy as np
 
-cdef extern from "gbt.h":
-    cdef cppclass GradientBoostedTrees:
-        GradientBoostedTrees() except +
-        GradientBoostedTrees(
+cdef extern from "gbt2.h":
+    cdef cppclass GradientBoostedTreesClassifier:
+        GradientBoostedTreesClassifier() except +
+        GradientBoostedTreesClassifier(
                 int n_features, 
                 int max_num_trees,
                 int max_depth_per_tree,
@@ -22,10 +22,10 @@ cdef extern from "gbt.h":
                 string split_selection_algorithm,
                 string model_path) except +
 
-        void fit(double *x, double *y, int n)
-        double *predict(double *x, int n)
+        void fit(double *x, int *y, int n)
+        int *predict(double *x, int n)
 
-cdef convert_double_ptr_to_python(double *ptr, int n):
+cdef convert_int_ptr_to_python(int *ptr, int n):
     cdef int i
     lst=[]
     for i in range(n):
@@ -33,7 +33,7 @@ cdef convert_double_ptr_to_python(double *ptr, int n):
     return lst
 
 cdef class GBT(object):
-    cdef GradientBoostedTrees g
+    cdef GradientBoostedTreesClassifier g
     
     def __cinit__(
             self, 
@@ -49,15 +49,18 @@ cdef class GBT(object):
             string split_selection_algorithm,
             string model_path):
 
-        self.g = GradientBoostedTrees(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+        self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
 
-    def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):   
+    def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):   
         cdef double *x_arr = &x[0]
-        cdef double *y_arr = &y[0]
-        self.g.fit(x_arr, y_arr, n)
+        cdef unsigned int *y_arr = &y[0]
+        cdef int *y_arr_new = <int *>malloc(n * sizeof(int))
+        for i in range(n):
+            y_arr_new[i] = y_arr[i]
+        self.g.fit(x_arr, y_arr_new, n)
     
     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
         cdef double *x_arr = &x[0]
-        return convert_double_ptr_to_python(self.g.predict(x_arr, n), n)
+        return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
 
 

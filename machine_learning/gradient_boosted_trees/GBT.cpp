@@ -9,7 +9,7 @@
             "/home/amondal/lib/python3.10/site-packages/numpy/core/include/numpy/ndarrayobject.h",
             "/home/amondal/lib/python3.10/site-packages/numpy/core/include/numpy/ndarraytypes.h",
             "/home/amondal/lib/python3.10/site-packages/numpy/core/include/numpy/ufuncobject.h",
-            "gbt.h"
+            "gbt2.h"
         ],
         "extra_link_args": [
             "-lz",
@@ -22,7 +22,7 @@
         "name": "GBT",
         "sources": [
             "GBT.pyx",
-            "gbt.cpp"
+            "gbt2.cpp"
         ]
     },
     "module_name": "GBT"
@@ -1304,7 +1304,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "numpy/ndarraytypes.h"
 #include "numpy/arrayscalars.h"
 #include "numpy/ufuncobject.h"
-#include "gbt.h"
+#include "gbt2.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -1915,12 +1915,12 @@ typedef npy_cdouble __pyx_t_5numpy_complex_t;
  *     return lst
  * 
  * cdef class GBT(object):             # <<<<<<<<<<<<<<
- *     cdef GradientBoostedTrees g
+ *     cdef GradientBoostedTreesClassifier g
  * 
  */
 struct __pyx_obj_3GBT_GBT {
   PyObject_HEAD
-  GradientBoostedTrees g;
+  GradientBoostedTreesClassifier g;
 };
 
 /* #### Code section: utility_code_proto ### */
@@ -2993,10 +2993,11 @@ static CYTHON_INLINE int __pyx_f_7cpython_5array_extend_buffer(arrayobject *, ch
 /* Module declarations from "numpy" */
 
 /* Module declarations from "GBT" */
-static PyObject *__pyx_f_3GBT_convert_double_ptr_to_python(double *, int); /*proto*/
+static PyObject *__pyx_f_3GBT_convert_int_ptr_to_python(int *, int); /*proto*/
 static std::string __pyx_convert_string_from_py_6libcpp_6string_std__in_string(PyObject *); /*proto*/
 /* #### Code section: typeinfo ### */
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t = { "float64_t", NULL, sizeof(__pyx_t_5numpy_float64_t), { 0 }, 0, 'R', 0, 0 };
+static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_uint32_t = { "uint32_t", NULL, sizeof(__pyx_t_5numpy_uint32_t), { 0 }, 0, __PYX_IS_UNSIGNED(__pyx_t_5numpy_uint32_t) ? 'U' : 'I', __PYX_IS_UNSIGNED(__pyx_t_5numpy_uint32_t), 0 };
 /* #### Code section: before_global_var ### */
 #define __Pyx_MODULE_NAME "GBT"
 extern int __pyx_module_is_main_GBT;
@@ -3009,6 +3010,7 @@ static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_MemoryError;
 static PyObject *__pyx_builtin_ImportError;
 /* #### Code section: string_decls ### */
+static const char __pyx_k_i[] = "i";
 static const char __pyx_k_n[] = "n";
 static const char __pyx_k_x[] = "x";
 static const char __pyx_k_y[] = "y";
@@ -3038,6 +3040,7 @@ static const char __pyx_k_isenabled[] = "isenabled";
 static const char __pyx_k_pyx_state[] = "__pyx_state";
 static const char __pyx_k_reduce_ex[] = "__reduce_ex__";
 static const char __pyx_k_reg_const[] = "reg_const";
+static const char __pyx_k_y_arr_new[] = "y_arr_new";
 static const char __pyx_k_model_path[] = "model_path";
 static const char __pyx_k_n_features[] = "n_features";
 static const char __pyx_k_GBT_predict[] = "GBT.predict";
@@ -3237,6 +3240,7 @@ typedef struct {
   PyObject *__pyx_n_s_gamma;
   PyObject *__pyx_kp_u_gc;
   PyObject *__pyx_n_s_getstate;
+  PyObject *__pyx_n_s_i;
   PyObject *__pyx_n_s_is_coroutine;
   PyObject *__pyx_kp_u_isenabled;
   PyObject *__pyx_n_s_lr;
@@ -3268,6 +3272,7 @@ typedef struct {
   PyObject *__pyx_n_s_x_arr;
   PyObject *__pyx_n_s_y;
   PyObject *__pyx_n_s_y_arr;
+  PyObject *__pyx_n_s_y_arr_new;
   PyObject *__pyx_tuple_;
   PyObject *__pyx_tuple__2;
   PyObject *__pyx_tuple__3;
@@ -3361,6 +3366,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_gamma);
   Py_CLEAR(clear_module_state->__pyx_kp_u_gc);
   Py_CLEAR(clear_module_state->__pyx_n_s_getstate);
+  Py_CLEAR(clear_module_state->__pyx_n_s_i);
   Py_CLEAR(clear_module_state->__pyx_n_s_is_coroutine);
   Py_CLEAR(clear_module_state->__pyx_kp_u_isenabled);
   Py_CLEAR(clear_module_state->__pyx_n_s_lr);
@@ -3392,6 +3398,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_x_arr);
   Py_CLEAR(clear_module_state->__pyx_n_s_y);
   Py_CLEAR(clear_module_state->__pyx_n_s_y_arr);
+  Py_CLEAR(clear_module_state->__pyx_n_s_y_arr_new);
   Py_CLEAR(clear_module_state->__pyx_tuple_);
   Py_CLEAR(clear_module_state->__pyx_tuple__2);
   Py_CLEAR(clear_module_state->__pyx_tuple__3);
@@ -3463,6 +3470,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_gamma);
   Py_VISIT(traverse_module_state->__pyx_kp_u_gc);
   Py_VISIT(traverse_module_state->__pyx_n_s_getstate);
+  Py_VISIT(traverse_module_state->__pyx_n_s_i);
   Py_VISIT(traverse_module_state->__pyx_n_s_is_coroutine);
   Py_VISIT(traverse_module_state->__pyx_kp_u_isenabled);
   Py_VISIT(traverse_module_state->__pyx_n_s_lr);
@@ -3494,6 +3502,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_x_arr);
   Py_VISIT(traverse_module_state->__pyx_n_s_y);
   Py_VISIT(traverse_module_state->__pyx_n_s_y_arr);
+  Py_VISIT(traverse_module_state->__pyx_n_s_y_arr_new);
   Py_VISIT(traverse_module_state->__pyx_tuple_);
   Py_VISIT(traverse_module_state->__pyx_tuple__2);
   Py_VISIT(traverse_module_state->__pyx_tuple__3);
@@ -3673,6 +3682,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_gamma __pyx_mstate_global->__pyx_n_s_gamma
 #define __pyx_kp_u_gc __pyx_mstate_global->__pyx_kp_u_gc
 #define __pyx_n_s_getstate __pyx_mstate_global->__pyx_n_s_getstate
+#define __pyx_n_s_i __pyx_mstate_global->__pyx_n_s_i
 #define __pyx_n_s_is_coroutine __pyx_mstate_global->__pyx_n_s_is_coroutine
 #define __pyx_kp_u_isenabled __pyx_mstate_global->__pyx_kp_u_isenabled
 #define __pyx_n_s_lr __pyx_mstate_global->__pyx_n_s_lr
@@ -3704,6 +3714,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_x_arr __pyx_mstate_global->__pyx_n_s_x_arr
 #define __pyx_n_s_y __pyx_mstate_global->__pyx_n_s_y
 #define __pyx_n_s_y_arr __pyx_mstate_global->__pyx_n_s_y_arr
+#define __pyx_n_s_y_arr_new __pyx_mstate_global->__pyx_n_s_y_arr_new
 #define __pyx_tuple_ __pyx_mstate_global->__pyx_tuple_
 #define __pyx_tuple__2 __pyx_mstate_global->__pyx_tuple__2
 #define __pyx_tuple__3 __pyx_mstate_global->__pyx_tuple__3
@@ -5974,14 +5985,14 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
 }
 
 /* "GBT.pyx":28
- *         double *predict(double *x, int n)
+ *         int *predict(double *x, int n)
  * 
- * cdef convert_double_ptr_to_python(double *ptr, int n):             # <<<<<<<<<<<<<<
+ * cdef convert_int_ptr_to_python(int *ptr, int n):             # <<<<<<<<<<<<<<
  *     cdef int i
  *     lst=[]
  */
 
-static PyObject *__pyx_f_3GBT_convert_double_ptr_to_python(double *__pyx_v_ptr, int __pyx_v_n) {
+static PyObject *__pyx_f_3GBT_convert_int_ptr_to_python(int *__pyx_v_ptr, int __pyx_v_n) {
   int __pyx_v_i;
   PyObject *__pyx_v_lst = NULL;
   PyObject *__pyx_r = NULL;
@@ -5994,10 +6005,10 @@ static PyObject *__pyx_f_3GBT_convert_double_ptr_to_python(double *__pyx_v_ptr, 
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("convert_double_ptr_to_python", 1);
+  __Pyx_RefNannySetupContext("convert_int_ptr_to_python", 1);
 
   /* "GBT.pyx":30
- * cdef convert_double_ptr_to_python(double *ptr, int n):
+ * cdef convert_int_ptr_to_python(int *ptr, int n):
  *     cdef int i
  *     lst=[]             # <<<<<<<<<<<<<<
  *     for i in range(n):
@@ -6027,7 +6038,7 @@ static PyObject *__pyx_f_3GBT_convert_double_ptr_to_python(double *__pyx_v_ptr, 
  *     return lst
  * 
  */
-    __pyx_t_1 = PyFloat_FromDouble((__pyx_v_ptr[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_ptr[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_5 = __Pyx_PyList_Append(__pyx_v_lst, __pyx_t_1); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6046,9 +6057,9 @@ static PyObject *__pyx_f_3GBT_convert_double_ptr_to_python(double *__pyx_v_ptr, 
   goto __pyx_L0;
 
   /* "GBT.pyx":28
- *         double *predict(double *x, int n)
+ *         int *predict(double *x, int n)
  * 
- * cdef convert_double_ptr_to_python(double *ptr, int n):             # <<<<<<<<<<<<<<
+ * cdef convert_int_ptr_to_python(int *ptr, int n):             # <<<<<<<<<<<<<<
  *     cdef int i
  *     lst=[]
  */
@@ -6056,7 +6067,7 @@ static PyObject *__pyx_f_3GBT_convert_double_ptr_to_python(double *__pyx_v_ptr, 
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("GBT.convert_double_ptr_to_python", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("GBT.convert_int_ptr_to_python", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_lst);
@@ -6066,7 +6077,7 @@ static PyObject *__pyx_f_3GBT_convert_double_ptr_to_python(double *__pyx_v_ptr, 
 }
 
 /* "GBT.pyx":38
- *     cdef GradientBoostedTrees g
+ *     cdef GradientBoostedTreesClassifier g
  * 
  *     def __cinit__(             # <<<<<<<<<<<<<<
  *             self,
@@ -6304,7 +6315,7 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
 
 static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self, int __pyx_v_n_features, int __pyx_v_max_num_trees, int __pyx_v_max_depth_per_tree, int __pyx_v_min_samples_for_split, double __pyx_v_reg_const, double __pyx_v_gamma, double __pyx_v_lr, double __pyx_v_feature_sample, double __pyx_v_data_sample, std::string __pyx_v_split_selection_algorithm, std::string __pyx_v_model_path) {
   int __pyx_r;
-  GradientBoostedTrees __pyx_t_1;
+  GradientBoostedTreesClassifier __pyx_t_1;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -6312,12 +6323,12 @@ static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self,
   /* "GBT.pyx":52
  *             string model_path):
  * 
- *         self.g = GradientBoostedTrees(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)             # <<<<<<<<<<<<<<
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)             # <<<<<<<<<<<<<<
  * 
- *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):
+ *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):
  */
   try {
-    __pyx_t_1 = GradientBoostedTrees(__pyx_v_n_features, __pyx_v_max_num_trees, __pyx_v_max_depth_per_tree, __pyx_v_min_samples_for_split, __pyx_v_reg_const, __pyx_v_gamma, __pyx_v_lr, __pyx_v_feature_sample, __pyx_v_data_sample, __pyx_v_split_selection_algorithm, __pyx_v_model_path);
+    __pyx_t_1 = GradientBoostedTreesClassifier(__pyx_v_n_features, __pyx_v_max_num_trees, __pyx_v_max_depth_per_tree, __pyx_v_min_samples_for_split, __pyx_v_reg_const, __pyx_v_gamma, __pyx_v_lr, __pyx_v_feature_sample, __pyx_v_data_sample, __pyx_v_split_selection_algorithm, __pyx_v_model_path);
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 52, __pyx_L1_error)
@@ -6325,7 +6336,7 @@ static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self,
   __pyx_v_self->g = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
   /* "GBT.pyx":38
- *     cdef GradientBoostedTrees g
+ *     cdef GradientBoostedTreesClassifier g
  * 
  *     def __cinit__(             # <<<<<<<<<<<<<<
  *             self,
@@ -6343,11 +6354,11 @@ static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self,
 }
 
 /* "GBT.pyx":54
- *         self.g = GradientBoostedTrees(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
  * 
- *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
+ *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
- *         cdef double *y_arr = &y[0]
+ *         cdef unsigned int *y_arr = &y[0]
  */
 
 /* Python wrapper */
@@ -6484,7 +6495,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self, PyArrayObject *__pyx_v_x, PyArrayObject *__pyx_v_y, int __pyx_v_n) {
   double *__pyx_v_x_arr;
-  double *__pyx_v_y_arr;
+  unsigned int *__pyx_v_y_arr;
+  int *__pyx_v_y_arr_new;
+  int __pyx_v_i;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_x;
   __Pyx_Buffer __pyx_pybuffer_x;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_y;
@@ -6493,6 +6506,8 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
   int __pyx_t_2;
+  int __pyx_t_3;
+  int __pyx_t_4;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -6512,16 +6527,16 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   __pyx_pybuffernd_x.diminfo[0].strides = __pyx_pybuffernd_x.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_x.diminfo[0].shape = __pyx_pybuffernd_x.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_y.rcbuffer->pybuffer, (PyObject*)__pyx_v_y, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 54, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_y.rcbuffer->pybuffer, (PyObject*)__pyx_v_y, &__Pyx_TypeInfo_nn___pyx_t_5numpy_uint32_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 54, __pyx_L1_error)
   }
   __pyx_pybuffernd_y.diminfo[0].strides = __pyx_pybuffernd_y.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_y.diminfo[0].shape = __pyx_pybuffernd_y.rcbuffer->pybuffer.shape[0];
 
   /* "GBT.pyx":55
  * 
- *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):
+ *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):
  *         cdef double *x_arr = &x[0]             # <<<<<<<<<<<<<<
- *         cdef double *y_arr = &y[0]
- *         self.g.fit(x_arr, y_arr, n)
+ *         cdef unsigned int *y_arr = &y[0]
+ *         cdef int *y_arr_new = <int *>malloc(n * sizeof(int))
  */
   __pyx_t_1 = 0;
   __pyx_t_2 = -1;
@@ -6536,11 +6551,11 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   __pyx_v_x_arr = (&(*__Pyx_BufPtrCContig1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_x.rcbuffer->pybuffer.buf, __pyx_t_1, __pyx_pybuffernd_x.diminfo[0].strides)));
 
   /* "GBT.pyx":56
- *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):
+ *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):
  *         cdef double *x_arr = &x[0]
- *         cdef double *y_arr = &y[0]             # <<<<<<<<<<<<<<
- *         self.g.fit(x_arr, y_arr, n)
- * 
+ *         cdef unsigned int *y_arr = &y[0]             # <<<<<<<<<<<<<<
+ *         cdef int *y_arr_new = <int *>malloc(n * sizeof(int))
+ *         for i in range(n):
  */
   __pyx_t_1 = 0;
   __pyx_t_2 = -1;
@@ -6552,23 +6567,54 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
     __PYX_ERR(0, 56, __pyx_L1_error)
   }
-  __pyx_v_y_arr = (&(*__Pyx_BufPtrCContig1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_y.rcbuffer->pybuffer.buf, __pyx_t_1, __pyx_pybuffernd_y.diminfo[0].strides)));
+  __pyx_v_y_arr = (&(*__Pyx_BufPtrCContig1d(__pyx_t_5numpy_uint32_t *, __pyx_pybuffernd_y.rcbuffer->pybuffer.buf, __pyx_t_1, __pyx_pybuffernd_y.diminfo[0].strides)));
 
   /* "GBT.pyx":57
  *         cdef double *x_arr = &x[0]
- *         cdef double *y_arr = &y[0]
- *         self.g.fit(x_arr, y_arr, n)             # <<<<<<<<<<<<<<
+ *         cdef unsigned int *y_arr = &y[0]
+ *         cdef int *y_arr_new = <int *>malloc(n * sizeof(int))             # <<<<<<<<<<<<<<
+ *         for i in range(n):
+ *             y_arr_new[i] = y_arr[i]
+ */
+  __pyx_v_y_arr_new = ((int *)malloc((__pyx_v_n * (sizeof(int)))));
+
+  /* "GBT.pyx":58
+ *         cdef unsigned int *y_arr = &y[0]
+ *         cdef int *y_arr_new = <int *>malloc(n * sizeof(int))
+ *         for i in range(n):             # <<<<<<<<<<<<<<
+ *             y_arr_new[i] = y_arr[i]
+ *         self.g.fit(x_arr, y_arr_new, n)
+ */
+  __pyx_t_2 = __pyx_v_n;
+  __pyx_t_3 = __pyx_t_2;
+  for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
+    __pyx_v_i = __pyx_t_4;
+
+    /* "GBT.pyx":59
+ *         cdef int *y_arr_new = <int *>malloc(n * sizeof(int))
+ *         for i in range(n):
+ *             y_arr_new[i] = y_arr[i]             # <<<<<<<<<<<<<<
+ *         self.g.fit(x_arr, y_arr_new, n)
+ * 
+ */
+    (__pyx_v_y_arr_new[__pyx_v_i]) = (__pyx_v_y_arr[__pyx_v_i]);
+  }
+
+  /* "GBT.pyx":60
+ *         for i in range(n):
+ *             y_arr_new[i] = y_arr[i]
+ *         self.g.fit(x_arr, y_arr_new, n)             # <<<<<<<<<<<<<<
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
  */
-  __pyx_v_self->g.fit(__pyx_v_x_arr, __pyx_v_y_arr, __pyx_v_n);
+  __pyx_v_self->g.fit(__pyx_v_x_arr, __pyx_v_y_arr_new, __pyx_v_n);
 
   /* "GBT.pyx":54
- *         self.g = GradientBoostedTrees(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
  * 
- *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
+ *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
- *         cdef double *y_arr = &y[0]
+ *         cdef unsigned int *y_arr = &y[0]
  */
 
   /* function exit code */
@@ -6594,12 +6640,12 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   return __pyx_r;
 }
 
-/* "GBT.pyx":59
- *         self.g.fit(x_arr, y_arr, n)
+/* "GBT.pyx":62
+ *         self.g.fit(x_arr, y_arr_new, n)
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
- *         return convert_double_ptr_to_python(self.g.predict(x_arr, n), n)
+ *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
  */
 
 /* Python wrapper */
@@ -6658,7 +6704,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -6666,14 +6712,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, 1); __PYX_ERR(0, 59, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, 1); __PYX_ERR(0, 62, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict") < 0)) __PYX_ERR(0, 59, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict") < 0)) __PYX_ERR(0, 62, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -6686,7 +6732,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 59, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 62, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6700,7 +6746,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_5numpy_ndarray, 1, "x", 0))) __PYX_ERR(0, 59, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_5numpy_ndarray, 1, "x", 0))) __PYX_ERR(0, 62, __pyx_L1_error)
   __pyx_r = __pyx_pf_3GBT_3GBT_4predict(((struct __pyx_obj_3GBT_GBT *)__pyx_v_self), __pyx_v_x, __pyx_v_n);
 
   /* function exit code */
@@ -6738,15 +6784,15 @@ static PyObject *__pyx_pf_3GBT_3GBT_4predict(struct __pyx_obj_3GBT_GBT *__pyx_v_
   __pyx_pybuffernd_x.rcbuffer = &__pyx_pybuffer_x;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_x.rcbuffer->pybuffer, (PyObject*)__pyx_v_x, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 59, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_x.rcbuffer->pybuffer, (PyObject*)__pyx_v_x, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 62, __pyx_L1_error)
   }
   __pyx_pybuffernd_x.diminfo[0].strides = __pyx_pybuffernd_x.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_x.diminfo[0].shape = __pyx_pybuffernd_x.rcbuffer->pybuffer.shape[0];
 
-  /* "GBT.pyx":60
+  /* "GBT.pyx":63
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
  *         cdef double *x_arr = &x[0]             # <<<<<<<<<<<<<<
- *         return convert_double_ptr_to_python(self.g.predict(x_arr, n), n)
+ *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
  * 
  */
   __pyx_t_1 = 0;
@@ -6757,32 +6803,32 @@ static PyObject *__pyx_pf_3GBT_3GBT_4predict(struct __pyx_obj_3GBT_GBT *__pyx_v_
   } else if (unlikely(__pyx_t_1 >= __pyx_pybuffernd_x.diminfo[0].shape)) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 60, __pyx_L1_error)
+    __PYX_ERR(0, 63, __pyx_L1_error)
   }
   __pyx_v_x_arr = (&(*__Pyx_BufPtrCContig1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_x.rcbuffer->pybuffer.buf, __pyx_t_1, __pyx_pybuffernd_x.diminfo[0].strides)));
 
-  /* "GBT.pyx":61
+  /* "GBT.pyx":64
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
  *         cdef double *x_arr = &x[0]
- *         return convert_double_ptr_to_python(self.g.predict(x_arr, n), n)             # <<<<<<<<<<<<<<
+ *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 61, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 61, __pyx_L1_error)
-  __pyx_t_4 = __pyx_f_3GBT_convert_double_ptr_to_python(__pyx_v_self->g.predict(__pyx_v_x_arr, __pyx_t_2), __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_3GBT_convert_int_ptr_to_python(__pyx_v_self->g.predict(__pyx_v_x_arr, __pyx_t_2), __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "GBT.pyx":59
- *         self.g.fit(x_arr, y_arr, n)
+  /* "GBT.pyx":62
+ *         self.g.fit(x_arr, y_arr_new, n)
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
- *         return convert_double_ptr_to_python(self.g.predict(x_arr, n), n)
+ *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
  */
 
   /* function exit code */
@@ -7034,7 +7080,7 @@ static PyObject *__pyx_tp_new_3GBT_GBT(PyTypeObject *t, PyObject *a, PyObject *k
   if (unlikely(!o)) return 0;
   #endif
   p = ((struct __pyx_obj_3GBT_GBT *)o);
-  new((void*)&(p->g)) GradientBoostedTrees();
+  new((void*)&(p->g)) GradientBoostedTreesClassifier();
   if (unlikely(__pyx_pw_3GBT_3GBT_1__cinit__(o, a, k) < 0)) goto bad;
   return o;
   bad:
@@ -7206,6 +7252,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_gamma, __pyx_k_gamma, sizeof(__pyx_k_gamma), 0, 0, 1, 1},
     {&__pyx_kp_u_gc, __pyx_k_gc, sizeof(__pyx_k_gc), 0, 1, 0, 0},
     {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
+    {&__pyx_n_s_i, __pyx_k_i, sizeof(__pyx_k_i), 0, 0, 1, 1},
     {&__pyx_n_s_is_coroutine, __pyx_k_is_coroutine, sizeof(__pyx_k_is_coroutine), 0, 0, 1, 1},
     {&__pyx_kp_u_isenabled, __pyx_k_isenabled, sizeof(__pyx_k_isenabled), 0, 1, 0, 0},
     {&__pyx_n_s_lr, __pyx_k_lr, sizeof(__pyx_k_lr), 0, 0, 1, 1},
@@ -7237,6 +7284,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_x_arr, __pyx_k_x_arr, sizeof(__pyx_k_x_arr), 0, 0, 1, 1},
     {&__pyx_n_s_y, __pyx_k_y, sizeof(__pyx_k_y), 0, 0, 1, 1},
     {&__pyx_n_s_y_arr, __pyx_k_y_arr, sizeof(__pyx_k_y_arr), 0, 0, 1, 1},
+    {&__pyx_n_s_y_arr_new, __pyx_k_y_arr_new, sizeof(__pyx_k_y_arr_new), 0, 0, 1, 1},
     {0, 0, 0, 0, 0, 0, 0}
   };
   return __Pyx_InitStrings(__pyx_string_tab);
@@ -7280,28 +7328,28 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__2);
 
   /* "GBT.pyx":54
- *         self.g = GradientBoostedTrees(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
  * 
- *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
+ *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
- *         cdef double *y_arr = &y[0]
+ *         cdef unsigned int *y_arr = &y[0]
  */
-  __pyx_tuple__3 = PyTuple_Pack(6, __pyx_n_s_self, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_n, __pyx_n_s_x_arr, __pyx_n_s_y_arr); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(8, __pyx_n_s_self, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_n, __pyx_n_s_x_arr, __pyx_n_s_y_arr, __pyx_n_s_y_arr_new, __pyx_n_s_i); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_GBT_pyx, __pyx_n_s_fit, 54, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_GBT_pyx, __pyx_n_s_fit, 54, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 54, __pyx_L1_error)
 
-  /* "GBT.pyx":59
- *         self.g.fit(x_arr, y_arr, n)
+  /* "GBT.pyx":62
+ *         self.g.fit(x_arr, y_arr_new, n)
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
- *         return convert_double_ptr_to_python(self.g.predict(x_arr, n), n)
+ *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
  */
-  __pyx_tuple__5 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_x, __pyx_n_s_n, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_x, __pyx_n_s_n, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_GBT_pyx, __pyx_n_s_predict, 59, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_GBT_pyx, __pyx_n_s_predict, 62, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 62, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -7787,11 +7835,11 @@ if (!__Pyx_RefNanny) {
   #endif
 
   /* "GBT.pyx":54
- *         self.g = GradientBoostedTrees(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
  * 
- *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.float64_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
+ *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
- *         cdef double *y_arr = &y[0]
+ *         cdef unsigned int *y_arr = &y[0]
  */
   __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_3GBT_3GBT_3fit, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_GBT_fit, NULL, __pyx_n_s_GBT, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -7799,16 +7847,16 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_3GBT_GBT);
 
-  /* "GBT.pyx":59
- *         self.g.fit(x_arr, y_arr, n)
+  /* "GBT.pyx":62
+ *         self.g.fit(x_arr, y_arr_new, n)
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
- *         return convert_double_ptr_to_python(self.g.predict(x_arr, n), n)
+ *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_3GBT_3GBT_5predict, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_GBT_predict, NULL, __pyx_n_s_GBT, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_3GBT_3GBT_5predict, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_GBT_predict, NULL, __pyx_n_s_GBT, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_3GBT_GBT, __pyx_n_s_predict, __pyx_t_2) < 0) __PYX_ERR(0, 59, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_3GBT_GBT, __pyx_n_s_predict, __pyx_t_2) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_3GBT_GBT);
 
