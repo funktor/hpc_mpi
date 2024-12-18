@@ -1,6 +1,18 @@
 #include "gbt2.h"
 using namespace std;
 
+double *transpose(const double *a, const int n, const int m) {
+    double *b = new double[n*m];
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            b[j*n+i] = a[i*m+j];
+        }
+    }
+
+    return b;
+}
+
 bool custom_comparator ( const mypair& l, const mypair& r) { 
     return l.first < r.first; 
 }
@@ -32,7 +44,11 @@ GradientBoostedTreesClassifier::GradientBoostedTreesClassifier(
                 double feature_sample,
                 double data_sample,
                 std::string split_selection_algorithm,
-                std::string model_path) {
+                std::string model_path,
+                MPI_Comm comm) {
+
+    MPI_Comm_size(comm, &this->n_process);
+    MPI_Comm_rank(comm, &this->rank);
 
     this->n_features = n_features;
     this->max_num_trees = max_num_trees;
@@ -49,6 +65,10 @@ GradientBoostedTreesClassifier::GradientBoostedTreesClassifier(
     this->curr_feature_importances = new double[n_features];
     this->grad = nullptr;
     this->hess = nullptr;
+    this->comm = comm;
+    this->g = 0;
+    this->start = 0;
+    this->end = 0;
 }
 
 GradientBoostedTreesClassifier::~GradientBoostedTreesClassifier(){}
@@ -75,6 +95,7 @@ int *GradientBoostedTreesClassifier::sample_features() {
         if (h <= 0.99) res[j] = f[k--].second;
         else res[j] = f[q++].second;
     }
+
     return res;
 }
 
@@ -105,10 +126,10 @@ int *GradientBoostedTreesClassifier::sample_data(int *curr_indices, int n) {
     return res;
 }
 
-NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(TreeNode *node, int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, int n) {
-    double max_gain = 0;
+NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, int n) {
+    double max_gain = -INFINITY;
     int best_split_feature_index = -1;
-    double best_split_feature_value = 0.0;
+    double best_split_feature_value = INFINITY;
 
     double g_lt = 0.0;
     double g_rt = g_sum;
@@ -120,7 +141,7 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(TreeNode *node,
 
         for (int j = 0; j < m; j++) {
             int k = curr_indices[j];
-            f[j] = std::make_pair(x[k*n_features+feature_index], k);
+            f[j] = std::make_pair(x[feature_index*n+k], k);
         }
 
         std::sort(f, f+m, custom_comparator);
@@ -149,7 +170,7 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(TreeNode *node,
 
         for (int j = 0; j < m; j++) {
             int k = curr_indices[j];
-            f.push_back(std::make_pair(x[k*n_features+feature_index], k));
+            f.push_back(std::make_pair(x[feature_index*n+k], k));
         }
 
         buckets.push_back(f);
@@ -265,17 +286,28 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(TreeNode *node,
 NodeSplit GradientBoostedTreesClassifier::get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, int n) {
     int m = node->num_indices;
 
-    double max_gain = 0;
+    double max_gain = -INFINITY;
     int best_split_feature_index = -1;
-    double best_split_feature_value = 0.0;
+    double best_split_feature_value = INFINITY;
 
     if (m >= min_samples_for_split && node->depth < max_depth_per_tree) {
         int *curr_indices;
         int n_samples = data_sample*m;
 
         if (n_samples > 10) {
-            curr_indices = sample_data(node->indices, m);
-            m = n_samples;
+            if (rank == 0) {
+                curr_indices = sample_data(node->indices, m);
+                m = n_samples;
+
+                for (int p = 1; p < n_process; p++) {
+                    MPI_Send(curr_indices, n_samples, MPI_INT, p, p, comm);
+                }
+            }
+            else {
+                curr_indices = new int[n_samples];
+                MPI_Recv(curr_indices, n_samples, MPI_INT, 0, rank, comm, MPI_STATUS_IGNORE);
+                m = n_samples;
+            }
         }
         else {
             curr_indices = node->indices;
@@ -294,13 +326,15 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split(TreeNode *node, int *sa
 
         for (int i = 0; i < f_samples; i++) {
             int j = sampled_feature_indices[i];
-            NodeSplit curr_split = get_node_split_feature(node, j, g_sum, h_sum, curr_node_val, curr_indices, m, x, n);
-            curr_feature_importances[j] += curr_split.gain;
+            if (j >= start && j <= end) {
+                NodeSplit curr_split = get_node_split_feature(j-start, g_sum, h_sum, curr_node_val, curr_indices, m, x, n);
+                curr_feature_importances[j] += curr_split.gain;
 
-            if (curr_split.gain > max_gain) {
-                best_split_feature_index = j;
-                best_split_feature_value = curr_split.split_value;
-                max_gain = curr_split.gain;
+                if (curr_split.gain > max_gain) {
+                    best_split_feature_index = j;
+                    best_split_feature_value = curr_split.split_value;
+                    max_gain = curr_split.gain;
+                }
             }
         }
     }
@@ -315,13 +349,61 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split(TreeNode *node, int *sa
 }
 
 void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
+    if (rank == 0) x = transpose(x, n, n_features);
+
+    MPI_Request request = MPI_REQUEST_NULL;
+
+    int h = n_features/n_process;
+    int m = n_features % n_process;
+
+    if (rank == 0) {
+        g = (m == 0)?h:h+1;
+        start = 0;
+        end = g-1;
+        
+        for (int p = 1; p < n_process; p++) {
+            if (p+1 <= m) {
+                int u = h+1;
+                MPI_Isend(x+p*u*n, u*n, MPI_DOUBLE, p, p, comm, &request);
+            }
+
+            else {
+                if (p <= m) {
+                    int u = h+1;
+                    MPI_Isend(x+p*u*n, h*n, MPI_DOUBLE, p, p, comm, &request);
+                }
+                else {
+                    int u = h;
+                    MPI_Isend(x+(p*u+m)*n, u*n, MPI_DOUBLE, p, p, comm, &request);
+                }
+            }
+
+            MPI_Isend(y, n, MPI_INT, p, p+1, comm, &request);
+        }
+
+        double *x1 = new double[g*n];
+        std::copy(x, x+g*n, x1);
+        x = x1;
+    }
+    else {
+        g = (rank+1 <= m)?h+1:h;
+        start = (rank <= m)?(rank*(h+1)):(m+rank*h);
+        end = start+g-1;
+
+        x = new double[g*n];
+        y = new int[n];
+
+        MPI_Recv(x, g*n, MPI_DOUBLE, 0, rank, comm, MPI_STATUS_IGNORE);
+        MPI_Recv(y, n, MPI_INT, 0, rank+1, comm, MPI_STATUS_IGNORE);
+    }
+    
     int num_tree = 0;
 
     double *scores = new double[n];
     grad = new double[n];
     hess = new double[n];
 
-    for (int i = 0; i < n_features; i++) curr_feature_importances[i] = 1.0;
+    for (int i = 0; i < n_features; i++) curr_feature_importances[i] = 1.0/n_features;
 
     double u = 0.0;
     for (int i = 0; i < n; i++) u += y[i];
@@ -341,8 +423,19 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
         int *all_indices = new int[n];
         for (int i = 0; i < n; i++) all_indices[i] = i;
 
-        int *sampled_feature_indices = sample_features();
         int f_samples = feature_sample*n_features;
+        int *sampled_feature_indices = new int[f_samples];
+
+        if (rank == 0) {
+            sampled_feature_indices = sample_features();
+
+            for (int p = 1; p < n_process; p++) {
+                MPI_Send(sampled_feature_indices, f_samples, MPI_INT, p, p, comm);
+            }
+        }
+        else {
+            MPI_Recv(sampled_feature_indices, f_samples, MPI_INT, 0, rank, comm, MPI_STATUS_IGNORE);
+        }
 
         TreeNode *root_node = (TreeNode*) malloc(sizeof(TreeNode));
         root_node->indices = all_indices;
@@ -365,60 +458,128 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
 
             bool is_leaf = true;
             NodeSplit split = get_node_split(node, sampled_feature_indices, f_samples, x, n);
+            
+            int *lt_rt_indices = new int[m];
 
-            if (split.gain > 0) {
-                is_leaf = false;
+            if (split.gain > 1e-10 && split.feature_index >= start && split.feature_index <= end) {
+                for (int j = 0; j < m; j++) {
+                    int k = curr_indices[j];
+                    if (x[(split.feature_index-start)*n+k] <= split.split_value) {
+                        lt_rt_indices[j] = 0;
+                    }
+                    else {
+                        lt_rt_indices[j] = 1;
+                    }
+                }
+            } 
+            else {
+                for (int j = 0; j < m; j++) {
+                    lt_rt_indices[j] = 0;
+                }
+            }
 
-                node->split_feature_index = split.feature_index;
-                node->split_feature_value = split.split_value;
-                node->is_leaf = false;
+            double *split_data = new double[m+n_features+3];
+            
+            split_data[0] = split.feature_index;
+            split_data[1] = split.split_value;
+            split_data[2] = split.gain;
+            std::copy(lt_rt_indices, lt_rt_indices+m, split_data+3);
+            std::copy(curr_feature_importances, curr_feature_importances+n_features, split_data+m+3);
 
-                TreeNode *lt = (TreeNode*) malloc(sizeof(TreeNode));
-                TreeNode *rt = (TreeNode*) malloc(sizeof(TreeNode));
+            if (rank == 0) {
+                MPI_Send(split_data, m+n_features+3, MPI_DOUBLE, 1, 0, comm);
+
+                double *split_data_recv = new double[m+n_features+3];
+                MPI_Recv(split_data_recv, m+n_features+3, MPI_DOUBLE, n_process-1, 0, comm, MPI_STATUS_IGNORE);
+
+                if (split_data_recv[2] > split_data[2]) std::copy(split_data_recv, split_data_recv+m+3, split_data);
+                std::copy(split_data_recv+m+3, split_data_recv+m+n_features+3, split_data+m+3);
+
+                MPI_Send(split_data, m+n_features+3, MPI_DOUBLE, 1, 1, comm);
+                MPI_Recv(split_data_recv, m+n_features+3, MPI_DOUBLE, n_process-1, 1, comm, MPI_STATUS_IGNORE);
                 
+                std::copy(split_data_recv, split_data_recv+m+n_features+3, split_data);
+            }
+            else {
+                double *split_data_recv = new double[m+n_features+3];
+                MPI_Recv(split_data_recv, m+n_features+3, MPI_DOUBLE, (rank-1)%n_process, 0, comm, MPI_STATUS_IGNORE);
+                if (split_data_recv[2] > split_data[2]) std::copy(split_data_recv, split_data_recv+m+3, split_data);
+                
+                for (int j = 0; j < n_features; j++) {
+                    if (j < start || j > end) {
+                        split_data[m+j+3] = split_data_recv[m+j+3];
+                    }
+                }
+                
+                MPI_Send(split_data, m+n_features+3, MPI_DOUBLE, (rank+1)%n_process, 0, comm);
+
+                split_data_recv = new double[m+n_features+3];
+                MPI_Recv(split_data_recv, m+n_features+3, MPI_DOUBLE, (rank-1)%n_process, 1, comm, MPI_STATUS_IGNORE);
+                std::copy(split_data_recv, split_data_recv+m+n_features+3, split_data);
+
+                MPI_Send(split_data, m+n_features+3, MPI_DOUBLE, (rank+1)%n_process, 1, comm);
+            }
+
+            split.feature_index = split_data[0];
+            split.split_value = split_data[1];
+            split.gain = split_data[2];
+            std::copy(split_data+3, split_data+m+3, lt_rt_indices);
+            std::copy(split_data+m+3, split_data+m+n_features+3, curr_feature_importances);
+
+            if (split.gain > 1e-10) {
                 int num_lt = 0;
                 int num_rt = 0;
 
                 for (int j = 0; j < m; j++) {
-                    int k = curr_indices[j];
-                    if (x[k*n_features+split.feature_index] <= split.split_value) {
-                        num_lt += 1;
+                    if (lt_rt_indices[j] == 0) {
+                        num_lt++;
                     }
                     else {
-                        num_rt += 1;
+                        num_rt++;
                     }
                 }
 
-                int *lt_indices = new int[num_lt];
-                int *rt_indices = new int[num_rt];
+                if (num_rt > 0 && num_lt > 0) {
+                    is_leaf = false;
 
-                int p = 0;
-                int q = 0;
+                    node->split_feature_index = split.feature_index;
+                    node->split_feature_value = split.split_value;
+                    node->is_leaf = false;
 
-                for (int j = 0; j < m; j++) {
-                    int k = curr_indices[j];
-                    if (x[k*n_features+split.feature_index] <= split.split_value) {
-                        lt_indices[p++] = k;
+                    TreeNode *lt = (TreeNode*) malloc(sizeof(TreeNode));
+                    TreeNode *rt = (TreeNode*) malloc(sizeof(TreeNode));
+
+                    int *lt_indices = new int[num_lt];
+                    int *rt_indices = new int[num_rt];
+
+                    int p = 0;
+                    int q = 0;
+
+                    for (int j = 0; j < m; j++) {
+                        int k = curr_indices[j];
+                        if (lt_rt_indices[j] == 0) {
+                            lt_indices[p++] = k;
+                        }
+                        else {
+                            rt_indices[q++] = k;
+                        }
                     }
-                    else {
-                        rt_indices[q++] = k;
-                    }
+
+                    lt->indices = lt_indices;
+                    rt->indices = rt_indices;
+
+                    lt->num_indices = num_lt;
+                    rt->num_indices = num_rt;
+
+                    lt->depth = node->depth+1;
+                    rt->depth = node->depth+1;
+
+                    node->lt_node = lt;
+                    node->rt_node = rt;
+
+                    nodes.push_back(lt);
+                    nodes.push_back(rt);
                 }
-
-                lt->indices = lt_indices;
-                rt->indices = rt_indices;
-
-                lt->num_indices = num_lt;
-                rt->num_indices = num_rt;
-
-                lt->depth = node->depth+1;
-                rt->depth = node->depth+1;
-
-                node->lt_node = lt;
-                node->rt_node = rt;
-
-                nodes.push_back(lt);
-                nodes.push_back(rt);
             }
 
             if (is_leaf) {
@@ -453,7 +614,10 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
         }
 
         all_trees.push_back(root_node);
-        std::cout << "Current Loss = " << loss << std::endl;
+
+        if (rank == 0) {
+            std::cout << "Current Loss = " << loss << std::endl;
+        }
 
         for (int i = 0; i < n; i++) scores[i] += new_scores[i];
         num_tree++;
@@ -516,12 +680,22 @@ int main(int argc, char *argv[]) {
     std::string split_selection_algorithm = argv[11];
     std::string model_path = argv[12];
 
-    double *x = new double[n*n_features];
-    int *y = new int[n];
-    int *y_copy = new int[n];
-    generate(x, y, n, n_features);
+    MPI_Init(NULL, NULL);
 
-    std::copy(y, y+n, y_copy);
+    int size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    double *x;
+    int *y;
+
+    if (rank == 0) {
+        x = new double[n*n_features];
+        y = new int[n];
+        generate(x, y, n, n_features);
+    }
 
     GradientBoostedTreesClassifier gbt(
         n_features, 
@@ -534,18 +708,23 @@ int main(int argc, char *argv[]) {
         feature_sample, 
         data_sample, 
         split_selection_algorithm,
-        model_path);
+        model_path, 
+        MPI_COMM_WORLD);
 
     gbt.fit(x, y, n);
-    int *res = gbt.predict(x, n);
-    print_arr(res, n, 1);
-    std::cout << std::endl;
-    print_arr(y_copy, n, 1);
-    double s = 0.0;
-    for (int i = 0; i < n; i++) {
-        if (res[i] == y_copy[i]) s++;
-    }
-    std::cout << s/n << std::endl;
 
+    if (rank == 0) {
+        int *res = gbt.predict(x, n);
+        print_arr(res, n, 1);
+        std::cout << std::endl;
+        print_arr(y, n, 1);
+        double s = 0.0;
+        for (int i = 0; i < n; i++) {
+            if (res[i] == y[i]) s++;
+        }
+        std::cout << s/n << std::endl;
+    }
+
+    MPI_Finalize();
     return 0;
 }

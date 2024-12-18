@@ -1,6 +1,7 @@
 #ifndef GBT2_H
 #define GBT2_H
 
+#include <mpi.h>
 #include <immintrin.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -73,6 +74,12 @@ class GradientBoostedTreesClassifier {
         double *curr_feature_importances;
         double *grad;
         double *hess;
+        int rank;
+        int n_process;
+        int g;
+        int start;
+        int end;
+        MPI_Comm comm;
 
         GradientBoostedTreesClassifier();
         GradientBoostedTreesClassifier( 
@@ -86,14 +93,15 @@ class GradientBoostedTreesClassifier {
                 double feature_sample,
                 double data_sample,
                 std::string split_selection_algorithm,
-                std::string model_path);
+                std::string model_path,
+                MPI_Comm comm);
 
         ~GradientBoostedTreesClassifier();
 
         void fit(double *x, int *y, int n);
         int *predict(double *x, int n);
         NodeSplit get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, int n);
-        NodeSplit get_node_split_feature(TreeNode *node, int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, int n);
+        NodeSplit get_node_split_feature(int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, int n);
         int *sample_features();
         int *sample_data(int *curr_indices, int n);
 };
