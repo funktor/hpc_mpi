@@ -1277,6 +1277,20 @@ static CYTHON_INLINE float __PYX_NAN() {
 #define __PYX_HAVE__GBT
 #define __PYX_HAVE_API__GBT
 /* Early includes */
+
+    #include <mpi.h>
+    
+    #if (MPI_VERSION < 3) && !defined(PyMPI_HAVE_MPI_Message)
+    typedef void *PyMPI_MPI_Message;
+    #define MPI_Message PyMPI_MPI_Message
+    #endif
+    
+    #if (MPI_VERSION < 4) && !defined(PyMPI_HAVE_MPI_Session)
+    typedef void *PyMPI_MPI_Session;
+    #define MPI_Session PyMPI_MPI_Session
+    #endif"
+    
+#include <mpi.h>
 #include <string.h>
 #include <string>
 #include "ios"
@@ -1580,6 +1594,7 @@ static const char *__pyx_f[] = {
   "contextvars.pxd",
   "array.pxd",
   "__init__.cython-30.pxd",
+  "MPI.pxd",
   "type.pxd",
   "bool.pxd",
   "complex.pxd",
@@ -1847,6 +1862,26 @@ static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(do
 struct arrayobject;
 typedef struct arrayobject arrayobject;
 #endif
+struct PyMPIDatatypeObject;
+struct PyMPIStatusObject;
+struct PyMPIRequestObject;
+struct PyMPIPrequestObject;
+struct PyMPIGrequestObject;
+struct PyMPIMessageObject;
+struct PyMPIOpObject;
+struct PyMPIGroupObject;
+struct PyMPIInfoObject;
+struct PyMPIErrhandlerObject;
+struct PyMPISessionObject;
+struct PyMPICommObject;
+struct PyMPIIntracommObject;
+struct PyMPITopocommObject;
+struct PyMPICartcommObject;
+struct PyMPIGraphcommObject;
+struct PyMPIDistgraphcommObject;
+struct PyMPIIntercommObject;
+struct PyMPIWinObject;
+struct PyMPIFileObject;
 struct __pyx_obj_3GBT_GBT;
 struct __pyx_opt_args_7cpython_11contextvars_get_value;
 struct __pyx_opt_args_7cpython_11contextvars_get_value_no_default;
@@ -1911,7 +1946,307 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 
-/* "GBT.pyx":35
+/* "mpi4py/MPI.pxd":29
+ *     ctypedef MPI_Count  Count  "MPI_Count"
+ * 
+ * ctypedef api class Datatype [             # <<<<<<<<<<<<<<
+ *     type   PyMPIDatatype_Type,
+ *     object PyMPIDatatypeObject,
+ */
+struct PyMPIDatatypeObject {
+  PyObject_HEAD
+  MPI_Datatype ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIDatatypeObject PyMPIDatatypeObject;
+
+
+/* "mpi4py/MPI.pxd":37
+ *     cdef object     __weakref__
+ * 
+ * ctypedef api class Status [             # <<<<<<<<<<<<<<
+ *     type   PyMPIStatus_Type,
+ *     object PyMPIStatusObject,
+ */
+struct PyMPIStatusObject {
+  PyObject_HEAD
+  MPI_Status ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIStatusObject PyMPIStatusObject;
+
+
+/* "mpi4py/MPI.pxd":45
+ *     cdef object   __weakref__
+ * 
+ * ctypedef api class Request [             # <<<<<<<<<<<<<<
+ *     type   PyMPIRequest_Type,
+ *     object PyMPIRequestObject,
+ */
+struct PyMPIRequestObject {
+  PyObject_HEAD
+  MPI_Request ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+  PyObject *ob_buf;
+};
+typedef struct PyMPIRequestObject PyMPIRequestObject;
+
+
+/* "mpi4py/MPI.pxd":54
+ *     cdef object      ob_buf
+ * 
+ * ctypedef api class Prequest(Request) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIPrequest_Type,
+ *     object PyMPIPrequestObject,
+ */
+struct PyMPIPrequestObject {
+  struct PyMPIRequestObject __pyx_base;
+};
+typedef struct PyMPIPrequestObject PyMPIPrequestObject;
+
+
+/* "mpi4py/MPI.pxd":60
+ *     pass
+ * 
+ * ctypedef api class Grequest(Request) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIGrequest_Type,
+ *     object PyMPIGrequestObject,
+ */
+struct PyMPIGrequestObject {
+  struct PyMPIRequestObject __pyx_base;
+  MPI_Request ob_grequest;
+};
+typedef struct PyMPIGrequestObject PyMPIGrequestObject;
+
+
+/* "mpi4py/MPI.pxd":66
+ *     cdef MPI_Request ob_grequest
+ * 
+ * ctypedef api class Message [             # <<<<<<<<<<<<<<
+ *     type   PyMPIMessage_Type,
+ *     object PyMPIMessageObject,
+ */
+struct PyMPIMessageObject {
+  PyObject_HEAD
+  MPI_Message ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+  PyObject *ob_buf;
+};
+typedef struct PyMPIMessageObject PyMPIMessageObject;
+
+
+/* "mpi4py/MPI.pxd":75
+ *     cdef object      ob_buf
+ * 
+ * ctypedef api class Op [             # <<<<<<<<<<<<<<
+ *     type   PyMPIOp_Type,
+ *     object PyMPIOpObject,
+ */
+struct PyMPIOpObject {
+  PyObject_HEAD
+  MPI_Op ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIOpObject PyMPIOpObject;
+
+
+/* "mpi4py/MPI.pxd":83
+ *     cdef object __weakref__
+ * 
+ * ctypedef api class Group [             # <<<<<<<<<<<<<<
+ *     type   PyMPIGroup_Type,
+ *     object PyMPIGroupObject,
+ */
+struct PyMPIGroupObject {
+  PyObject_HEAD
+  MPI_Group ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIGroupObject PyMPIGroupObject;
+
+
+/* "mpi4py/MPI.pxd":91
+ *     cdef object  __weakref__
+ * 
+ * ctypedef api class Info [             # <<<<<<<<<<<<<<
+ *     type   PyMPIInfo_Type,
+ *     object PyMPIInfoObject,
+ */
+struct PyMPIInfoObject {
+  PyObject_HEAD
+  MPI_Info ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIInfoObject PyMPIInfoObject;
+
+
+/* "mpi4py/MPI.pxd":99
+ *     cdef object __weakref__
+ * 
+ * ctypedef api class Errhandler [             # <<<<<<<<<<<<<<
+ *     type   PyMPIErrhandler_Type,
+ *     object PyMPIErrhandlerObject,
+ */
+struct PyMPIErrhandlerObject {
+  PyObject_HEAD
+  MPI_Errhandler ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIErrhandlerObject PyMPIErrhandlerObject;
+
+
+/* "mpi4py/MPI.pxd":107
+ *     cdef object       __weakref__
+ * 
+ * ctypedef api class Session [             # <<<<<<<<<<<<<<
+ *     type   PyMPISession_Type,
+ *     object PyMPISessionObject,
+ */
+struct PyMPISessionObject {
+  PyObject_HEAD
+  MPI_Session ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPISessionObject PyMPISessionObject;
+
+
+/* "mpi4py/MPI.pxd":115
+ *     cdef object     __weakref__
+ * 
+ * ctypedef api class Comm [             # <<<<<<<<<<<<<<
+ *     type   PyMPIComm_Type,
+ *     object PyMPICommObject,
+ */
+struct PyMPICommObject {
+  PyObject_HEAD
+  MPI_Comm ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPICommObject PyMPICommObject;
+
+
+/* "mpi4py/MPI.pxd":123
+ *     cdef object __weakref__
+ * 
+ * ctypedef api class Intracomm(Comm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIIntracomm_Type,
+ *     object PyMPIIntracommObject,
+ */
+struct PyMPIIntracommObject {
+  struct PyMPICommObject __pyx_base;
+};
+typedef struct PyMPIIntracommObject PyMPIIntracommObject;
+
+
+/* "mpi4py/MPI.pxd":129
+ *     pass
+ * 
+ * ctypedef api class Topocomm(Intracomm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPITopocomm_Type,
+ *     object PyMPITopocommObject,
+ */
+struct PyMPITopocommObject {
+  struct PyMPIIntracommObject __pyx_base;
+};
+typedef struct PyMPITopocommObject PyMPITopocommObject;
+
+
+/* "mpi4py/MPI.pxd":135
+ *     pass
+ * 
+ * ctypedef api class Cartcomm(Topocomm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPICartcomm_Type,
+ *     object PyMPICartcommObject,
+ */
+struct PyMPICartcommObject {
+  struct PyMPITopocommObject __pyx_base;
+};
+typedef struct PyMPICartcommObject PyMPICartcommObject;
+
+
+/* "mpi4py/MPI.pxd":141
+ *     pass
+ * 
+ * ctypedef api class Graphcomm(Topocomm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIGraphcomm_Type,
+ *     object PyMPIGraphcommObject,
+ */
+struct PyMPIGraphcommObject {
+  struct PyMPITopocommObject __pyx_base;
+};
+typedef struct PyMPIGraphcommObject PyMPIGraphcommObject;
+
+
+/* "mpi4py/MPI.pxd":147
+ *     pass
+ * 
+ * ctypedef api class Distgraphcomm(Topocomm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIDistgraphcomm_Type,
+ *     object PyMPIDistgraphcommObject,
+ */
+struct PyMPIDistgraphcommObject {
+  struct PyMPITopocommObject __pyx_base;
+};
+typedef struct PyMPIDistgraphcommObject PyMPIDistgraphcommObject;
+
+
+/* "mpi4py/MPI.pxd":153
+ *     pass
+ * 
+ * ctypedef api class Intercomm(Comm) [             # <<<<<<<<<<<<<<
+ *     type   PyMPIIntercomm_Type,
+ *     object PyMPIIntercommObject,
+ */
+struct PyMPIIntercommObject {
+  struct PyMPICommObject __pyx_base;
+};
+typedef struct PyMPIIntercommObject PyMPIIntercommObject;
+
+
+/* "mpi4py/MPI.pxd":159
+ *     pass
+ * 
+ * ctypedef api class Win [             # <<<<<<<<<<<<<<
+ *     type   PyMPIWin_Type,
+ *     object PyMPIWinObject,
+ */
+struct PyMPIWinObject {
+  PyObject_HEAD
+  MPI_Win ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+  PyObject *ob_mem;
+};
+typedef struct PyMPIWinObject PyMPIWinObject;
+
+
+/* "mpi4py/MPI.pxd":168
+ *     cdef object   ob_mem
+ * 
+ * ctypedef api class File [             # <<<<<<<<<<<<<<
+ *     type   PyMPIFile_Type,
+ *     object PyMPIFileObject,
+ */
+struct PyMPIFileObject {
+  PyObject_HEAD
+  MPI_File ob_mpi;
+  unsigned int flags;
+  PyObject *__weakref__;
+};
+typedef struct PyMPIFileObject PyMPIFileObject;
+
+
+/* "GBT.pyx":53
  *     return lst
  * 
  * cdef class GBT(object):             # <<<<<<<<<<<<<<
@@ -2201,6 +2536,12 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject *const *kwvalues
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,
     const char* function_name);
 
+/* ArgTypeTest.proto */
+#define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
+    ((likely(__Pyx_IS_TYPE(obj, type) | (none_allowed && (obj == Py_None)))) ? 1 :\
+        __Pyx__ArgTypeTest(obj, type, name, exact))
+static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
+
 /* MoveIfSupported.proto */
 #if CYTHON_USE_CPP_STD_MOVE
   #include <utility>
@@ -2208,12 +2549,6 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject *const *kwvalues
 #else
   #define __PYX_STD_MOVE_IF_SUPPORTED(x) x
 #endif
-
-/* ArgTypeTest.proto */
-#define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
-    ((likely(__Pyx_IS_TYPE(obj, type) | (none_allowed && (obj == Py_None)))) ? 1 :\
-        __Pyx__ArgTypeTest(obj, type, name, exact))
-static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
 
 /* IsLittleEndian.proto */
 static CYTHON_INLINE int __Pyx_Is_Little_Endian(void);
@@ -2893,6 +3228,10 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayO
 static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *__pyx_v_self); /* proto*/
 static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__pyx_v_self); /* proto*/
 
+/* Module declarations from "mpi4py.libmpi" */
+
+/* Module declarations from "mpi4py.MPI" */
+
 /* Module declarations from "libc.string" */
 
 /* Module declarations from "libcpp.string" */
@@ -3019,6 +3358,7 @@ static const char __pyx_k_lr[] = "lr";
 static const char __pyx_k_GBT[] = "GBT";
 static const char __pyx_k__11[] = "?";
 static const char __pyx_k_fit[] = "fit";
+static const char __pyx_k_comm[] = "comm";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_self[] = "self";
@@ -3066,7 +3406,7 @@ static const char __pyx_k_numpy_core_umath_failed_to_impor[] = "numpy.core.umath
 /* #### Code section: decls ### */
 static int __pyx_pf_7cpython_5array_5array___getbuffer__(arrayobject *__pyx_v_self, Py_buffer *__pyx_v_info, CYTHON_UNUSED int __pyx_v_flags); /* proto */
 static void __pyx_pf_7cpython_5array_5array_2__releasebuffer__(CYTHON_UNUSED arrayobject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
-static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self, int __pyx_v_n_features, int __pyx_v_max_num_trees, int __pyx_v_max_depth_per_tree, int __pyx_v_min_samples_for_split, double __pyx_v_reg_const, double __pyx_v_gamma, double __pyx_v_lr, double __pyx_v_feature_sample, double __pyx_v_data_sample, std::string __pyx_v_split_selection_algorithm, std::string __pyx_v_model_path); /* proto */
+static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self, int __pyx_v_n_features, int __pyx_v_max_num_trees, int __pyx_v_max_depth_per_tree, int __pyx_v_min_samples_for_split, double __pyx_v_reg_const, double __pyx_v_gamma, double __pyx_v_lr, double __pyx_v_feature_sample, double __pyx_v_data_sample, std::string __pyx_v_split_selection_algorithm, std::string __pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm); /* proto */
 static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self, PyArrayObject *__pyx_v_x, PyArrayObject *__pyx_v_y, int __pyx_v_n); /* proto */
 static PyObject *__pyx_pf_3GBT_3GBT_4predict(struct __pyx_obj_3GBT_GBT *__pyx_v_self, PyArrayObject *__pyx_v_x, PyObject *__pyx_v_n); /* proto */
 static PyObject *__pyx_pf_3GBT_3GBT_6__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_3GBT_GBT *__pyx_v_self); /* proto */
@@ -3099,6 +3439,50 @@ typedef struct {
   #ifdef __Pyx_Coroutine_USED
   PyTypeObject *__pyx_CoroutineType;
   #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  #if CYTHON_USE_MODULE_STATE
+  PyObject *PyMPIDatatype_Type;
+  PyObject *PyMPIStatus_Type;
+  PyObject *PyMPIRequest_Type;
+  PyObject *PyMPIPrequest_Type;
+  PyObject *PyMPIGrequest_Type;
+  PyObject *PyMPIMessage_Type;
+  PyObject *PyMPIOp_Type;
+  PyObject *PyMPIGroup_Type;
+  PyObject *PyMPIInfo_Type;
+  PyObject *PyMPIErrhandler_Type;
+  PyObject *PyMPISession_Type;
+  PyObject *PyMPIComm_Type;
+  PyObject *PyMPIIntracomm_Type;
+  PyObject *PyMPITopocomm_Type;
+  PyObject *PyMPICartcomm_Type;
+  PyObject *PyMPIGraphcomm_Type;
+  PyObject *PyMPIDistgraphcomm_Type;
+  PyObject *PyMPIIntercomm_Type;
+  PyObject *PyMPIWin_Type;
+  PyObject *PyMPIFile_Type;
+  #endif
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Datatype;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Status;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Request;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Prequest;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Grequest;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Message;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Op;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Group;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Info;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Errhandler;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Session;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Comm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Intracomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Topocomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Cartcomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Graphcomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Distgraphcomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Intercomm;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_Win;
+  PyTypeObject *__pyx_ptype_6mpi4py_3MPI_File;
   #if CYTHON_USE_MODULE_STATE
   #endif
   #if CYTHON_USE_MODULE_STATE
@@ -3232,6 +3616,7 @@ typedef struct {
   PyObject *__pyx_n_s__11;
   PyObject *__pyx_n_s_asyncio_coroutines;
   PyObject *__pyx_n_s_cline_in_traceback;
+  PyObject *__pyx_n_s_comm;
   PyObject *__pyx_n_s_data_sample;
   PyObject *__pyx_kp_u_disable;
   PyObject *__pyx_kp_u_enable;
@@ -3325,6 +3710,46 @@ static int __pyx_m_clear(PyObject *m) {
   #ifdef __Pyx_FusedFunction_USED
   Py_CLEAR(clear_module_state->__pyx_FusedFunctionType);
   #endif
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Datatype);
+  Py_CLEAR(clear_module_state->PyMPIDatatype_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Status);
+  Py_CLEAR(clear_module_state->PyMPIStatus_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Request);
+  Py_CLEAR(clear_module_state->PyMPIRequest_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Prequest);
+  Py_CLEAR(clear_module_state->PyMPIPrequest_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Grequest);
+  Py_CLEAR(clear_module_state->PyMPIGrequest_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Message);
+  Py_CLEAR(clear_module_state->PyMPIMessage_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Op);
+  Py_CLEAR(clear_module_state->PyMPIOp_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Group);
+  Py_CLEAR(clear_module_state->PyMPIGroup_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Info);
+  Py_CLEAR(clear_module_state->PyMPIInfo_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Errhandler);
+  Py_CLEAR(clear_module_state->PyMPIErrhandler_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Session);
+  Py_CLEAR(clear_module_state->PyMPISession_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Comm);
+  Py_CLEAR(clear_module_state->PyMPIComm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Intracomm);
+  Py_CLEAR(clear_module_state->PyMPIIntracomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Topocomm);
+  Py_CLEAR(clear_module_state->PyMPITopocomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Cartcomm);
+  Py_CLEAR(clear_module_state->PyMPICartcomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Graphcomm);
+  Py_CLEAR(clear_module_state->PyMPIGraphcomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Distgraphcomm);
+  Py_CLEAR(clear_module_state->PyMPIDistgraphcomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Intercomm);
+  Py_CLEAR(clear_module_state->PyMPIIntercomm_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_Win);
+  Py_CLEAR(clear_module_state->PyMPIWin_Type);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6mpi4py_3MPI_File);
+  Py_CLEAR(clear_module_state->PyMPIFile_Type);
   Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4type_type);
   Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4bool_bool);
   Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_7complex_complex);
@@ -3358,6 +3783,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s__11);
   Py_CLEAR(clear_module_state->__pyx_n_s_asyncio_coroutines);
   Py_CLEAR(clear_module_state->__pyx_n_s_cline_in_traceback);
+  Py_CLEAR(clear_module_state->__pyx_n_s_comm);
   Py_CLEAR(clear_module_state->__pyx_n_s_data_sample);
   Py_CLEAR(clear_module_state->__pyx_kp_u_disable);
   Py_CLEAR(clear_module_state->__pyx_kp_u_enable);
@@ -3429,6 +3855,46 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   #ifdef __Pyx_FusedFunction_USED
   Py_VISIT(traverse_module_state->__pyx_FusedFunctionType);
   #endif
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Datatype);
+  Py_VISIT(traverse_module_state->PyMPIDatatype_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Status);
+  Py_VISIT(traverse_module_state->PyMPIStatus_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Request);
+  Py_VISIT(traverse_module_state->PyMPIRequest_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Prequest);
+  Py_VISIT(traverse_module_state->PyMPIPrequest_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Grequest);
+  Py_VISIT(traverse_module_state->PyMPIGrequest_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Message);
+  Py_VISIT(traverse_module_state->PyMPIMessage_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Op);
+  Py_VISIT(traverse_module_state->PyMPIOp_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Group);
+  Py_VISIT(traverse_module_state->PyMPIGroup_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Info);
+  Py_VISIT(traverse_module_state->PyMPIInfo_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Errhandler);
+  Py_VISIT(traverse_module_state->PyMPIErrhandler_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Session);
+  Py_VISIT(traverse_module_state->PyMPISession_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Comm);
+  Py_VISIT(traverse_module_state->PyMPIComm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Intracomm);
+  Py_VISIT(traverse_module_state->PyMPIIntracomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Topocomm);
+  Py_VISIT(traverse_module_state->PyMPITopocomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Cartcomm);
+  Py_VISIT(traverse_module_state->PyMPICartcomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Graphcomm);
+  Py_VISIT(traverse_module_state->PyMPIGraphcomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Distgraphcomm);
+  Py_VISIT(traverse_module_state->PyMPIDistgraphcomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Intercomm);
+  Py_VISIT(traverse_module_state->PyMPIIntercomm_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_Win);
+  Py_VISIT(traverse_module_state->PyMPIWin_Type);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6mpi4py_3MPI_File);
+  Py_VISIT(traverse_module_state->PyMPIFile_Type);
   Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4type_type);
   Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4bool_bool);
   Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_7complex_complex);
@@ -3462,6 +3928,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s__11);
   Py_VISIT(traverse_module_state->__pyx_n_s_asyncio_coroutines);
   Py_VISIT(traverse_module_state->__pyx_n_s_cline_in_traceback);
+  Py_VISIT(traverse_module_state->__pyx_n_s_comm);
   Py_VISIT(traverse_module_state->__pyx_n_s_data_sample);
   Py_VISIT(traverse_module_state->__pyx_kp_u_disable);
   Py_VISIT(traverse_module_state->__pyx_kp_u_enable);
@@ -3541,6 +4008,50 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #ifdef __Pyx_Coroutine_USED
 #define __pyx_CoroutineType __pyx_mstate_global->__pyx_CoroutineType
 #endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#if CYTHON_USE_MODULE_STATE
+#define PyMPIDatatype_Type __pyx_mstate_global->PyMPIDatatype_Type
+#define PyMPIStatus_Type __pyx_mstate_global->PyMPIStatus_Type
+#define PyMPIRequest_Type __pyx_mstate_global->PyMPIRequest_Type
+#define PyMPIPrequest_Type __pyx_mstate_global->PyMPIPrequest_Type
+#define PyMPIGrequest_Type __pyx_mstate_global->PyMPIGrequest_Type
+#define PyMPIMessage_Type __pyx_mstate_global->PyMPIMessage_Type
+#define PyMPIOp_Type __pyx_mstate_global->PyMPIOp_Type
+#define PyMPIGroup_Type __pyx_mstate_global->PyMPIGroup_Type
+#define PyMPIInfo_Type __pyx_mstate_global->PyMPIInfo_Type
+#define PyMPIErrhandler_Type __pyx_mstate_global->PyMPIErrhandler_Type
+#define PyMPISession_Type __pyx_mstate_global->PyMPISession_Type
+#define PyMPIComm_Type __pyx_mstate_global->PyMPIComm_Type
+#define PyMPIIntracomm_Type __pyx_mstate_global->PyMPIIntracomm_Type
+#define PyMPITopocomm_Type __pyx_mstate_global->PyMPITopocomm_Type
+#define PyMPICartcomm_Type __pyx_mstate_global->PyMPICartcomm_Type
+#define PyMPIGraphcomm_Type __pyx_mstate_global->PyMPIGraphcomm_Type
+#define PyMPIDistgraphcomm_Type __pyx_mstate_global->PyMPIDistgraphcomm_Type
+#define PyMPIIntercomm_Type __pyx_mstate_global->PyMPIIntercomm_Type
+#define PyMPIWin_Type __pyx_mstate_global->PyMPIWin_Type
+#define PyMPIFile_Type __pyx_mstate_global->PyMPIFile_Type
+#endif
+#define __pyx_ptype_6mpi4py_3MPI_Datatype __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Datatype
+#define __pyx_ptype_6mpi4py_3MPI_Status __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Status
+#define __pyx_ptype_6mpi4py_3MPI_Request __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Request
+#define __pyx_ptype_6mpi4py_3MPI_Prequest __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Prequest
+#define __pyx_ptype_6mpi4py_3MPI_Grequest __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Grequest
+#define __pyx_ptype_6mpi4py_3MPI_Message __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Message
+#define __pyx_ptype_6mpi4py_3MPI_Op __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Op
+#define __pyx_ptype_6mpi4py_3MPI_Group __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Group
+#define __pyx_ptype_6mpi4py_3MPI_Info __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Info
+#define __pyx_ptype_6mpi4py_3MPI_Errhandler __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Errhandler
+#define __pyx_ptype_6mpi4py_3MPI_Session __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Session
+#define __pyx_ptype_6mpi4py_3MPI_Comm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Comm
+#define __pyx_ptype_6mpi4py_3MPI_Intracomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Intracomm
+#define __pyx_ptype_6mpi4py_3MPI_Topocomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Topocomm
+#define __pyx_ptype_6mpi4py_3MPI_Cartcomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Cartcomm
+#define __pyx_ptype_6mpi4py_3MPI_Graphcomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Graphcomm
+#define __pyx_ptype_6mpi4py_3MPI_Distgraphcomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Distgraphcomm
+#define __pyx_ptype_6mpi4py_3MPI_Intercomm __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Intercomm
+#define __pyx_ptype_6mpi4py_3MPI_Win __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_Win
+#define __pyx_ptype_6mpi4py_3MPI_File __pyx_mstate_global->__pyx_ptype_6mpi4py_3MPI_File
 #if CYTHON_USE_MODULE_STATE
 #endif
 #if CYTHON_USE_MODULE_STATE
@@ -3674,6 +4185,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s__11 __pyx_mstate_global->__pyx_n_s__11
 #define __pyx_n_s_asyncio_coroutines __pyx_mstate_global->__pyx_n_s_asyncio_coroutines
 #define __pyx_n_s_cline_in_traceback __pyx_mstate_global->__pyx_n_s_cline_in_traceback
+#define __pyx_n_s_comm __pyx_mstate_global->__pyx_n_s_comm
 #define __pyx_n_s_data_sample __pyx_mstate_global->__pyx_n_s_data_sample
 #define __pyx_kp_u_disable __pyx_mstate_global->__pyx_kp_u_disable
 #define __pyx_kp_u_enable __pyx_mstate_global->__pyx_kp_u_enable
@@ -5984,7 +6496,7 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
   return __pyx_r;
 }
 
-/* "GBT.pyx":28
+/* "GBT.pyx":46
  *         int *predict(double *x, int n)
  * 
  * cdef convert_int_ptr_to_python(int *ptr, int n):             # <<<<<<<<<<<<<<
@@ -6007,19 +6519,19 @@ static PyObject *__pyx_f_3GBT_convert_int_ptr_to_python(int *__pyx_v_ptr, int __
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("convert_int_ptr_to_python", 1);
 
-  /* "GBT.pyx":30
+  /* "GBT.pyx":48
  * cdef convert_int_ptr_to_python(int *ptr, int n):
  *     cdef int i
  *     lst=[]             # <<<<<<<<<<<<<<
  *     for i in range(n):
  *         lst.append(ptr[i])
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_lst = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "GBT.pyx":31
+  /* "GBT.pyx":49
  *     cdef int i
  *     lst=[]
  *     for i in range(n):             # <<<<<<<<<<<<<<
@@ -6031,20 +6543,20 @@ static PyObject *__pyx_f_3GBT_convert_int_ptr_to_python(int *__pyx_v_ptr, int __
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "GBT.pyx":32
+    /* "GBT.pyx":50
  *     lst=[]
  *     for i in range(n):
  *         lst.append(ptr[i])             # <<<<<<<<<<<<<<
  *     return lst
  * 
  */
-    __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_ptr[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_ptr[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 50, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = __Pyx_PyList_Append(__pyx_v_lst, __pyx_t_1); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 32, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyList_Append(__pyx_v_lst, __pyx_t_1); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 50, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "GBT.pyx":33
+  /* "GBT.pyx":51
  *     for i in range(n):
  *         lst.append(ptr[i])
  *     return lst             # <<<<<<<<<<<<<<
@@ -6056,7 +6568,7 @@ static PyObject *__pyx_f_3GBT_convert_int_ptr_to_python(int *__pyx_v_ptr, int __
   __pyx_r = __pyx_v_lst;
   goto __pyx_L0;
 
-  /* "GBT.pyx":28
+  /* "GBT.pyx":46
  *         int *predict(double *x, int n)
  * 
  * cdef convert_int_ptr_to_python(int *ptr, int n):             # <<<<<<<<<<<<<<
@@ -6076,7 +6588,7 @@ static PyObject *__pyx_f_3GBT_convert_int_ptr_to_python(int *__pyx_v_ptr, int __
   return __pyx_r;
 }
 
-/* "GBT.pyx":38
+/* "GBT.pyx":56
  *     cdef GradientBoostedTreesClassifier g
  * 
  *     def __cinit__(             # <<<<<<<<<<<<<<
@@ -6098,9 +6610,10 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
   double __pyx_v_data_sample;
   std::string __pyx_v_split_selection_algorithm;
   std::string __pyx_v_model_path;
+  struct PyMPICommObject *__pyx_v_comm = 0;
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
-  PyObject* values[11] = {0,0,0,0,0,0,0,0,0,0,0};
+  PyObject* values[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -6114,10 +6627,12 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
   #endif
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
   {
-    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_n_features,&__pyx_n_s_max_num_trees,&__pyx_n_s_max_depth_per_tree,&__pyx_n_s_min_samples_for_split,&__pyx_n_s_reg_const,&__pyx_n_s_gamma,&__pyx_n_s_lr,&__pyx_n_s_feature_sample,&__pyx_n_s_data_sample,&__pyx_n_s_split_selection_algorithm,&__pyx_n_s_model_path,0};
+    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_n_features,&__pyx_n_s_max_num_trees,&__pyx_n_s_max_depth_per_tree,&__pyx_n_s_min_samples_for_split,&__pyx_n_s_reg_const,&__pyx_n_s_gamma,&__pyx_n_s_lr,&__pyx_n_s_feature_sample,&__pyx_n_s_data_sample,&__pyx_n_s_split_selection_algorithm,&__pyx_n_s_model_path,&__pyx_n_s_comm,0};
     if (__pyx_kwds) {
       Py_ssize_t kw_args;
       switch (__pyx_nargs) {
+        case 12: values[11] = __Pyx_Arg_VARARGS(__pyx_args, 11);
+        CYTHON_FALLTHROUGH;
         case 11: values[10] = __Pyx_Arg_VARARGS(__pyx_args, 10);
         CYTHON_FALLTHROUGH;
         case 10: values[9] = __Pyx_Arg_VARARGS(__pyx_args, 9);
@@ -6150,7 +6665,7 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -6158,9 +6673,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 1); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 1); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -6168,9 +6683,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 2); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 2); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -6178,9 +6693,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 3); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 3); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -6188,9 +6703,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 4); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 4); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -6198,9 +6713,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 5); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 5); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
@@ -6208,9 +6723,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[6]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 6); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 6); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
@@ -6218,9 +6733,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[7]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 7); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 7); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
@@ -6228,9 +6743,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[8]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 8); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 8); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  9:
@@ -6238,9 +6753,9 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[9]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 9); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 9); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case 10:
@@ -6248,16 +6763,26 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
           (void)__Pyx_Arg_NewRef_VARARGS(values[10]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, 10); __PYX_ERR(0, 38, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 10); __PYX_ERR(0, 56, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case 11:
+        if (likely((values[11] = __Pyx_GetKwValue_VARARGS(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_comm)) != 0)) {
+          (void)__Pyx_Arg_NewRef_VARARGS(values[11]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, 11); __PYX_ERR(0, 56, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "__cinit__") < 0)) __PYX_ERR(0, 38, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "__cinit__") < 0)) __PYX_ERR(0, 56, __pyx_L3_error)
       }
-    } else if (unlikely(__pyx_nargs != 11)) {
+    } else if (unlikely(__pyx_nargs != 12)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_Arg_VARARGS(__pyx_args, 0);
@@ -6271,22 +6796,24 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
       values[8] = __Pyx_Arg_VARARGS(__pyx_args, 8);
       values[9] = __Pyx_Arg_VARARGS(__pyx_args, 9);
       values[10] = __Pyx_Arg_VARARGS(__pyx_args, 10);
+      values[11] = __Pyx_Arg_VARARGS(__pyx_args, 11);
     }
-    __pyx_v_n_features = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_n_features == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 40, __pyx_L3_error)
-    __pyx_v_max_num_trees = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_max_num_trees == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 41, __pyx_L3_error)
-    __pyx_v_max_depth_per_tree = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_max_depth_per_tree == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 42, __pyx_L3_error)
-    __pyx_v_min_samples_for_split = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_min_samples_for_split == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L3_error)
-    __pyx_v_reg_const = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_reg_const == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 44, __pyx_L3_error)
-    __pyx_v_gamma = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_gamma == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 45, __pyx_L3_error)
-    __pyx_v_lr = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_lr == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L3_error)
-    __pyx_v_feature_sample = __pyx_PyFloat_AsDouble(values[7]); if (unlikely((__pyx_v_feature_sample == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L3_error)
-    __pyx_v_data_sample = __pyx_PyFloat_AsDouble(values[8]); if (unlikely((__pyx_v_data_sample == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L3_error)
-    __pyx_v_split_selection_algorithm = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(values[9]); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L3_error)
-    __pyx_v_model_path = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(values[10]); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L3_error)
+    __pyx_v_n_features = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_n_features == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L3_error)
+    __pyx_v_max_num_trees = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_max_num_trees == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L3_error)
+    __pyx_v_max_depth_per_tree = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_max_depth_per_tree == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 60, __pyx_L3_error)
+    __pyx_v_min_samples_for_split = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_min_samples_for_split == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 61, __pyx_L3_error)
+    __pyx_v_reg_const = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_reg_const == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L3_error)
+    __pyx_v_gamma = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_gamma == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L3_error)
+    __pyx_v_lr = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_lr == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L3_error)
+    __pyx_v_feature_sample = __pyx_PyFloat_AsDouble(values[7]); if (unlikely((__pyx_v_feature_sample == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 65, __pyx_L3_error)
+    __pyx_v_data_sample = __pyx_PyFloat_AsDouble(values[8]); if (unlikely((__pyx_v_data_sample == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L3_error)
+    __pyx_v_split_selection_algorithm = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(values[9]); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 67, __pyx_L3_error)
+    __pyx_v_model_path = __pyx_convert_string_from_py_6libcpp_6string_std__in_string(values[10]); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
+    __pyx_v_comm = ((struct PyMPICommObject *)values[11]);
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 11, 11, __pyx_nargs); __PYX_ERR(0, 38, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 12, 12, __pyx_nargs); __PYX_ERR(0, 56, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6300,9 +6827,14 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_3GBT_3GBT___cinit__(((struct __pyx_obj_3GBT_GBT *)__pyx_v_self), __pyx_v_n_features, __pyx_v_max_num_trees, __pyx_v_max_depth_per_tree, __pyx_v_min_samples_for_split, __pyx_v_reg_const, __pyx_v_gamma, __pyx_v_lr, __pyx_v_feature_sample, __pyx_v_data_sample, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_v_split_selection_algorithm), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_v_model_path));
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_comm), __pyx_ptype_6mpi4py_3MPI_Comm, 1, "comm", 0))) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_r = __pyx_pf_3GBT_3GBT___cinit__(((struct __pyx_obj_3GBT_GBT *)__pyx_v_self), __pyx_v_n_features, __pyx_v_max_num_trees, __pyx_v_max_depth_per_tree, __pyx_v_min_samples_for_split, __pyx_v_reg_const, __pyx_v_gamma, __pyx_v_lr, __pyx_v_feature_sample, __pyx_v_data_sample, __PYX_STD_MOVE_IF_SUPPORTED(__pyx_v_split_selection_algorithm), __PYX_STD_MOVE_IF_SUPPORTED(__pyx_v_model_path), __pyx_v_comm);
 
   /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = -1;
+  __pyx_L0:;
   {
     Py_ssize_t __pyx_temp;
     for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -6313,29 +6845,29 @@ static int __pyx_pw_3GBT_3GBT_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx
   return __pyx_r;
 }
 
-static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self, int __pyx_v_n_features, int __pyx_v_max_num_trees, int __pyx_v_max_depth_per_tree, int __pyx_v_min_samples_for_split, double __pyx_v_reg_const, double __pyx_v_gamma, double __pyx_v_lr, double __pyx_v_feature_sample, double __pyx_v_data_sample, std::string __pyx_v_split_selection_algorithm, std::string __pyx_v_model_path) {
+static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self, int __pyx_v_n_features, int __pyx_v_max_num_trees, int __pyx_v_max_depth_per_tree, int __pyx_v_min_samples_for_split, double __pyx_v_reg_const, double __pyx_v_gamma, double __pyx_v_lr, double __pyx_v_feature_sample, double __pyx_v_data_sample, std::string __pyx_v_split_selection_algorithm, std::string __pyx_v_model_path, struct PyMPICommObject *__pyx_v_comm) {
   int __pyx_r;
   GradientBoostedTreesClassifier __pyx_t_1;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
 
-  /* "GBT.pyx":52
- *             string model_path):
+  /* "GBT.pyx":71
+ *             MPI.Comm comm):
  * 
- *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)             # <<<<<<<<<<<<<<
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path, comm.ob_mpi)             # <<<<<<<<<<<<<<
  * 
  *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):
  */
   try {
-    __pyx_t_1 = GradientBoostedTreesClassifier(__pyx_v_n_features, __pyx_v_max_num_trees, __pyx_v_max_depth_per_tree, __pyx_v_min_samples_for_split, __pyx_v_reg_const, __pyx_v_gamma, __pyx_v_lr, __pyx_v_feature_sample, __pyx_v_data_sample, __pyx_v_split_selection_algorithm, __pyx_v_model_path);
+    __pyx_t_1 = GradientBoostedTreesClassifier(__pyx_v_n_features, __pyx_v_max_num_trees, __pyx_v_max_depth_per_tree, __pyx_v_min_samples_for_split, __pyx_v_reg_const, __pyx_v_gamma, __pyx_v_lr, __pyx_v_feature_sample, __pyx_v_data_sample, __pyx_v_split_selection_algorithm, __pyx_v_model_path, __pyx_v_comm->ob_mpi);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 52, __pyx_L1_error)
+    __PYX_ERR(0, 71, __pyx_L1_error)
   }
   __pyx_v_self->g = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "GBT.pyx":38
+  /* "GBT.pyx":56
  *     cdef GradientBoostedTreesClassifier g
  * 
  *     def __cinit__(             # <<<<<<<<<<<<<<
@@ -6353,8 +6885,8 @@ static int __pyx_pf_3GBT_3GBT___cinit__(struct __pyx_obj_3GBT_GBT *__pyx_v_self,
   return __pyx_r;
 }
 
-/* "GBT.pyx":54
- *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+/* "GBT.pyx":73
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path, comm.ob_mpi)
  * 
  *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
@@ -6420,7 +6952,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 54, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 73, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -6428,9 +6960,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 54, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 73, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, 1); __PYX_ERR(0, 54, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, 1); __PYX_ERR(0, 73, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -6438,14 +6970,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 54, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 73, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, 2); __PYX_ERR(0, 54, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, 2); __PYX_ERR(0, 73, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "fit") < 0)) __PYX_ERR(0, 54, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "fit") < 0)) __PYX_ERR(0, 73, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -6456,11 +6988,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     }
     __pyx_v_x = ((PyArrayObject *)values[0]);
     __pyx_v_y = ((PyArrayObject *)values[1]);
-    __pyx_v_n = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_n == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 54, __pyx_L3_error)
+    __pyx_v_n = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_n == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 73, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 54, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("fit", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 73, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6474,8 +7006,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_5numpy_ndarray, 1, "x", 0))) __PYX_ERR(0, 54, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_5numpy_ndarray, 1, "y", 0))) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_5numpy_ndarray, 1, "x", 0))) __PYX_ERR(0, 73, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_5numpy_ndarray, 1, "y", 0))) __PYX_ERR(0, 73, __pyx_L1_error)
   __pyx_r = __pyx_pf_3GBT_3GBT_2fit(((struct __pyx_obj_3GBT_GBT *)__pyx_v_self), __pyx_v_x, __pyx_v_y, __pyx_v_n);
 
   /* function exit code */
@@ -6522,16 +7054,16 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   __pyx_pybuffernd_y.rcbuffer = &__pyx_pybuffer_y;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_x.rcbuffer->pybuffer, (PyObject*)__pyx_v_x, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 54, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_x.rcbuffer->pybuffer, (PyObject*)__pyx_v_x, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 73, __pyx_L1_error)
   }
   __pyx_pybuffernd_x.diminfo[0].strides = __pyx_pybuffernd_x.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_x.diminfo[0].shape = __pyx_pybuffernd_x.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_y.rcbuffer->pybuffer, (PyObject*)__pyx_v_y, &__Pyx_TypeInfo_nn___pyx_t_5numpy_uint32_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 54, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_y.rcbuffer->pybuffer, (PyObject*)__pyx_v_y, &__Pyx_TypeInfo_nn___pyx_t_5numpy_uint32_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 73, __pyx_L1_error)
   }
   __pyx_pybuffernd_y.diminfo[0].strides = __pyx_pybuffernd_y.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_y.diminfo[0].shape = __pyx_pybuffernd_y.rcbuffer->pybuffer.shape[0];
 
-  /* "GBT.pyx":55
+  /* "GBT.pyx":74
  * 
  *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):
  *         cdef double *x_arr = &x[0]             # <<<<<<<<<<<<<<
@@ -6546,11 +7078,11 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   } else if (unlikely(__pyx_t_1 >= __pyx_pybuffernd_x.diminfo[0].shape)) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 55, __pyx_L1_error)
+    __PYX_ERR(0, 74, __pyx_L1_error)
   }
   __pyx_v_x_arr = (&(*__Pyx_BufPtrCContig1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_x.rcbuffer->pybuffer.buf, __pyx_t_1, __pyx_pybuffernd_x.diminfo[0].strides)));
 
-  /* "GBT.pyx":56
+  /* "GBT.pyx":75
  *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):
  *         cdef double *x_arr = &x[0]
  *         cdef unsigned int *y_arr = &y[0]             # <<<<<<<<<<<<<<
@@ -6565,11 +7097,11 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   } else if (unlikely(__pyx_t_1 >= __pyx_pybuffernd_y.diminfo[0].shape)) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 56, __pyx_L1_error)
+    __PYX_ERR(0, 75, __pyx_L1_error)
   }
   __pyx_v_y_arr = (&(*__Pyx_BufPtrCContig1d(__pyx_t_5numpy_uint32_t *, __pyx_pybuffernd_y.rcbuffer->pybuffer.buf, __pyx_t_1, __pyx_pybuffernd_y.diminfo[0].strides)));
 
-  /* "GBT.pyx":57
+  /* "GBT.pyx":76
  *         cdef double *x_arr = &x[0]
  *         cdef unsigned int *y_arr = &y[0]
  *         cdef int *y_arr_new = <int *>malloc(n * sizeof(int))             # <<<<<<<<<<<<<<
@@ -6578,7 +7110,7 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
  */
   __pyx_v_y_arr_new = ((int *)malloc((__pyx_v_n * (sizeof(int)))));
 
-  /* "GBT.pyx":58
+  /* "GBT.pyx":77
  *         cdef unsigned int *y_arr = &y[0]
  *         cdef int *y_arr_new = <int *>malloc(n * sizeof(int))
  *         for i in range(n):             # <<<<<<<<<<<<<<
@@ -6590,7 +7122,7 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "GBT.pyx":59
+    /* "GBT.pyx":78
  *         cdef int *y_arr_new = <int *>malloc(n * sizeof(int))
  *         for i in range(n):
  *             y_arr_new[i] = y_arr[i]             # <<<<<<<<<<<<<<
@@ -6600,7 +7132,7 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
     (__pyx_v_y_arr_new[__pyx_v_i]) = (__pyx_v_y_arr[__pyx_v_i]);
   }
 
-  /* "GBT.pyx":60
+  /* "GBT.pyx":79
  *         for i in range(n):
  *             y_arr_new[i] = y_arr[i]
  *         self.g.fit(x_arr, y_arr_new, n)             # <<<<<<<<<<<<<<
@@ -6609,8 +7141,8 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
  */
   __pyx_v_self->g.fit(__pyx_v_x_arr, __pyx_v_y_arr_new, __pyx_v_n);
 
-  /* "GBT.pyx":54
- *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+  /* "GBT.pyx":73
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path, comm.ob_mpi)
  * 
  *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
@@ -6640,7 +7172,7 @@ static PyObject *__pyx_pf_3GBT_3GBT_2fit(struct __pyx_obj_3GBT_GBT *__pyx_v_self
   return __pyx_r;
 }
 
-/* "GBT.pyx":62
+/* "GBT.pyx":81
  *         self.g.fit(x_arr, y_arr_new, n)
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):             # <<<<<<<<<<<<<<
@@ -6704,7 +7236,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -6712,14 +7244,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, 1); __PYX_ERR(0, 62, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, 1); __PYX_ERR(0, 81, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict") < 0)) __PYX_ERR(0, 62, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "predict") < 0)) __PYX_ERR(0, 81, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -6732,7 +7264,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 62, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("predict", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 81, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6746,7 +7278,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_5numpy_ndarray, 1, "x", 0))) __PYX_ERR(0, 62, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_5numpy_ndarray, 1, "x", 0))) __PYX_ERR(0, 81, __pyx_L1_error)
   __pyx_r = __pyx_pf_3GBT_3GBT_4predict(((struct __pyx_obj_3GBT_GBT *)__pyx_v_self), __pyx_v_x, __pyx_v_n);
 
   /* function exit code */
@@ -6784,11 +7316,11 @@ static PyObject *__pyx_pf_3GBT_3GBT_4predict(struct __pyx_obj_3GBT_GBT *__pyx_v_
   __pyx_pybuffernd_x.rcbuffer = &__pyx_pybuffer_x;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_x.rcbuffer->pybuffer, (PyObject*)__pyx_v_x, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 62, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_x.rcbuffer->pybuffer, (PyObject*)__pyx_v_x, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 81, __pyx_L1_error)
   }
   __pyx_pybuffernd_x.diminfo[0].strides = __pyx_pybuffernd_x.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_x.diminfo[0].shape = __pyx_pybuffernd_x.rcbuffer->pybuffer.shape[0];
 
-  /* "GBT.pyx":63
+  /* "GBT.pyx":82
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
  *         cdef double *x_arr = &x[0]             # <<<<<<<<<<<<<<
@@ -6803,11 +7335,11 @@ static PyObject *__pyx_pf_3GBT_3GBT_4predict(struct __pyx_obj_3GBT_GBT *__pyx_v_
   } else if (unlikely(__pyx_t_1 >= __pyx_pybuffernd_x.diminfo[0].shape)) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 63, __pyx_L1_error)
+    __PYX_ERR(0, 82, __pyx_L1_error)
   }
   __pyx_v_x_arr = (&(*__Pyx_BufPtrCContig1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_x.rcbuffer->pybuffer.buf, __pyx_t_1, __pyx_pybuffernd_x.diminfo[0].strides)));
 
-  /* "GBT.pyx":64
+  /* "GBT.pyx":83
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
  *         cdef double *x_arr = &x[0]
  *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)             # <<<<<<<<<<<<<<
@@ -6815,15 +7347,15 @@ static PyObject *__pyx_pf_3GBT_3GBT_4predict(struct __pyx_obj_3GBT_GBT *__pyx_v_
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
-  __pyx_t_4 = __pyx_f_3GBT_convert_int_ptr_to_python(__pyx_v_self->g.predict(__pyx_v_x_arr, __pyx_t_2), __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 83, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 83, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_3GBT_convert_int_ptr_to_python(__pyx_v_self->g.predict(__pyx_v_x_arr, __pyx_t_2), __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "GBT.pyx":62
+  /* "GBT.pyx":81
  *         self.g.fit(x_arr, y_arr_new, n)
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):             # <<<<<<<<<<<<<<
@@ -7244,6 +7776,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s__11, __pyx_k__11, sizeof(__pyx_k__11), 0, 0, 1, 1},
     {&__pyx_n_s_asyncio_coroutines, __pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 0, 1, 1},
     {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
+    {&__pyx_n_s_comm, __pyx_k_comm, sizeof(__pyx_k_comm), 0, 0, 1, 1},
     {&__pyx_n_s_data_sample, __pyx_k_data_sample, sizeof(__pyx_k_data_sample), 0, 0, 1, 1},
     {&__pyx_kp_u_disable, __pyx_k_disable, sizeof(__pyx_k_disable), 0, 1, 0, 0},
     {&__pyx_kp_u_enable, __pyx_k_enable, sizeof(__pyx_k_enable), 0, 1, 0, 0},
@@ -7291,7 +7824,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 31, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 49, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(3, 120, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(4, 986, __pyx_L1_error)
@@ -7327,29 +7860,29 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "GBT.pyx":54
- *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+  /* "GBT.pyx":73
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path, comm.ob_mpi)
  * 
  *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
  *         cdef unsigned int *y_arr = &y[0]
  */
-  __pyx_tuple__3 = PyTuple_Pack(8, __pyx_n_s_self, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_n, __pyx_n_s_x_arr, __pyx_n_s_y_arr, __pyx_n_s_y_arr_new, __pyx_n_s_i); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(8, __pyx_n_s_self, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_n, __pyx_n_s_x_arr, __pyx_n_s_y_arr, __pyx_n_s_y_arr_new, __pyx_n_s_i); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_GBT_pyx, __pyx_n_s_fit, 54, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_GBT_pyx, __pyx_n_s_fit, 73, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 73, __pyx_L1_error)
 
-  /* "GBT.pyx":62
+  /* "GBT.pyx":81
  *         self.g.fit(x_arr, y_arr_new, n)
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
  *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
  */
-  __pyx_tuple__5 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_x, __pyx_n_s_n, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_x, __pyx_n_s_n, __pyx_n_s_x_arr); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_GBT_pyx, __pyx_n_s_predict, 62, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_GBT_pyx, __pyx_n_s_predict, 81, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 81, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -7453,15 +7986,15 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_3GBT_GBT = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_3GBT_GBT_spec, NULL); if (unlikely(!__pyx_ptype_3GBT_GBT)) __PYX_ERR(0, 35, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_3GBT_GBT_spec, __pyx_ptype_3GBT_GBT) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
+  __pyx_ptype_3GBT_GBT = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_3GBT_GBT_spec, NULL); if (unlikely(!__pyx_ptype_3GBT_GBT)) __PYX_ERR(0, 53, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_3GBT_GBT_spec, __pyx_ptype_3GBT_GBT) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
   #else
   __pyx_ptype_3GBT_GBT = &__pyx_type_3GBT_GBT;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_3GBT_GBT) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_3GBT_GBT) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
   __pyx_ptype_3GBT_GBT->tp_print = 0;
@@ -7471,9 +8004,9 @@ static int __Pyx_modinit_type_init_code(void) {
     __pyx_ptype_3GBT_GBT->tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
   #endif
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_GBT, (PyObject *) __pyx_ptype_3GBT_GBT) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_GBT, (PyObject *) __pyx_ptype_3GBT_GBT) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if (__Pyx_setup_reduce((PyObject *) __pyx_ptype_3GBT_GBT) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_ptype_3GBT_GBT) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
   #endif
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -7490,7 +8023,30 @@ static int __Pyx_modinit_type_import_code(void) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 9, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("mpi4py.MPI"); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 29, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_6mpi4py_3MPI_Datatype = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Datatype", sizeof(struct PyMPIDatatypeObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIDatatypeObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Datatype) __PYX_ERR(5, 29, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Status = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Status", sizeof(struct PyMPIStatusObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIStatusObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Status) __PYX_ERR(5, 37, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Request = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Request", sizeof(struct PyMPIRequestObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIRequestObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Request) __PYX_ERR(5, 45, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Prequest = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Prequest", sizeof(struct PyMPIPrequestObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIPrequestObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Prequest) __PYX_ERR(5, 54, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Grequest = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Grequest", sizeof(struct PyMPIGrequestObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIGrequestObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Grequest) __PYX_ERR(5, 60, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Message = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Message", sizeof(struct PyMPIMessageObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIMessageObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Message) __PYX_ERR(5, 66, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Op = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Op", sizeof(struct PyMPIOpObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIOpObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Op) __PYX_ERR(5, 75, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Group = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Group", sizeof(struct PyMPIGroupObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIGroupObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Group) __PYX_ERR(5, 83, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Info = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Info", sizeof(struct PyMPIInfoObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIInfoObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Info) __PYX_ERR(5, 91, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Errhandler = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Errhandler", sizeof(struct PyMPIErrhandlerObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIErrhandlerObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Errhandler) __PYX_ERR(5, 99, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Session = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Session", sizeof(struct PyMPISessionObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPISessionObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Session) __PYX_ERR(5, 107, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Comm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Comm", sizeof(struct PyMPICommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPICommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Comm) __PYX_ERR(5, 115, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Intracomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Intracomm", sizeof(struct PyMPIIntracommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIIntracommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Intracomm) __PYX_ERR(5, 123, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Topocomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Topocomm", sizeof(struct PyMPITopocommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPITopocommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Topocomm) __PYX_ERR(5, 129, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Cartcomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Cartcomm", sizeof(struct PyMPICartcommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPICartcommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Cartcomm) __PYX_ERR(5, 135, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Graphcomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Graphcomm", sizeof(struct PyMPIGraphcommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIGraphcommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Graphcomm) __PYX_ERR(5, 141, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Distgraphcomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Distgraphcomm", sizeof(struct PyMPIDistgraphcommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIDistgraphcommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Distgraphcomm) __PYX_ERR(5, 147, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Intercomm = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Intercomm", sizeof(struct PyMPIIntercommObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIIntercommObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Intercomm) __PYX_ERR(5, 153, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_Win = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "Win", sizeof(struct PyMPIWinObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIWinObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_Win) __PYX_ERR(5, 159, __pyx_L1_error)
+  __pyx_ptype_6mpi4py_3MPI_File = __Pyx_ImportType_3_0_11(__pyx_t_1, "mpi4py.MPI", "File", sizeof(struct PyMPIFileObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(struct PyMPIFileObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_6mpi4py_3MPI_File) __PYX_ERR(5, 168, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_7cpython_4type_type = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "type", 
   #if defined(PYPY_VERSION_NUM) && PYPY_VERSION_NUM < 0x050B0000
@@ -7500,15 +8056,15 @@ static int __Pyx_modinit_type_import_code(void) {
   #else
   sizeof(PyHeapTypeObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyHeapTypeObject),
   #endif
-  __Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_4type_type) __PYX_ERR(5, 9, __pyx_L1_error)
+  __Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_4type_type) __PYX_ERR(6, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 8, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_7cpython_4bool_bool = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "bool", sizeof(PyBoolObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyBoolObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_4bool_bool) __PYX_ERR(6, 8, __pyx_L1_error)
+  __pyx_ptype_7cpython_4bool_bool = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "bool", sizeof(PyBoolObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyBoolObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_4bool_bool) __PYX_ERR(7, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 15, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(8, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_7cpython_7complex_complex = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "complex", sizeof(PyComplexObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyComplexObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_7complex_complex) __PYX_ERR(7, 15, __pyx_L1_error)
+  __pyx_ptype_7cpython_7complex_complex = __Pyx_ImportType_3_0_11(__pyx_t_1, __Pyx_BUILTIN_MODULE_NAME, "complex", sizeof(PyComplexObject), __PYX_GET_STRUCT_ALIGNMENT_3_0_11(PyComplexObject),__Pyx_ImportType_CheckSize_Warn_3_0_11); if (!__pyx_ptype_7cpython_7complex_complex) __PYX_ERR(8, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyImport_ImportModule("array"); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 69, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -7834,29 +8390,29 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "GBT.pyx":54
- *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path)
+  /* "GBT.pyx":73
+ *         self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path, comm.ob_mpi)
  * 
  *     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
  *         cdef unsigned int *y_arr = &y[0]
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_3GBT_3GBT_3fit, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_GBT_fit, NULL, __pyx_n_s_GBT, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_3GBT_3GBT_3fit, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_GBT_fit, NULL, __pyx_n_s_GBT, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_3GBT_GBT, __pyx_n_s_fit, __pyx_t_2) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_3GBT_GBT, __pyx_n_s_fit, __pyx_t_2) < 0) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_3GBT_GBT);
 
-  /* "GBT.pyx":62
+  /* "GBT.pyx":81
  *         self.g.fit(x_arr, y_arr_new, n)
  * 
  *     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):             # <<<<<<<<<<<<<<
  *         cdef double *x_arr = &x[0]
  *         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_3GBT_3GBT_5predict, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_GBT_predict, NULL, __pyx_n_s_GBT, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_3GBT_3GBT_5predict, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_GBT_predict, NULL, __pyx_n_s_GBT, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_3GBT_GBT, __pyx_n_s_predict, __pyx_t_2) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_3GBT_GBT, __pyx_n_s_predict, __pyx_t_2) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_3GBT_GBT);
 
