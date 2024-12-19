@@ -96,6 +96,8 @@ int *GradientBoostedTreesClassifier::sample_features() {
         else res[j] = f[q++].second;
     }
 
+    delete[] f;
+
     return res;
 }
 
@@ -122,6 +124,8 @@ int *GradientBoostedTreesClassifier::sample_data(int *curr_indices, int n) {
         if (h <= 0.99) res[j] = f[k--].second;
         else res[j] = f[q++].second;
     }
+
+    delete[] f;
 
     return res;
 }
@@ -162,6 +166,8 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(int feature_ind
                 max_gain = gain;
             }
         }
+
+        delete[] f;
     }
     
     else if (split_selection_algorithm == "histogram") {
@@ -272,6 +278,10 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(int feature_ind
                 max_gain = gain;
             }
         }
+
+        delete[] g_buckets;
+        delete[] h_buckets;
+        delete[] max_val_buckets;
     }
 
     NodeSplit split;
@@ -291,7 +301,7 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split(TreeNode *node, int *sa
     double best_split_feature_value = INFINITY;
 
     if (m >= min_samples_for_split && node->depth < max_depth_per_tree) {
-        int *curr_indices;
+        int *curr_indices = new int[m];
         int n_samples = data_sample*m;
 
         if (n_samples > 10) {
@@ -304,13 +314,12 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split(TreeNode *node, int *sa
                 }
             }
             else {
-                curr_indices = new int[n_samples];
                 MPI_Recv(curr_indices, n_samples, MPI_INT, 0, rank, comm, MPI_STATUS_IGNORE);
                 m = n_samples;
             }
         }
         else {
-            curr_indices = node->indices;
+            std::copy(node->indices, node->indices+m, curr_indices);
         }
 
         double g_sum = 0.0;
@@ -337,6 +346,8 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split(TreeNode *node, int *sa
                 }
             }
         }
+
+        delete[] curr_indices;
     }
 
     NodeSplit split;
@@ -380,10 +391,6 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
 
             MPI_Isend(y, n, MPI_INT, p, p+1, comm, &request);
         }
-
-        double *x1 = new double[g*n];
-        std::copy(x, x+g*n, x1);
-        x = x1;
     }
     else {
         g = (rank+1 <= m)?h+1:h;
@@ -420,9 +427,6 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
             hess[i] = z*(1.0-z);
         }
 
-        int *all_indices = new int[n];
-        for (int i = 0; i < n; i++) all_indices[i] = i;
-
         int f_samples = feature_sample*n_features;
         int *sampled_feature_indices = new int[f_samples];
 
@@ -437,8 +441,9 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
             MPI_Recv(sampled_feature_indices, f_samples, MPI_INT, 0, rank, comm, MPI_STATUS_IGNORE);
         }
 
-        TreeNode *root_node = (TreeNode*) malloc(sizeof(TreeNode));
-        root_node->indices = all_indices;
+        TreeNode *root_node = new TreeNode;
+        root_node->indices = new int[n];
+        for (int i = 0; i < n; i++) root_node->indices[i] = i;
         root_node->num_indices = n;
         root_node->depth = 0;
 
@@ -479,6 +484,7 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
             }
 
             double *split_data = new double[m+n_features+3];
+            double *split_data_recv = new double[m+n_features+3];
             
             split_data[0] = split.feature_index;
             split_data[1] = split.split_value;
@@ -488,8 +494,6 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
 
             if (rank == 0) {
                 MPI_Send(split_data, m+n_features+3, MPI_DOUBLE, 1, 0, comm);
-
-                double *split_data_recv = new double[m+n_features+3];
                 MPI_Recv(split_data_recv, m+n_features+3, MPI_DOUBLE, n_process-1, 0, comm, MPI_STATUS_IGNORE);
 
                 if (split_data_recv[2] > split_data[2]) std::copy(split_data_recv, split_data_recv+m+3, split_data);
@@ -520,11 +524,15 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
                 MPI_Send(split_data, m+n_features+3, MPI_DOUBLE, (rank+1)%n_process, 1, comm);
             }
 
+            delete[] split_data_recv;
+
             split.feature_index = split_data[0];
             split.split_value = split_data[1];
             split.gain = split_data[2];
             std::copy(split_data+3, split_data+m+3, lt_rt_indices);
             std::copy(split_data+m+3, split_data+m+n_features+3, curr_feature_importances);
+
+            delete[] split_data;
 
             if (split.gain > 1e-10) {
                 int num_lt = 0;
@@ -546,11 +554,11 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
                     node->split_feature_value = split.split_value;
                     node->is_leaf = false;
 
-                    TreeNode *lt = (TreeNode*) malloc(sizeof(TreeNode));
-                    TreeNode *rt = (TreeNode*) malloc(sizeof(TreeNode));
+                    TreeNode *lt = new TreeNode;
+                    TreeNode *rt = new TreeNode;
 
-                    int *lt_indices = new int[num_lt];
-                    int *rt_indices = new int[num_rt];
+                    lt->indices = new int[num_lt];
+                    rt->indices = new int[num_rt];
 
                     int p = 0;
                     int q = 0;
@@ -558,15 +566,12 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
                     for (int j = 0; j < m; j++) {
                         int k = curr_indices[j];
                         if (lt_rt_indices[j] == 0) {
-                            lt_indices[p++] = k;
+                            lt->indices[p++] = k;
                         }
                         else {
-                            rt_indices[q++] = k;
+                            rt->indices[q++] = k;
                         }
                     }
-
-                    lt->indices = lt_indices;
-                    rt->indices = rt_indices;
 
                     lt->num_indices = num_lt;
                     rt->num_indices = num_rt;
@@ -584,13 +589,12 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
 
             if (is_leaf) {
                 node->is_leaf = true;
-                int *curr_indices = node->indices;
 
                 double g_sum = 0.0;
                 double h_sum = 0.0;
 
                 for (int i = 0; i < m; i++) {
-                    int j = curr_indices[i];
+                    int j = node->indices[i];
                     
                     g_sum += grad[j];
                     h_sum += hess[j];
@@ -599,7 +603,7 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
                 node->leaf_weight = -lr*g_sum/(lr*lr*h_sum+reg_const);
 
                 for (int i = 0; i < m; i++) {
-                    int j = curr_indices[i];
+                    int j = node->indices[i];
                     new_scores[j] = lr*(node->leaf_weight);
                     double z = 1.0/(1.0+exp(-scores[j]-new_scores[j]));
                     loss += (y[j] == 1)?-log(z):-log(1.0-z);
@@ -609,8 +613,10 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
                 loss += gamma;
             }
             else {
-                node->indices = nullptr;
+                delete[] node->indices;
             }
+
+            delete[] lt_rt_indices;
         }
 
         all_trees.push_back(root_node);
@@ -620,6 +626,8 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
         }
 
         for (int i = 0; i < n; i++) scores[i] += new_scores[i];
+        delete[] new_scores;
+        
         num_tree++;
     }
 }
