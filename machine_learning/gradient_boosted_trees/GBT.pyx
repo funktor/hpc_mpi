@@ -25,6 +25,7 @@ cimport numpy as np
 
 cdef extern from "gbt2.h":
     cdef cppclass GradientBoostedTreesClassifier:
+        string model_path
         GradientBoostedTreesClassifier() except +
         GradientBoostedTreesClassifier(
                 int n_features, 
@@ -42,6 +43,10 @@ cdef extern from "gbt2.h":
 
         void fit(double *x, int *y, int n)
         int *predict(double *x, int n)
+
+    cdef void save_model(GradientBoostedTreesClassifier &gbt, string path)
+    cdef GradientBoostedTreesClassifier load_model(string path)
+
 
 cdef convert_int_ptr_to_python(int *ptr, int n):
     cdef int i
@@ -81,5 +86,11 @@ cdef class GBT(object):
     def predict(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, n):
         cdef double *x_arr = &x[0]
         return convert_int_ptr_to_python(self.g.predict(x_arr, n), n)
+
+    def save_model(self):
+        save_model(self.g, self.g.model_path)
+
+    def load_model(self, model_path):
+        self.g = load_model(model_path)
 
 

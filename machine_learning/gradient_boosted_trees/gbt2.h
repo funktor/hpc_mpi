@@ -31,6 +31,9 @@
 #include <stdbool.h>    // bool type
 #include <fstream>
 #include <cmath>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
 
 using namespace std;
 
@@ -44,8 +47,8 @@ struct TreeNode {
     int num_indices;
     int depth;
     double leaf_weight;
-    TreeNode *lt_node;
-    TreeNode *rt_node;
+    TreeNode *lt_node = nullptr;
+    TreeNode *rt_node = nullptr;
 };
 
 struct NodeSplit {
@@ -105,5 +108,8 @@ class GradientBoostedTreesClassifier {
         int *sample_features();
         int *sample_data(int *curr_indices, int n);
 };
+
+void save_model(GradientBoostedTreesClassifier &gbt, std::string model_path);
+GradientBoostedTreesClassifier load_model(std::string model_path);
 
 #endif

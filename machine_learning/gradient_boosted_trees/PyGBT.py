@@ -42,10 +42,13 @@ os.makedirs("models", exist_ok=True)
 v = GBT(m, 100, 3, 2, 0.01, 0.0, 0.1, 1.0, 0.8, "histogram", "models/gbt_model", comm)
     
 if rank == 0:    
-    x = X_train.reshape((n_train*m,))
-    y = Y_train.astype(np.uint32)
+    # x = X_train.reshape((n_train*m,))
+    # y = Y_train.astype(np.uint32)
     
-    v.fit(x, y, n_train)
+    # v.fit(x, y, n_train)
+    # v.save_model()
+    
+    v.load_model("models/gbt_model")
     
     x = X_test.reshape((n_test*m,))
     y = Y_test.astype(np.uint32)
@@ -53,6 +56,6 @@ if rank == 0:
     out = v.predict(x, n_test)
     print(sum([out[i] == y[i] for i in range(n_test)])/n_test)
     
-else:
-    v.fit(np.empty(shape=(n_train*m,)), np.empty(shape=(n_train,), dtype=np.uint32), n_train)
-    v.predict(np.empty(shape=(n_train*m,)), n_test)
+# else:
+#     v.fit(np.empty(shape=(n_train*m,)), np.empty(shape=(n_train,), dtype=np.uint32), n_train)
+#     # v.predict(np.empty(shape=(n_test*m,)), n_test)

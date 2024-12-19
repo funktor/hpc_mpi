@@ -31,6 +31,27 @@ void print_arr(const T *arr, const int n, const int m) {
     std::cout << std::endl;
 }
 
+// void save_model_weights(GradientBoostedTreesClassifier &gbt, std::string path) {
+//     std::ofstream outfile(path);
+//     if (outfile.is_open()) {
+//         for (int i = 0; i < lr.n_features; i++) outfile << lr.weights[i] << " ";
+//         outfile << lr.bias;
+//     }
+//     outfile.close();
+// }
+
+// void load_model_weights(GradientBoostedTreesClassifier &gbt, std::string path) {
+//     lr.weights = new double[lr.n_features];
+
+//     std::ifstream infile(path);
+//     if (infile.is_open()) {
+//         for (int i = 0; i < lr.n_features; i++) infile >> lr.weights[i];
+//         infile >> lr.bias;
+//     }
+//     infile.close();
+// }
+
+
 GradientBoostedTreesClassifier::GradientBoostedTreesClassifier(){}
 
 GradientBoostedTreesClassifier::GradientBoostedTreesClassifier(
@@ -627,9 +648,14 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
 
         for (int i = 0; i < n; i++) scores[i] += new_scores[i];
         delete[] new_scores;
-        
+
         num_tree++;
     }
+
+    delete[] scores;
+    delete[] grad;
+    delete[] hess;
+    delete[] curr_feature_importances;
 }
 
 int *GradientBoostedTreesClassifier::predict(double *x, int n) {
@@ -638,7 +664,7 @@ int *GradientBoostedTreesClassifier::predict(double *x, int n) {
     for (int i = 0; i < n; i++) {
         double score = bias;
         for (TreeNode *node : all_trees) {
-            while (1) {
+            while (node != nullptr) {
                 if (node->is_leaf) {
                     score += lr*(node->leaf_weight);
                     break;
@@ -657,6 +683,106 @@ int *GradientBoostedTreesClassifier::predict(double *x, int n) {
     }
 
     return res;
+}
+
+struct NodeSer {
+    TreeNode *node;
+    int parent_id;
+    int is_left;
+};
+
+void save_model(GradientBoostedTreesClassifier &gbt, std::string model_path) {
+    std::ofstream outfile(model_path);
+
+    if (outfile.is_open()) {
+        outfile.clear();
+        outfile << gbt.n_features << " ";
+        outfile << gbt.lr << " ";
+        outfile << gbt.bias << " ";
+
+        int curr_node_id = 0;
+
+        for (TreeNode *root : gbt.all_trees) {
+            std::deque<NodeSer> qtrees;
+            NodeSer q = {root, -1, -1};
+            qtrees.push_back(q);
+
+            while (qtrees.size() > 0) {
+                NodeSer qt = qtrees.front();
+                qtrees.pop_front();
+
+                TreeNode *node = qt.node;
+                outfile << curr_node_id << " ";
+                outfile << qt.parent_id << " ";
+                outfile << qt.is_left << " ";
+                outfile << node->is_leaf << " ";
+                outfile << node->leaf_weight << " ";
+                outfile << node->split_feature_index << " ";
+                outfile << node->split_feature_value << " ";
+
+                if (node->lt_node != nullptr) {
+                    NodeSer q = {node->lt_node, curr_node_id, 1};
+                    qtrees.push_back(q);
+                }
+                if (node->rt_node != nullptr) {
+                    NodeSer q = {node->rt_node, curr_node_id, 0};
+                    qtrees.push_back(q);
+                }
+
+                curr_node_id++;
+            }
+        }
+
+        outfile << -1 << " ";
+        outfile << -1 << " ";
+        outfile << -1 << " ";
+        outfile << 0 << " ";
+        outfile << 0.0 << " ";
+        outfile << -1 << " ";
+        outfile << 0.0 << " ";
+    }
+
+    outfile.close();
+    std::cout << "Object serialized successfully." << std::endl;
+}
+
+GradientBoostedTreesClassifier load_model(std::string model_path) {
+    GradientBoostedTreesClassifier gbt;
+    std::ifstream infile(model_path);
+
+    if (infile.is_open()) {
+        infile >> gbt.n_features;
+        infile >> gbt.lr;
+        infile >> gbt.bias;
+        std::vector<TreeNode *> node_seq;
+
+        while (1) {
+            TreeNode *node = new TreeNode;
+            int curr_node_id;
+            int parent_node_id;
+            int is_left;
+
+            infile >> curr_node_id;
+            if (curr_node_id == -1) break;
+
+            infile >> parent_node_id;
+            infile >> is_left;
+            infile >> node->is_leaf;
+            infile >> node->leaf_weight;
+            infile >> node->split_feature_index;
+            infile >> node->split_feature_value;
+
+            if (parent_node_id == -1) gbt.all_trees.push_back(node);
+            
+            if (is_left == 1) node_seq[parent_node_id]->lt_node = node;
+            else if (is_left == 0) node_seq[parent_node_id]->rt_node = node;
+
+            node_seq.push_back(node);
+        }
+    }
+
+    infile.close();
+    return gbt;
 }
 
 void generate(double *x, int *y, int n, int m) {
@@ -721,8 +847,11 @@ int main(int argc, char *argv[]) {
 
     gbt.fit(x, y, n);
 
+    if (rank == 0) save_model(gbt, gbt.model_path);
+
     if (rank == 0) {
-        int *res = gbt.predict(x, n);
+        GradientBoostedTreesClassifier gbt2 = load_model(gbt.model_path);
+        int *res = gbt2.predict(x, n);
         print_arr(res, n, 1);
         std::cout << std::endl;
         print_arr(y, n, 1);
@@ -731,6 +860,7 @@ int main(int argc, char *argv[]) {
             if (res[i] == y[i]) s++;
         }
         std::cout << s/n << std::endl;
+        delete[] res;
     }
 
     MPI_Finalize();
