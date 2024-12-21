@@ -122,7 +122,7 @@ int *GradientBoostedTreesClassifier::sample_features() {
     return res;
 }
 
-int *GradientBoostedTreesClassifier::sample_data(int *curr_indices, int n) {
+int *GradientBoostedTreesClassifier::sample_data(const int *curr_indices, const int n) {
     mypair *f = new mypair[n];
 
     for (int j = 0; j < n; j++) {
@@ -151,7 +151,7 @@ int *GradientBoostedTreesClassifier::sample_data(int *curr_indices, int n) {
     return res;
 }
 
-NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, int n) {
+NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(const int feature_index, const double g_sum, const double h_sum, const double curr_node_val, const int *curr_indices, const int m, double *x, const int n) {
     double max_gain = -INFINITY;
     int best_split_feature_index = -1;
     double best_split_feature_value = INFINITY;
@@ -314,7 +314,7 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(int feature_ind
     return split;
 }
 
-NodeSplit GradientBoostedTreesClassifier::get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, int n) {
+NodeSplit GradientBoostedTreesClassifier::get_node_split(const TreeNode *node, const int *sampled_feature_indices, const int f_samples, double *x, const int n) {
     int m = node->num_indices;
 
     double max_gain = -INFINITY;
@@ -380,7 +380,7 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split(TreeNode *node, int *sa
     return split;
 }
 
-void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
+void GradientBoostedTreesClassifier::fit(double *x, int *y, const int n) {
     if (rank == 0) x = transpose(x, n, n_features);
 
     MPI_Request request = MPI_REQUEST_NULL;
@@ -655,10 +655,9 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, int n) {
     delete[] scores;
     delete[] grad;
     delete[] hess;
-    delete[] curr_feature_importances;
 }
 
-int *GradientBoostedTreesClassifier::predict(double *x, int n) {
+int *GradientBoostedTreesClassifier::predict(const double *x, const int n) {
     int *res = new int[n];
 
     for (int i = 0; i < n; i++) {
@@ -691,14 +690,14 @@ struct NodeSer {
     int is_left;
 };
 
-void save_model(GradientBoostedTreesClassifier &gbt, std::string model_path) {
+void save_model(GradientBoostedTreesClassifier &gbt, const std::string model_path) {
     std::ofstream outfile(model_path);
 
     if (outfile.is_open()) {
-        outfile.clear();
         outfile << gbt.n_features << " ";
         outfile << gbt.lr << " ";
         outfile << gbt.bias << " ";
+        for (int i = 0; i < gbt.n_features; i++) outfile << gbt.curr_feature_importances[i] << " ";
 
         int curr_node_id = 0;
 
@@ -734,19 +733,13 @@ void save_model(GradientBoostedTreesClassifier &gbt, std::string model_path) {
         }
 
         outfile << -1 << " ";
-        outfile << -1 << " ";
-        outfile << -1 << " ";
-        outfile << 0 << " ";
-        outfile << 0.0 << " ";
-        outfile << -1 << " ";
-        outfile << 0.0 << " ";
     }
 
     outfile.close();
     std::cout << "Object serialized successfully." << std::endl;
 }
 
-GradientBoostedTreesClassifier load_model(std::string model_path) {
+GradientBoostedTreesClassifier load_model(const std::string model_path) {
     GradientBoostedTreesClassifier gbt;
     std::ifstream infile(model_path);
 
@@ -754,6 +747,10 @@ GradientBoostedTreesClassifier load_model(std::string model_path) {
         infile >> gbt.n_features;
         infile >> gbt.lr;
         infile >> gbt.bias;
+
+        gbt.curr_feature_importances = new double[gbt.n_features];
+        for (int i = 0; i < gbt.n_features; i++) infile >> gbt.curr_feature_importances[i];
+
         std::vector<TreeNode *> node_seq;
 
         while (1) {

@@ -102,11 +102,11 @@ class GradientBoostedTreesClassifier {
         ~GradientBoostedTreesClassifier();
 
         void fit(double *x, int *y, int n);
-        int *predict(double *x, int n);
-        NodeSplit get_node_split(TreeNode *node, int *sampled_feature_indices, int f_samples, double *x, int n);
-        NodeSplit get_node_split_feature(int feature_index, double g_sum, double h_sum, double curr_node_val, int *curr_indices, int m, double *x, int n);
+        int *predict(const double *x, const int n);
+        NodeSplit get_node_split(const TreeNode *node, const int *sampled_feature_indices, const int f_samples, double *x, const int n);
+        NodeSplit get_node_split_feature(const int feature_index, const double g_sum, const double h_sum, const double curr_node_val, const int *curr_indices, const int m, double *x, const int n);
         int *sample_features();
-        int *sample_data(int *curr_indices, int n);
+        int *sample_data(const int *curr_indices, const int n);
 };
 
 void save_model(GradientBoostedTreesClassifier &gbt, std::string model_path);
