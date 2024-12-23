@@ -171,20 +171,35 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(const int featu
 
         std::sort(f, f+m, custom_comparator);
 
+        double gs = 0.0;
+        double hs = 0.0;
+
         for (int i = 0; i < m; i++) {
             double v = f[i].first;
             int j = f[i].second;
 
-            g_lt += grad[j];
-            h_lt += hess[j];
-            g_rt -= grad[j];
-            h_rt -= hess[j];
+            if (i+1 < m && abs(v-f[i+1].first) <= 1e-7) {
+                gs += grad[j];
+                hs += hess[j];
+            }
+            else {
+                gs += grad[j];
+                hs += hess[j];
+                
+                g_lt += gs;
+                h_lt += hs;
+                g_rt -= gs;
+                h_rt -= hs;
 
-            double gain = lr*(1-0.5*lr)*(g_lt*g_lt/(lr*lr*h_lt+reg_const) + g_rt*g_rt/(lr*lr*h_rt+reg_const))-curr_node_val-gamma;
+                double gain = lr*(1-0.5*lr)*(g_lt*g_lt/(lr*lr*h_lt+reg_const) + g_rt*g_rt/(lr*lr*h_rt+reg_const))-curr_node_val-gamma;
 
-            if (gain > max_gain) {
-                best_split_feature_value = v;
-                max_gain = gain;
+                if (gain > max_gain) {
+                    best_split_feature_value = v;
+                    max_gain = gain;
+                }
+                
+                gs = 0.0;
+                hs = 0.0;
             }
         }
 
