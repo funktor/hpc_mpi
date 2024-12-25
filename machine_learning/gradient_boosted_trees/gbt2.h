@@ -12,6 +12,7 @@
 #include <map>
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include <deque>
 #include <tuple>
 #include <map>
@@ -46,7 +47,7 @@ struct TreeNode {
     int *indices;
     int num_indices;
     int depth;
-    double leaf_weight;
+    double *leaf_weights;
     TreeNode *lt_node = nullptr;
     TreeNode *rt_node = nullptr;
 };
@@ -63,6 +64,7 @@ class GradientBoostedTreesClassifier {
     public:
         std::vector<TreeNode*> all_trees;
         int n_features;
+        int n_classes;
         int max_num_trees;
         int max_depth_per_tree;
         int min_samples_for_split;
@@ -87,6 +89,7 @@ class GradientBoostedTreesClassifier {
         GradientBoostedTreesClassifier();
         GradientBoostedTreesClassifier( 
                 int n_features, 
+                int n_classes,
                 int max_num_trees,
                 int max_depth_per_tree,
                 int min_samples_for_split,
@@ -104,7 +107,7 @@ class GradientBoostedTreesClassifier {
         void fit(double *x, int *y, int n);
         int *predict(const double *x, const int n);
         NodeSplit get_node_split(const TreeNode *node, const int *sampled_feature_indices, const int f_samples, double *x, const int n);
-        NodeSplit get_node_split_feature(const int feature_index, const double g_sum, const double h_sum, const double curr_node_val, const int *curr_indices, const int m, double *x, const int n);
+        NodeSplit get_node_split_feature(const int feature_index, const double *g_sum, const double *h_sum, const double curr_node_val, const int *curr_indices, const int m, double *x, const int n);
         int *sample_features();
         int *sample_data(const int *curr_indices, const int n);
 };
