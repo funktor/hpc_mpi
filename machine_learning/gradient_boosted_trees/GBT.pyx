@@ -29,6 +29,7 @@ cdef extern from "gbt2.h":
         GradientBoostedTreesClassifier() except +
         GradientBoostedTreesClassifier(
                 int n_features, 
+                int n_classes,
                 int max_num_trees,
                 int max_depth_per_tree,
                 int min_samples_for_split,
@@ -61,6 +62,7 @@ cdef class GBT(object):
     def __cinit__(
             self, 
             int n_features, 
+            int n_classes,
             int max_num_trees,
             int max_depth_per_tree,
             int min_samples_for_split,
@@ -73,7 +75,7 @@ cdef class GBT(object):
             string model_path, 
             MPI.Comm comm):
 
-        self.g = GradientBoostedTreesClassifier(n_features, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path, comm.ob_mpi)
+        self.g = GradientBoostedTreesClassifier(n_features, n_classes, max_num_trees, max_depth_per_tree, min_samples_for_split, reg_const, gamma, lr, feature_sample, data_sample, split_selection_algorithm, model_path, comm.ob_mpi)
 
     def fit(self, np.ndarray[np.float64_t, ndim=1, mode='c'] x, np.ndarray[np.uint32_t, ndim=1, mode='c'] y, int n):   
         cdef double *x_arr = &x[0]

@@ -41,12 +41,12 @@ using namespace std;
 typedef std::pair<double, int> mypair;
 
 struct TreeNode {
-    int split_feature_index;
-    double split_feature_value;
-    bool is_leaf;
+    int split_feature_index = -1;
+    double split_feature_value = __DBL_MAX__;
+    bool is_leaf = false;
     int *indices;
-    int num_indices;
-    int depth;
+    int num_indices = -1;
+    int depth = -1;
     double *leaf_weights;
     TreeNode *lt_node = nullptr;
     TreeNode *rt_node = nullptr;
