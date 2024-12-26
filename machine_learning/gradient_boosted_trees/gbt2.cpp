@@ -227,8 +227,8 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(const int featu
                 double gg1 = 0.0;
                 double gg2 = 0.0;
                 for (int cl = 0; cl < n_classes; cl++) {
-                    gg1 += lr*(1-0.5*lr)*g_lt[cl]*g_lt[cl]/(lr*lr*h_lt[cl]+reg_const);
-                    gg2 += lr*(1-0.5*lr)*g_rt[cl]*g_rt[cl]/(lr*lr*h_rt[cl]+reg_const);
+                    gg1 += 0.5*lr*lr*g_lt[cl]*g_lt[cl]/(lr*lr*h_lt[cl]+reg_const);
+                    gg2 += 0.5*lr*lr*g_rt[cl]*g_rt[cl]/(lr*lr*h_rt[cl]+reg_const);
                 }
 
                 double gain = gg1+gg2-curr_node_val-gamma;
@@ -358,8 +358,8 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split_feature(const int featu
             double gg1 = 0.0;
             double gg2 = 0.0;
             for (int cl = 0; cl < n_classes; cl++) {
-                gg1 += lr*(1-0.5*lr)*g_lt[cl]*g_lt[cl]/(lr*lr*h_lt[cl]+reg_const);
-                gg2 += lr*(1-0.5*lr)*g_rt[cl]*g_rt[cl]/(lr*lr*h_rt[cl]+reg_const);
+                gg1 += 0.5*lr*lr*g_lt[cl]*g_lt[cl]/(lr*lr*h_lt[cl]+reg_const);
+                gg2 += 0.5*lr*lr*g_rt[cl]*g_rt[cl]/(lr*lr*h_rt[cl]+reg_const);
             }
 
             double gain = gg1+gg2-curr_node_val-gamma;
@@ -423,6 +423,7 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split(const TreeNode *node, c
 
         for (int i = 0; i < m; i++) {
             int j = curr_indices[i];
+
             for (int cl = 0; cl < n_classes; cl++) {
                 g_sum[cl] += grad[j*n_classes+cl];
                 h_sum[cl] += hess[j*n_classes+cl];
@@ -431,7 +432,7 @@ NodeSplit GradientBoostedTreesClassifier::get_node_split(const TreeNode *node, c
 
         double curr_node_val = 0.0;
         for (int cl = 0; cl < n_classes; cl++) {
-            curr_node_val += lr*(1-0.5*lr)*g_sum[cl]*g_sum[cl]/(lr*lr*h_sum[cl]+reg_const);
+            curr_node_val += 0.5*lr*lr*g_sum[cl]*g_sum[cl]/(lr*lr*h_sum[cl]+reg_const);
         }
 
         for (int i = 0; i < f_samples; i++) {
@@ -519,7 +520,7 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, const int n) {
 
     for (int i = 0; i < n_features; i++) curr_feature_importances[i] = 1.0/n_features;
 
-    bias = 1.0/n_classes;
+    bias = 0.0;
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n_classes; j++) {
@@ -532,17 +533,24 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, const int n) {
 
         for (int i = 0; i < n; i++) {
             double maxs = -INFINITY;
+            double mins = INFINITY;
             for (int cl = 0; cl < n_classes; cl++) {
                 maxs = max(maxs, scores[i*n_classes+cl]);
+                mins = min(mins, scores[i*n_classes+cl]);
             }
 
-            double ss = 0.0;
+            double ss1 = 0.0;
+            double ss2 = 0.0;
             for (int j = 0; j < n_classes; j++) {
-                ss += exp(scores[i*n_classes+j]-maxs);
+                ss1 += exp(scores[i*n_classes+j]-maxs);
+                ss2 += exp(scores[i*n_classes+j]-mins);
             }
 
             for (int j = 0; j < n_classes; j++) {
-                double z = (ss == 0)?0.5:exp(scores[i*n_classes+j]-maxs)/ss;
+                double z;
+                if (ss1 == 0) z = (ss2 == 0)?0.5:exp(scores[i*n_classes+j]-mins)/ss2;
+                else z = exp(scores[i*n_classes+j]-maxs)/ss1;
+
                 grad[i*n_classes+j] = z-labels[i*n_classes+j];
                 hess[i*n_classes+j] = z*(1-z);
             }
@@ -730,9 +738,15 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, const int n) {
                     }
                 }
 
+                double mw = -INFINITY;
                 for (int cl = 0; cl < n_classes; cl++) {
                     node->leaf_weights[cl] = -lr*g_sum[cl]/(lr*lr*h_sum[cl]+reg_const);
+                    mw = max(mw, abs(node->leaf_weights[cl]));
                 }
+
+                mw = max(mw, 1e-3);
+
+                for (int cl = 0; cl < n_classes; cl++) node->leaf_weights[cl] /= mw;
 
                 delete[] g_sum;
                 delete[] h_sum;
@@ -743,17 +757,24 @@ void GradientBoostedTreesClassifier::fit(double *x, int *y, const int n) {
                     for (int cl = 0; cl < n_classes; cl++) new_scores[j*n_classes+cl] = lr*(node->leaf_weights[cl]);
 
                     double maxs = -INFINITY;
+                    double mins = INFINITY;
                     for (int cl = 0; cl < n_classes; cl++) {
                         maxs = max(maxs, scores[j*n_classes+cl]+new_scores[j*n_classes+cl]);
+                        mins = min(mins, scores[j*n_classes+cl]+new_scores[j*n_classes+cl]);
                     }
 
-                    double ss = 0.0;
+                    double ss1 = 0.0;
+                    double ss2 = 0.0;
                     for (int cl = 0; cl < n_classes; cl++) {
-                        ss += exp(scores[j*n_classes+cl]+new_scores[j*n_classes+cl]-maxs);
+                        ss1 += exp(scores[j*n_classes+cl]+new_scores[j*n_classes+cl]-maxs);
+                        ss2 += exp(scores[j*n_classes+cl]+new_scores[j*n_classes+cl]-mins);
                     }
 
                     for (int cl = 0; cl < n_classes; cl++) {
-                        double z = (ss == 0)?0.5:exp(scores[j*n_classes+cl]+new_scores[j*n_classes+cl]-maxs)/ss;
+                        double z;
+                        if (ss1 == 0) z = (ss2 == 0)?0.5:exp(scores[j*n_classes+cl]+new_scores[j*n_classes+cl]-mins)/ss2;
+                        else z = exp(scores[j*n_classes+cl]+new_scores[j*n_classes+cl]-maxs)/ss1;
+
                         loss += (z == 0)?0.0:-labels[j*n_classes+cl]*log(z)*(1.0/n);
                     }
                 }
@@ -806,16 +827,27 @@ int *GradientBoostedTreesClassifier::predict(const double *x, const int n) {
         }
 
         double maxs = -INFINITY;
-        for (int cl = 0; cl < n_classes; cl++) maxs = max(maxs, scores[cl]);
+        double mins = INFINITY;
+        for (int cl = 0; cl < n_classes; cl++) {
+            maxs = max(maxs, scores[cl]);
+            mins = min(mins, scores[cl]);
+        }
 
-        double ss = 0;
-        for (int cl = 0; cl < n_classes; cl++) ss += exp(scores[cl]-maxs);
+        double ss1 = 0;
+        double ss2 = 0;
+        for (int cl = 0; cl < n_classes; cl++) {
+            ss1 += exp(scores[cl]-maxs);
+            ss2 += exp(scores[cl]-mins);
+        }
 
         double max_sss = -INFINITY;
         int best_cl = -1;
 
         for (int cl = 0; cl < n_classes; cl++) {
-            double sss = (ss == 0)?0.5:exp(scores[cl]-maxs)/ss;
+            double sss;
+            if (ss1 == 0) sss = (ss2 == 0)?0.5:exp(scores[cl]-mins)/ss2;
+            else sss = exp(scores[cl]-maxs)/ss1;
+
             if (sss > max_sss) {
                 max_sss = sss;
                 best_cl = cl;
@@ -997,7 +1029,6 @@ int main(int argc, char *argv[]) {
 
     if (rank == 0) {
         GradientBoostedTreesClassifier gbt2 = load_model(gbt.model_path);
-        save_model(gbt2, "gbt_model2");
         int *res = gbt2.predict(x, n);
         print_arr(res, n, 1);
         std::cout << std::endl;

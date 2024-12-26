@@ -19,11 +19,11 @@ size = comm.Get_size()
 X_train, X_test, Y_train, Y_test = None, None, None, None
 
 if rank == 0:
-    n, m = 10000, 100
-    X, Y = make_classification(n_samples=n, n_features=m, random_state=42, n_classes=7, shuffle=True, n_informative=50)
+    # n, m = 10000, 100
+    # X, Y = make_classification(n_samples=n, n_features=m, random_state=42, n_classes=7, shuffle=True, n_informative=80)
     
-    # X, Y = fetch_covtype(return_X_y=True)
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.4, random_state = 42)
+    X, Y = fetch_covtype(return_X_y=True)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 20000, random_state = 42)
     
     enc = LabelEncoder()
     Y_train = enc.fit_transform(Y_train)
@@ -44,7 +44,7 @@ dims = comm.bcast(dims, root=0)
 n_train, n_test, m = dims
 
 os.makedirs("models", exist_ok=True)
-v = GBT(m, 7, 100, 9, 2, 1.0, 0.0, 0.1, 1.0, 1.0, "histogram", "models/gbt_model", comm)
+v = GBT(m, 7, 20, 10, 2, 1.0, 0.0, 0.3, 1.0, 1.0, "histogram", "models/gbt_model", comm)
     
 if rank == 0:    
     x = X_train.reshape((n_train*m,))
