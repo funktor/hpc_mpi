@@ -622,8 +622,9 @@ class Graph {
                         double z1 = exp(a->values[i*m+j]-maxv[i])/sumv[i];
                         for (auto k = 0; k < m; k++) {
                             double z2 = exp(a->values[i*m+k]-maxv[i])/sumv[i];
+
                             if (grad == nullptr) out[0]->values[i*m+j] += ((j == k)?z1*(1.0-z1):-z1*z2);
-                            else out[0]->values[i*m+j] += grad->values[i*m+j]*((j == k)?z1*(1.0-z1):-z1*z2);
+                            else out[0]->values[i*m+j] += grad->values[i*m+k]*((j == k)?z1*(1.0-z1):-z1*z2);
                         }
                     }
                 }
@@ -1182,7 +1183,7 @@ void fit(double *x, double *y, unsigned long n, unsigned long m_x, unsigned long
 int main(int argc, char *argv[]) {
     unsigned long n = 10000;
     unsigned long m_x = 128;
-    unsigned long m_y = 5;
+    unsigned long m_y = 3;
     unsigned long batch_size = 64;
     unsigned long n_epochs = 100;
 
