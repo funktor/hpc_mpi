@@ -31,10 +31,13 @@
 #include <omp.h>
 #include <assert.h>
 #include <initializer_list>
+#include <cuda.h>
+#include <cuda_runtime.h>
 
 using namespace std;
 
 #define EPSILON 1e-15
+#define TILE_WIDTH 16
 
 template<typename T>
 class NodeFunc;
@@ -142,7 +145,7 @@ Tensor *add(const Tensor *a, const Tensor *b) {
     std::copy(a->shape, a->shape+a->n_dim, out->shape);
 
     unsigned long n = get_tensor_n_elements(a);
-    out->values = new float[n];
+    cudaMallocManaged(&out->values, sizeof(float)*n);
 
     omp_set_num_threads(4);
     #pragma omp parallel for shared(a, b, out)
@@ -151,9 +154,53 @@ Tensor *add(const Tensor *a, const Tensor *b) {
     return out;
 }
 
+__global__ 
+void cuda_mul(float *a, float *b, float *c, int n, int m, int p) {
+    int row = blockIdx.y*blockDim.y + threadIdx.y;
+    int col = blockIdx.x*blockDim.x + threadIdx.x;
+
+    if (row < n && col < p) {
+        float res = 0.0;
+        for (int i = 0; i < m; i++) res += a[row*m+i]*b[i*p+col];
+        c[row*p+col] = res;
+    }
+}
+
+__global__ 
+void cuda_mul_tiled(float *a, float *b, float *c, int n, int m, int p) {
+    __shared__ float Mds[TILE_WIDTH*TILE_WIDTH];
+    __shared__ float Nds[TILE_WIDTH*TILE_WIDTH];
+
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+    int tx = threadIdx.x;
+    int ty = threadIdx.y;
+
+    int row = by*TILE_WIDTH + ty;
+    int col = bx*TILE_WIDTH + tx;
+
+    float res = 0.0;
+    for (int ph = 0; ph < ceil(m/float(TILE_WIDTH)); ph++) {
+        if (row < n && (ph*TILE_WIDTH + tx) < m) Mds[ty*TILE_WIDTH+tx] = a[row*m + ph*TILE_WIDTH + tx];
+        else Mds[ty*TILE_WIDTH+tx] = 0.0;
+
+
+        if ((ph*TILE_WIDTH + ty) < m && col < p) Nds[ty*TILE_WIDTH+tx] = b[(ph*TILE_WIDTH+ty)*p + col];
+        else Nds[ty*TILE_WIDTH+tx] = 0.0;
+
+        __syncthreads();
+
+        for (int i = 0; i < TILE_WIDTH; i++) res += Mds[ty*TILE_WIDTH+i]*Nds[i*TILE_WIDTH+tx];
+        __syncthreads();
+    }
+
+    if (row < n && col < p) c[row*p+col] = res;
+}
+
 class Graph {
     private:
     public:
+        std::unordered_set<std::string> is_cached;
         std::vector<std::vector<NodeFunc<float>*>> dag;
         std::unordered_map<NodeFunc<float>*, Tensor*> grad_acc;
 
@@ -237,7 +284,7 @@ class Graph {
                 out->shape[0] = n;
                 out->shape[1] = m;
 
-                out->values = new float[n*m];
+                cudaMallocManaged(&out->values, sizeof(float)*n*m);
                 for (auto i = 0; i < n*m; i++) out->values[i] = 0.0;
 
                 for (NodeFunc<float> *x : inp) {
@@ -256,7 +303,7 @@ class Graph {
             };
 
             obj->d_func = [inp](Tensor *grad){
-                Tensor **out = new Tensor*[inp.size()];
+                Tensor **out = new Tensor*[1];
                 
                 unsigned int k = 0;
 
@@ -275,7 +322,7 @@ class Graph {
                     out[k]->shape[0] = n;
                     out[k]->shape[1] = m;
 
-                    out[k]->values = new float[n*m];
+                    cudaMallocManaged(&out[k]->values, sizeof(float)*n*m);
                     for (auto i = 0; i < n*m; i++) out[k]->values[i] = 0.0;
                     
                     omp_set_num_threads(4);
@@ -331,7 +378,7 @@ class Graph {
                 out->shape[0] = n;
                 out->shape[1] = p;
 
-                out->values = new float[n*p];
+                cudaMallocManaged(&out->values, sizeof(float)*n*p);
                 for (auto i = 0; i < n*p; i++) out->values[i] = 0.0;
 
                 unsigned int k = 0;
@@ -354,7 +401,7 @@ class Graph {
             };
 
             obj->d_func = [inp](Tensor *grad) {
-                Tensor **out = new Tensor*[inp.size()];
+                Tensor **out = new Tensor*[1];
 
                 unsigned int p = 0;
                 for (NodeFunc<float> *x : inp) p += x->func()->shape[1];
@@ -379,7 +426,7 @@ class Graph {
                     out[k]->shape[0] = n;
                     out[k]->shape[1] = m;
 
-                    out[k]->values = new float[n*m];
+                    cudaMallocManaged(&out[k]->values, sizeof(float)*n*m);
                     for (auto i = 0; i < n*m; i++) out[k]->values[i] = 0.0;
                     
                     for (auto i = 0; i < n; i++) {
@@ -392,7 +439,8 @@ class Graph {
                     k++;
                     q += m;
                 }
-                
+
+
                 return out;
             };
 
@@ -411,47 +459,43 @@ class Graph {
             std::string id = obj->id;
 
             obj->oup_shape = new unsigned int[2];
+            Tensor *out = new Tensor();
 
             if (inp2->is_param) {
                 obj->oup_shape[0] = inp1->oup_shape[0];
                 obj->oup_shape[1] = inp2->oup_shape[1];
+
+                out->n_dim = 2;
+                out->shape = obj->oup_shape;
+                cudaMallocManaged(&out->values, sizeof(float)*obj->oup_shape[0]*obj->oup_shape[1]);
             }
             else {
                 obj->oup_shape[1] = inp1->oup_shape[0];
                 obj->oup_shape[0] = inp2->oup_shape[1];
+
+                out->n_dim = 2;
+                out->shape = obj->oup_shape;
+                cudaMallocManaged(&out->values, sizeof(float)*obj->oup_shape[0]*obj->oup_shape[1]);
             }
 
-            obj->func = [inp1, inp2, this, id, obj](){
+            obj->func = [inp1, inp2, this, id, obj, out](){
                 if (obj->node_val != nullptr) return obj->node_val;
-                
-                Tensor *out = new Tensor();
 
                 Tensor *a = inp1->func();
                 Tensor *b = inp2->func();
 
                 assert(a->shape[1] == b->shape[0]);
 
-                out->n_dim = 2;
-                out->shape = new unsigned int[2];
-
                 if (inp2->is_param) {
-                    out->shape[0] = a->shape[0];
-                    out->shape[1] = b->shape[1];
-
                     unsigned int m = out->shape[0]*out->shape[1];
-
-                    out->values = new float[m];
                     for (auto i = 0; i < m; i++) out->values[i] = 0.0;
+                    
+                    dim3 bd(16, 16, 1);
+                    dim3 gd(ceil(out->shape[0]/16.0), ceil(out->shape[1]/16.0), 1);
 
-                    omp_set_num_threads(4);
-                    #pragma omp parallel for shared(a, b, out)
-                    for (auto i = 0; i < a->shape[0]; i++) {
-                        for (auto j = 0; j < b->shape[0]; j++) {
-                            for (auto k = 0; k < b->shape[1]; k++) {
-                                out->values[i*b->shape[1]+k] += a->values[i*b->shape[0]+j]*b->values[j*b->shape[1]+k];
-                            }
-                        }
-                    }
+                    cuda_mul<<<gd, bd>>>(a->values, b->values, out->values, a->shape[0], a->shape[1], b->shape[1]);
+                    
+                    cudaDeviceSynchronize();
                 }
                 else {
                     out->shape[0] = b->shape[0];
@@ -459,7 +503,7 @@ class Graph {
 
                     unsigned int m = out->shape[0]*out->shape[1];
 
-                    out->values = new float[m];
+                    cudaMallocManaged(&out->values, sizeof(float)*m);
                     for (auto i = 0; i < m; i++) out->values[i] = 0.0;
 
                     omp_set_num_threads(4);
@@ -499,7 +543,7 @@ class Graph {
 
                     if (grad != nullptr) assert(b->shape[1] == grad->shape[1]);
 
-                    out[0]->values = new float[n*m];
+                    cudaMallocManaged(&out[0]->values, sizeof(float)*n*m);
                     for (auto i = 0; i < n*m; i++) out[0]->values[i] = 0.0;
 
                     omp_set_num_threads(4);
@@ -525,7 +569,7 @@ class Graph {
                     out[1]->shape[0] = n;
                     out[1]->shape[1] = m;
 
-                    out[1]->values = new float[n*m];
+                    cudaMallocManaged(&out[1]->values, sizeof(float)*n*m);
                     for (auto i = 0; i < n*m; i++) out[1]->values[i] = 0.0;
 
                     omp_set_num_threads(4);
@@ -558,7 +602,7 @@ class Graph {
 
                     if (grad != nullptr) assert(a->shape[1] == grad->shape[1]);
 
-                    out[0]->values = new float[n*m];
+                    cudaMallocManaged(&out[0]->values, sizeof(float)*n*m);
                     for (auto i = 0; i < n*m; i++) out[0]->values[i] = 0.0;
 
                     omp_set_num_threads(4);
@@ -584,7 +628,7 @@ class Graph {
                     out[1]->shape[0] = n;
                     out[1]->shape[1] = m;
 
-                    out[1]->values = new float[n*m];
+                    cudaMallocManaged(&out[1]->values, sizeof(float)*n*m);
                     for (auto i = 0; i < n*m; i++) out[1]->values[i] = 0.0;
 
                     omp_set_num_threads(4);
@@ -631,7 +675,7 @@ class Graph {
                 out->shape[0] = n;
                 out->shape[1] = m;
 
-                out->values = new float[n*m];
+                cudaMallocManaged(&out->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, out)
@@ -657,7 +701,7 @@ class Graph {
                 out[0]->shape[0] = n;
                 out[0]->shape[1] = m;
 
-                out[0]->values = new float[n*m];
+                cudaMallocManaged(&out[0]->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, grad, out)
@@ -697,7 +741,7 @@ class Graph {
                 out->shape[0] = n;
                 out->shape[1] = m;
 
-                out->values = new float[n*m];
+                cudaMallocManaged(&out->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, out)
@@ -723,7 +767,7 @@ class Graph {
                 out[0]->shape[0] = n;
                 out[0]->shape[1] = m;
 
-                out[0]->values = new float[n*m];
+                cudaMallocManaged(&out[0]->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, grad, out)
@@ -777,7 +821,7 @@ class Graph {
                 out->shape[0] = n;
                 out->shape[1] = m;
 
-                out->values = new float[n*m];
+                cudaMallocManaged(&out->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, maxv, sumv, out)
@@ -818,7 +862,7 @@ class Graph {
                 out[0]->shape[0] = n;
                 out[0]->shape[1] = m;
 
-                out[0]->values = new float[n*m];
+                cudaMallocManaged(&out[0]->values, sizeof(float)*n*m);
                 for (auto i = 0; i < n*m; i++) out[0]->values[i] = 0.0;
 
                 //dL/dxj = dL/dyk*dyk/dxj
@@ -873,7 +917,7 @@ class Graph {
                 out->shape = new unsigned int[1];
                 out->shape[0] = 1;
 
-                out->values = new float[1]; 
+                cudaMallocManaged(&out->values, sizeof(float));
                 out->values[0] = 0.0;
 
                 omp_set_num_threads(4);
@@ -903,7 +947,7 @@ class Graph {
                 out[0]->shape[0] = n;
                 out[0]->shape[1] = m;
 
-                out[0]->values = new float[n*m];
+                cudaMallocManaged(&out[0]->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, b, out)
@@ -920,7 +964,7 @@ class Graph {
                 out[1]->shape[0] = n;
                 out[1]->shape[1] = m;
 
-                out[1]->values = new float[n*m];
+                cudaMallocManaged(&out[1]->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, b, grad, out)
@@ -965,7 +1009,8 @@ class Graph {
                 out->shape = new unsigned int[1];
                 out->shape[0] = 1;
 
-                out->values = new float[1]; 
+                cudaMallocManaged(&out->values, sizeof(float));
+
                 out->values[0] = 0.0;
 
                 omp_set_num_threads(4);
@@ -995,7 +1040,7 @@ class Graph {
                 out[0]->shape[0] = n;
                 out[0]->shape[1] = m;
 
-                out[0]->values = new float[n*m];
+                cudaMallocManaged(&out[0]->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, b, grad, out)
@@ -1012,7 +1057,7 @@ class Graph {
                 out[1]->shape[0] = n;
                 out[1]->shape[1] = m;
 
-                out[1]->values = new float[n*m];
+                cudaMallocManaged(&out[1]->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, b, grad, out)
@@ -1057,7 +1102,8 @@ class Graph {
                 out->shape = new unsigned int[1];
                 out->shape[0] = 1;
 
-                out->values = new float[1];
+                cudaMallocManaged(&out->values, sizeof(float));
+
                 out->values[0] = 0.0;
 
                 omp_set_num_threads(4);
@@ -1087,7 +1133,7 @@ class Graph {
                 out[0]->shape[0] = n;
                 out[0]->shape[1] = m;
 
-                out[0]->values = new float[n*m];
+                cudaMallocManaged(&out[0]->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, b, grad, out)
@@ -1104,7 +1150,7 @@ class Graph {
                 out[1]->shape[0] = n;
                 out[1]->shape[1] = m;
 
-                out[1]->values = new float[n*m];
+                cudaMallocManaged(&out[1]->values, sizeof(float)*n*m);
 
                 omp_set_num_threads(4);
                 #pragma omp parallel for shared(a, b, grad, out)
@@ -1207,7 +1253,7 @@ class Graph {
                                 c->n_dim = 1;
                                 c->shape = new unsigned int[1];
                                 c->shape[0] = b_dim;
-                                c->values = new float[b_dim];
+                                cudaMallocManaged(&c->values, sizeof(float)*b_dim);
                                 for (auto j1 = 0; j1 < b_dim; j1++) c->values[j1] = 0.0;
                                 grad_acc[child] = c;
                             }
@@ -1228,7 +1274,7 @@ class Graph {
                 Tensor *v = kv.second;
 
                 delete [] v->shape;
-                delete [] v->values;
+                cudaFree(v->values);
                 delete v;
             }
         }
@@ -1264,7 +1310,8 @@ class Graph {
                 std::normal_distribution<float> dist(0.0, sqrt(2.0/n));
 
                 unsigned int h = n*m;
-                float *init_v = new float[h];
+                float *init_v;
+                cudaMallocManaged(&init_v, sizeof(float)*h);
                 for (auto j = 0; j < h; j++) init_v[j] = dist(engine);
 
                 Tensor *param = new Tensor();
@@ -1377,7 +1424,7 @@ void fit(float *x, float *y, unsigned long n, unsigned long m_x, unsigned long m
         while (j < n) {
             unsigned int new_batch = min(batch_size, n-j);
 
-            unsigned int b = 16;
+            unsigned int b = 64;
             unsigned int i = 0;
             while (i < new_batch) {
                 unsigned int b2 = min(b, new_batch-i);
@@ -1415,7 +1462,7 @@ void fit(float *x, float *y, unsigned long n, unsigned long m_x, unsigned long m
                 for (auto k = 0; k < v->shape[0]; k++) u->node_val->values[k] -= lr*v->values[k]/new_batch;
 
                 delete [] v->shape;
-                delete [] v->values;
+                cudaFree(v->values);
                 delete v;
             }
 
@@ -1430,28 +1477,30 @@ void fit(float *x, float *y, unsigned long n, unsigned long m_x, unsigned long m
 
 
 int main(int argc, char *argv[]) {
-    unsigned long n = 100000;
+    unsigned long n = 10000;
     unsigned long m_x = 128;
     unsigned long m_y = 1;
-    unsigned long batch_size = 256;
+    unsigned long batch_size = 64;
     unsigned long n_epochs = 100;
 
-    float *x = new float[n*m_x];
-    float *y = new float[n*m_y];
+    float *x, *y;
 
-    generate_binary_classification_data(x, y, n, m_x, m_y); 
+    cudaMallocManaged(&x, sizeof(float)*n*m_x);
+    cudaMallocManaged(&y, sizeof(float)*n*m_y);
+
+    generate_binary_classification_data(x, y, n, m_x, m_y);
     Graph *g = model(m_x, m_y);
     fit(x, y, n, m_x, m_y, batch_size, n_epochs, 0.001, g);
 
     for (auto i = 0; i < g->dag.size(); i++) {
         for (auto j = 0; j < g->dag[i].size(); j++) {
             NodeFunc<float> *node = g->dag[i][j];
-            delete [] node->node_val;
+            cudaFree(node->node_val);
             delete node;
         }
     }
 
-    delete [] x;
-    delete [] y;
+    cudaFree(x);
+    cudaFree(y);
     delete g;
 }

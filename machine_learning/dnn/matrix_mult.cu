@@ -109,49 +109,39 @@ void mat_mul(float *a, float *b, float *c, int n, int m, int p) {
 }
 
 int main(){
-    int n = 2048;
-    int m = 2048;
-    int p = 2048;
+    int n = 1024;
+    int m = 1024;
+    int p = 1024;
 
     float *a, *b, *c, *d;
-    float *d_a, *d_b, *d_c; 
 
     size_t size_a = sizeof(float)*n*m;
     size_t size_b = sizeof(float)*m*p;
     size_t size_c = sizeof(float)*n*p;
 
-    a   = (float*)malloc(size_a);
-    b   = (float*)malloc(size_b);
-    c   = (float*)malloc(size_c);
-    d   = (float*)malloc(size_c);
+    cudaMallocManaged(&a, size_a);
+    cudaMallocManaged(&b, size_b);
+    cudaMallocManaged(&c, size_c);
+    d = (float*)malloc(size_c);
 
     generate_data(a, n, m);
     generate_data(b, m, p);
 
     auto start = std::chrono::high_resolution_clock::now();
-    
-    cudaMalloc((void**)&d_a, size_a);
-    cudaMalloc((void**)&d_b, size_b);
-    cudaMalloc((void**)&d_c, size_c);
-
-    cudaMemcpy(d_a, a, size_a, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, b, size_b, cudaMemcpyHostToDevice);
 
     dim3 bd(16, 16, 1);
     dim3 gd(ceil(n/16.0), ceil(p/16.0), 1);
 
-    cuda_mul_tiled<<<gd, bd>>>(d_a, d_b, d_c, n, m, p);
+    cuda_mul<<<gd, bd>>>(a, b, c, n, m, p);
     
-    cudaMemcpy(c, d_c, size_c, cudaMemcpyDeviceToHost);
-
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_c);
+    cudaDeviceSynchronize();
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
     std::cout << "CUDA Duration = " << duration.count() << " ms" << std::endl;
+
+    print_vector(c, 100);
 
     start = std::chrono::high_resolution_clock::now();
     mat_mul(a, b, d, n, m, p);
@@ -160,8 +150,10 @@ int main(){
 
     std::cout << "Standard Duration = " << duration.count() << " ms" << std::endl;
 
-    free(a); 
-    free(b); 
-    free(c);
+    print_vector(d, 100);
+
+    cudaFree(a);
+    cudaFree(b);
+    cudaFree(c);
     free(d);
 }
