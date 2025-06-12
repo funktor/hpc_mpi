@@ -123,32 +123,17 @@ struct std::hash<NodeFunc<T>> {
   }
 };
 
-unsigned int get_tensor_n_elements(const Tensor *a) {
-    unsigned int n = 1;
-    for (auto i = 0; i < a->n_dim; i++) n *= a->shape[i];
-    return n;
-}
-
-bool is_same_shape(const Tensor *a, const Tensor *b) {
-    if (a->n_dim == b->n_dim) {
-        for (auto i = 0; i < a->n_dim; i++) {
-            if (a->shape[i] != b->shape[i]) return false;
-        }
-        return true;
-    }
-    return false;
-}
-
 Tensor *add(const Tensor *a, const Tensor *b) {
     Tensor *out = new Tensor();
 
-    assert(is_same_shape(a, b));
+    assert(a->shape[0] == b->shape[0] && a->shape[1] == b->shape[1]);
 
     out->n_dim = a->n_dim;
     out->shape = new unsigned int[out->n_dim];
-    std::copy(a->shape, a->shape+a->n_dim, out->shape);
+    out->shape[0] = a->shape[0];
+    out->shape[1] = a->shape[1];
 
-    unsigned int n = get_tensor_n_elements(a);
+    unsigned int n = out->shape[0]*out->shape[1];
     out->values = new float[n];
 
     for (auto i = 0; i < n; i++) out->values[i] = a->values[i] + b->values[i];
@@ -236,6 +221,14 @@ class Graph {
             obj->oup_shape = new unsigned int[2];
             obj->oup_shape[0] = n;
             obj->oup_shape[1] = m;
+
+            Tensor *c = new Tensor();
+            c->n_dim = 1;
+            c->shape = new unsigned int[1];
+            c->shape[0] = n*m;
+            c->values = new float[n*m];
+            for (auto i = 0; i < n*m; i++) c->values[i] = 0.0;
+            grad_acc[obj] = c;
 
             Tensor **d_out = new Tensor*[1];
 
@@ -1195,33 +1188,21 @@ class Graph {
 
                     for (auto j = 0; j < nd->num_children; j++) {
                         NodeFunc<float>* child = nd->children[j];
-
                         if (grad_map.count(child) == 0) grad_map[child] = child_grads[j];
                         else grad_map[child] = add(grad_map[child], child_grads[j]);
+                    }
+                }
+            }
 
-                        if (child->is_param) {
-                            Tensor *b = grad_map[child];
-                            unsigned int b_dim = b->shape[1];
+            for (auto kv : grad_map) {
+                NodeFunc<float>* child = kv.first;
+                if (child->is_param) {
+                    Tensor *b = kv.second;
+                    Tensor *c = grad_acc[child];
 
-                            Tensor *c;
-
-                            if (grad_acc.count(child) == 0) {
-                                c = new Tensor();
-                                c->n_dim = 1;
-                                c->shape = new unsigned int[1];
-                                c->shape[0] = b_dim;
-                                c->values = new float[b_dim];
-                                for (auto j1 = 0; j1 < b_dim; j1++) c->values[j1] = 0.0;
-                                grad_acc[child] = c;
-                            }
-                            
-                            c = grad_acc[child];
-
-                            for (auto i1 = 0; i1 < b->shape[0]; i1++) {
-                                for (auto j1 = 0; j1 < b->shape[1]; j1++) {
-                                    c->values[j1] += b->values[i1*b->shape[1]+j1];
-                                }
-                            }
+                    for (auto i = 0; i < b->shape[0]; i++) {
+                        for (auto j = 0; j < b->shape[1]; j++) {
+                            c->values[j] += b->values[i*b->shape[1]+j];
                         }
                     }
                 }
@@ -1396,13 +1377,9 @@ void fit(float *x, float *y, unsigned int n, unsigned int m_x, unsigned int m_y,
                 Tensor *v = kv.second;
 
                 for (auto k = 0; k < v->shape[0]; k++) u->node_val->values[k] -= lr*v->values[k]/new_batch;
-
-                delete [] v->shape;
-                delete [] v->values;
-                delete v;
+                for (auto k = 0; k < v->shape[0]; k++) v->values[k] = 0.0;
             }
 
-            g->grad_acc.clear();
             j += batch_size;
         }
         
@@ -1417,11 +1394,11 @@ void fit(float *x, float *y, unsigned int n, unsigned int m_x, unsigned int m_y,
 
 
 int main(int argc, char *argv[]) {
-    unsigned int n = 10000;
+    unsigned int n = 100000;
     unsigned int m_x = 128;
     unsigned int m_y = 1;
     unsigned int batch_size = 256;
-    unsigned int n_epochs = 10;
+    unsigned int n_epochs = 100;
 
     if (n % batch_size != 0) n += (batch_size - (n % batch_size));
 
@@ -1431,6 +1408,14 @@ int main(int argc, char *argv[]) {
     generate_binary_classification_data(x, y, n, m_x, m_y); 
     Graph *g = model(m_x, m_y, batch_size);
     fit(x, y, n, m_x, m_y, batch_size, n_epochs, 0.001, g);
+
+    for (auto kv : g->grad_acc) {
+        Tensor *v = kv.second;
+
+        delete [] v->shape;
+        delete [] v->values;
+        delete v;
+    }
 
     for (auto i = 0; i < g->dag.size(); i++) {
         for (auto j = 0; j < g->dag[i].size(); j++) {
