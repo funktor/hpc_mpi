@@ -31,7 +31,7 @@
 #include <variant>
 #include <assert.h>
 #include <initializer_list>
-#include "/opt/homebrew/opt/libomp/include/omp.h"
+#include <omp.h>
 
 using namespace std;
 

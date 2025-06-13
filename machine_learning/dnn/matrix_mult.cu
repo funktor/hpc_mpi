@@ -130,7 +130,7 @@ int main(){
     auto start = std::chrono::high_resolution_clock::now();
 
     dim3 bd(16, 16, 1);
-    dim3 gd(ceil(n/16.0), ceil(p/16.0), 1);
+    dim3 gd(ceil(p/16.0), ceil(n/16.0), 1);
 
     cuda_mul<<<gd, bd>>>(a, b, c, n, m, p);
     
