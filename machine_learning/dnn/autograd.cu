@@ -34,6 +34,7 @@
 #include <omp.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <csignal>
 
 using namespace std;
 
@@ -44,6 +45,14 @@ template<typename T>
 class NodeFunc;
 
 class Graph;
+
+void handleSignal(int signal) {
+    if (signal == SIGINT) {
+        std::cout << "\nCtrl+C detected. Cleaning up and exiting gracefully...\n";
+        cudaDeviceReset();
+        std::exit(0);
+    }
+}
 
 std::string get_uuid() {
     static std::random_device dev;
@@ -102,6 +111,7 @@ class NodeFunc {
 
         std::function<Tensor*()> func;
         std::function<Tensor**(Tensor *)> d_func;
+        std::function<void()> cuda_destroy;
 
         NodeFunc** children;
         unsigned int num_children = 0;
@@ -158,6 +168,63 @@ void cuda_mul(float *a, float *b, float *c, int n, int m, int p) {
         for (int i = 0; i < m; i++) res += a[row*m+i]*b[i*p+col];
         c[row*p+col] = res;
     }
+}
+
+__global__ 
+void cuda_mul_tb(float *a, float *b, float *c, int n, int m, int p) {
+    // a.bT
+    // a - nxm   b - pxm   c - nxp
+    int row = blockIdx.y*blockDim.y + threadIdx.y;
+    int col = blockIdx.x*blockDim.x + threadIdx.x;
+
+    if (row < n && col < p) {
+        float res = 0.0;
+        for (int i = 0; i < m; i++) res += a[row*m+i]*b[col*m+i];
+        c[row*p+col] = res;
+    }
+}
+
+__global__ 
+void cuda_mul_tbi(float *b, float *c, int n, int m, int p) {
+    // a.bT
+    // a - nxm   b - pxm   c - nxp
+    int row = blockIdx.y*blockDim.y + threadIdx.y;
+    int col = blockIdx.x*blockDim.x + threadIdx.x;
+
+    if (row < n && col < p) {
+        float res = 0.0;
+        for (int i = 0; i < m; i++) res += b[col*m+i];
+        c[row*p+col] = res;
+    }
+}
+
+__global__ 
+void cuda_mul_w(float *a, float *b, float *c, int n, int m, int p) {
+    // c[i,j,k] = grad[i,k]*x[i,j]   nxm  nxp
+    int i = blockIdx.z*blockDim.z + threadIdx.z;
+    int j = blockIdx.y*blockDim.y + threadIdx.y;
+    int k = blockIdx.x*blockDim.x + threadIdx.x;
+
+    if (i < n && j < p && k < m) c[i*p*m+j*m+k] = a[i*m+k]*b[i*p+j];
+}
+
+__global__ 
+void cuda_mul_wi(float *b, float *c, int n, int m, int p) {
+    // a.bT
+    // a - nxm   b - pxm   c - nxp
+    // c[i,j,k] = grad[i,k]*x[i,j]   nxm  nxp
+    int i = blockIdx.z*blockDim.z + threadIdx.z;
+    int j = blockIdx.y*blockDim.y + threadIdx.y;
+    int k = blockIdx.x*blockDim.x + threadIdx.x;
+
+    if (i < n && j < p && k < m) c[i*p*m+j*m+k] = b[i*p+j];
+}
+
+__global__ 
+void cuda_add(float *a, float *b, int n, int m) {
+    int row = blockIdx.y*blockDim.y + threadIdx.y;
+    int col = blockIdx.x*blockDim.x + threadIdx.x;
+    if (row < n && col < m) a[row*m+col] += b[row*m+col];
 }
 
 __global__ 
@@ -227,6 +294,17 @@ class Graph {
                 return d_out;
             };
 
+            obj->cuda_destroy = [obj, d_out](){
+                delete [] obj->node_val->shape;
+                delete [] obj->node_val->values;
+                delete obj->node_val;
+                delete [] obj->oup_shape;
+                
+                delete [] d_out[0]->shape;
+                delete [] d_out[0]->values;
+                delete d_out[0];
+            };
+
             return obj;
         }
 
@@ -253,6 +331,17 @@ class Graph {
             obj->d_func = [d_out](Tensor *grad){                
                 d_out[0] = grad; 
                 return d_out;
+            };
+
+            obj->cuda_destroy = [obj, d_out](){
+                delete [] obj->node_val->shape;
+                delete [] obj->node_val->values;
+                delete obj->node_val;
+                delete [] obj->oup_shape;
+
+                delete [] d_out[0]->shape;
+                delete [] d_out[0]->values;
+                delete d_out[0];
             };
 
             return obj;
@@ -289,6 +378,25 @@ class Graph {
             obj->d_func = [d_out](Tensor *grad){                
                 d_out[0] = grad; 
                 return d_out;
+            };
+
+            obj->cuda_destroy = [obj, this, d_out](){
+                delete [] obj->node_val->shape;
+                delete [] obj->node_val->values;
+                delete obj->node_val;
+                delete [] obj->oup_shape;
+
+                for (auto kv : grad_acc) {
+                    Tensor *v = kv.second;
+
+                    delete [] v->shape;
+                    delete [] v->values;
+                    delete v;
+                }
+
+                delete [] d_out[0]->shape;
+                delete [] d_out[0]->values;
+                delete d_out[0];
             };
 
             return obj;
@@ -372,6 +480,23 @@ class Graph {
                 }
 
                 return d_out;
+            };
+
+            obj->cuda_destroy = [inp, obj, this, d_out](){
+                delete [] obj->node_val->shape;
+                delete [] obj->node_val->values;
+                delete obj->node_val;
+                delete [] obj->oup_shape;
+
+                unsigned int k = 0;
+
+                for (NodeFunc<float> *x : inp) {
+                    delete [] d_out[k]->shape;
+                    delete [] d_out[k]->values;
+                    delete d_out[k];
+                    k++;
+                }
+                delete [] d_out;
             };
 
             obj->children = new NodeFunc<float>*[inp.size()];
@@ -496,10 +621,12 @@ class Graph {
             if (inp2->is_param) {
                 obj->oup_shape[0] = inp1->oup_shape[0];
                 obj->oup_shape[1] = inp2->oup_shape[1];
+                assert(inp1->oup_shape[1] == inp2->oup_shape[0]);
             }
             else {
                 obj->oup_shape[0] = inp2->oup_shape[0];
                 obj->oup_shape[1] = inp1->oup_shape[1];
+                assert(inp2->oup_shape[1] == inp1->oup_shape[0]);
             }
 
             unsigned int n = obj->oup_shape[0];
@@ -528,41 +655,19 @@ class Graph {
                 if (inp2->is_param) {
                     assert(a->shape[1] == b->shape[0]);
 
-                    // for (auto i = 0; i < n*m; i++) out->values[i] = 0.0;
+                    unsigned int n = a->shape[0];
+                    unsigned int m = a->shape[1];
+                    unsigned int p = b->shape[1];
 
-                    cudaMemcpy(d_a, a->values, sizeof(float)*a->shape[0]*a->shape[1], cudaMemcpyHostToDevice);
-                    cudaMemcpy(d_b, b->values, sizeof(float)*b->shape[0]*b->shape[1], cudaMemcpyHostToDevice);
+                    cudaMemcpy(d_a, a->values, sizeof(float)*n*m, cudaMemcpyHostToDevice);
+                    cudaMemcpy(d_b, b->values, sizeof(float)*m*p, cudaMemcpyHostToDevice);
 
                     dim3 bd(32, 32, 1);
-                    dim3 gd(ceil(m/32.0), ceil(n/32.0), 1);
+                    dim3 gd(ceil(p/32.0), ceil(n/32.0), 1);
 
-                    cuda_mul<<<gd, bd>>>(d_a, d_b, d_c, a->shape[0], b->shape[0], b->shape[1]);
+                    cuda_mul<<<gd, bd>>>(d_a, d_b, d_c, n, m, p);
 
-                    cudaMemcpy(out->values, d_c, sizeof(float)*n*m, cudaMemcpyDeviceToHost);
-
-                    // cudaDeviceSynchronize();
-
-                    // float *z1 = new float[n*m];
-                    // std::copy(out->values, out->values+n*m, z1);
-
-                    // for (auto i = 0; i < n*m; i++) out->values[i] = 0.0;
-
-                    // omp_set_num_threads(8);
-                    // #pragma omp parallel for shared(a, b, out)
-                    // for (auto i = 0; i < a->shape[0]; i++) {
-                    //     for (auto j = 0; j < b->shape[0]; j++) {
-                    //         for (auto k = 0; k < b->shape[1]; k++) {
-                    //             out->values[i*b->shape[1]+k] += a->values[i*b->shape[0]+j]*b->values[j*b->shape[1]+k];
-                    //         }
-                    //     }
-                    // }
-
-                    // float *z2 = new float[n*m];
-                    // std::copy(out->values, out->values+n*m, z2);
-
-                    // for (auto i = 0; i < n*m; i++) {
-                    //     if (fabs(z1[i]-z2[i]) > 1e-3) std::cout << i << " " << z1[i] << " " << z2[i] << std::endl;
-                    // }
+                    cudaMemcpy(out->values, d_c, sizeof(float)*n*p, cudaMemcpyDeviceToHost);
                 }
                 else {
                     assert(b->shape[1] == a->shape[0]);
@@ -588,6 +693,9 @@ class Graph {
 
 
             Tensor **d_out = new Tensor*[2];
+            float *d_grad, *d_dc, *d_df;
+
+            cudaMalloc((void**)&d_grad, sizeof(float)*n*m);
 
             if (inp2->is_param) {
                 unsigned int n = inp1->oup_shape[0];
@@ -601,6 +709,7 @@ class Graph {
                 d_out[0]->values = new float[n*m];
                 // cudaMallocManaged(&d_out[0]->values, sizeof(float)*n*m);
 
+                cudaMalloc((void**)&d_dc, sizeof(float)*n*m);
 
                 m = inp2->oup_shape[0]*inp2->oup_shape[1];
 
@@ -611,6 +720,8 @@ class Graph {
                 d_out[1]->shape[1] = m;
                 d_out[1]->values = new float[n*m];
                 // cudaMallocManaged(&d_out[1]->values, sizeof(float)*n*m);
+
+                cudaMalloc((void**)&d_df, sizeof(float)*n*m);
             }
             else {
                 unsigned int n = inp2->oup_shape[0];
@@ -633,47 +744,52 @@ class Graph {
                 d_out[1]->values = new float[n*m];
             }
 
-            obj->d_func = [inp1, inp2, d_out](Tensor *grad){
+            obj->d_func = [inp1, inp2, d_out, d_a, d_b, d_grad, d_dc, d_df](Tensor *grad){
                 Tensor *a = inp1->func();
                 Tensor *b = inp2->func();
 
                 if (inp2->is_param) {
                     //128x32, a=128x64 b=64x32 - 128x64
                     //dL/dxj = dL/dy1*wj1+dL/dy2*wj2+...
+                    //grad.wT
 
                     unsigned int n = a->shape[0];
                     unsigned int m = a->shape[1];
+                    unsigned int p = b->shape[1];
 
-                    if (grad != nullptr) assert(b->shape[1] == grad->shape[1]);
+                    if (grad != nullptr) assert(p == grad->shape[1]);
 
-                    for (auto i = 0; i < n*m; i++) d_out[0]->values[i] = 0.0;
+                    dim3 bd(32, 32, 1);
+                    dim3 gd(ceil(m/32.0), ceil(n/32.0), 1);
 
-                    omp_set_num_threads(8);
-                    #pragma omp parallel for shared(b, grad, d_out)
-                    for (auto i = 0; i < n; i++) {
-                        for (auto j = 0; j < b->shape[0]; j++) {
-                            for (auto k = 0; k < b->shape[1]; k++) {
-                                if (grad == nullptr) d_out[0]->values[i*b->shape[0]+j] += b->values[j*b->shape[1]+k];
-                                else d_out[0]->values[i*b->shape[0]+j] += grad->values[i*b->shape[1]+k]*b->values[j*b->shape[1]+k];
-                            }
-                        }
+                    cudaMemcpy(d_b, b->values, sizeof(float)*m*p, cudaMemcpyHostToDevice);
+
+                    if (grad != nullptr) {
+                        cudaMemcpy(d_grad, grad->values, sizeof(float)*n*p, cudaMemcpyHostToDevice);
+                        cuda_mul_tb<<<gd, bd>>>(d_grad, d_b, d_dc, n, p, m);
+                        cudaMemcpy(d_out[0]->values, d_dc, sizeof(float)*n*m, cudaMemcpyDeviceToHost);
                     }
+                    else {
+                        cuda_mul_tbi<<<gd, bd>>>(d_b, d_dc, n, p, m);
+                        cudaMemcpy(d_out[0]->values, d_dc, sizeof(float)*n*m, cudaMemcpyDeviceToHost);
+                    }
+
 
                     //128x32, a=128x64 b=64x32 - 128x64x32
                     //dL/dwjk = dL/dyk*dyk/dwjk
 
-                    m = b->shape[0]*b->shape[1];
-                    for (auto i = 0; i < n*m; i++) d_out[1]->values[i] = 0.0;
+                    cudaMemcpy(d_a, a->values, sizeof(float)*n*m, cudaMemcpyHostToDevice);
 
-                    omp_set_num_threads(8);
-                    #pragma omp parallel for shared(a, b, grad, d_out)
-                    for (auto i = 0; i < n; i++) {
-                        for (auto j = 0; j < b->shape[0]; j++) {
-                            for (auto k = 0; k < b->shape[1]; k++) {
-                                if (grad == nullptr) d_out[1]->values[i*m+j*b->shape[1]+k] += a->values[i*b->shape[0]+j];
-                                else d_out[1]->values[i*m+j*b->shape[1]+k] += grad->values[i*b->shape[1]+k]*a->values[i*b->shape[0]+j];
-                            }
-                        }
+                    dim3 bd1(16, 8, 8);
+                    dim3 gd1(ceil(p/16.0), ceil(m/8.0), ceil(n/8.0));
+
+                    if (grad != nullptr) {
+                        cuda_mul_w<<<gd1, bd1>>>(d_grad, d_a, d_df, n, p, m);
+                        cudaMemcpy(d_out[1]->values, d_df, sizeof(float)*n*m*p, cudaMemcpyDeviceToHost);
+                    }
+                    else {
+                        cuda_mul_wi<<<gd1, bd1>>>(d_a, d_df, n, p, m);
+                        cudaMemcpy(d_out[1]->values, d_df, sizeof(float)*n*m*p, cudaMemcpyDeviceToHost);
                     }
 
                     return d_out;
@@ -720,6 +836,27 @@ class Graph {
 
                     return d_out;
                 }
+            };
+
+            obj->cuda_destroy = [obj, this, d_out, d_a, d_b, d_c, d_grad, d_dc, d_df](){
+                delete [] obj->node_val->shape;
+                delete [] obj->node_val->values;
+                delete obj->node_val;
+                delete [] obj->oup_shape;
+
+                delete [] d_out[0]->shape;
+                delete [] d_out[1]->shape;
+                delete [] d_out[0]->values;
+                delete [] d_out[1]->values;
+                delete d_out[0];
+                delete d_out[1];
+
+                cudaFree(d_a);
+                cudaFree(d_b);
+                cudaFree(d_c);
+                cudaFree(d_grad);
+                cudaFree(d_dc);
+                cudaFree(d_df);
             };
 
             obj->children = new NodeFunc<float>*[2];
@@ -783,6 +920,17 @@ class Graph {
                 return d_out;
             };
 
+            obj->cuda_destroy = [obj, this, d_out](){
+                delete [] obj->node_val->shape;
+                delete [] obj->node_val->values;
+                delete obj->node_val;
+                delete [] obj->oup_shape;
+
+                delete [] d_out[0]->shape;
+                delete [] d_out[0]->values;
+                delete d_out[0];
+            };
+
             obj->children = new NodeFunc<float>*[1];
             obj->children[0] = inp;
             obj->num_children = 1;
@@ -842,6 +990,17 @@ class Graph {
                 }
                 
                 return d_out;
+            };
+
+            obj->cuda_destroy = [obj, this, d_out](){
+                delete [] obj->node_val->shape;
+                delete [] obj->node_val->values;
+                delete obj->node_val;
+                delete [] obj->oup_shape;
+
+                delete [] d_out[0]->shape;
+                delete [] d_out[0]->values;
+                delete d_out[0];
             };
 
             obj->children = new NodeFunc<float>*[1];
@@ -1122,6 +1281,21 @@ class Graph {
                 }
                 
                 return d_out;
+            };
+
+            obj->cuda_destroy = [obj, this, d_out](){
+                delete [] obj->node_val->shape;
+                delete [] obj->node_val->values;
+                delete obj->node_val;
+                delete [] obj->oup_shape;
+
+                delete [] d_out[0]->shape;
+                delete [] d_out[0]->values;
+                delete d_out[0];
+
+                delete [] d_out[1]->shape;
+                delete [] d_out[1]->values;
+                delete d_out[1];
             };
 
             obj->children = new NodeFunc<float>*[2];
@@ -1439,7 +1613,7 @@ void fit(float *x, float *y, unsigned int n, unsigned int m_x, unsigned int m_y,
         while (j < n) {
             unsigned int new_batch = min(batch_size, n-j);
 
-            unsigned int b = 1024;
+            unsigned int b = 8192;
             unsigned int i = 0;
             while (i < new_batch) {
                 unsigned int b2 = min(b, new_batch-i);
@@ -1503,10 +1677,12 @@ void fit(float *x, float *y, unsigned int n, unsigned int m_x, unsigned int m_y,
 
 
 int main(int argc, char *argv[]) {
+    std::signal(SIGINT, handleSignal);
+    
     unsigned int n = 10000;
-    unsigned int m_x = 20000;
+    unsigned int m_x = 128;
     unsigned int m_y = 1;
-    unsigned int batch_size = 1024;
+    unsigned int batch_size = 8192;
     unsigned int n_epochs = 100;
 
     if (n % batch_size != 0) n += (batch_size - (n % batch_size));
@@ -1516,21 +1692,13 @@ int main(int argc, char *argv[]) {
 
     generate_binary_classification_data(x, y, n, m_x, m_y); 
     Graph *g = model(m_x, m_y, batch_size);
-    fit(x, y, n, m_x, m_y, batch_size, n_epochs, 0.01, g);
-
-    for (auto kv : g->grad_acc) {
-        Tensor *v = kv.second;
-
-        cudaFree(v->values);
-        delete [] v->shape;
-        delete v;
-    }
+    fit(x, y, n, m_x, m_y, batch_size, n_epochs, 0.03, g);
 
     for (auto i = 0; i < g->dag.size(); i++) {
         for (auto j = 0; j < g->dag[i].size(); j++) {
             NodeFunc<float> *node = g->dag[i][j];
             if (!node->is_input && !node->is_output) {
-                cudaFree(node->node_val);
+                node->cuda_destroy();
                 delete node;
             }
         }
@@ -1539,4 +1707,6 @@ int main(int argc, char *argv[]) {
     delete [] x;
     delete [] y;
     delete g;
+    
+    cudaDeviceReset();
 }
