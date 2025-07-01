@@ -1,69 +1,124 @@
+#include <unistd.h>
+#include <stdio.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <array>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <deque>
+#include <tuple>
+#include <map>
+#include <fcntl.h>
+#include <functional>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstring>
+#include <string>
+#include <random>
+#include <algorithm>
+#include <chrono>
+#include <mutex>
+#include <thread>
+#include <ctime> 
+#include <stdbool.h>    // bool type
+#include <fstream>
+#include <cmath>
+#include <variant>
+#include <omp.h>
 #include <math.h>
 #include <assert.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#define N 10000000
+#define N 50000000
 #define MAX_ERR 1e-6
 
-__global__ void vector_add(float *out, float *a, float *b, int n) {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
-    
-    for(int i = index; i < n; i += stride){
-        out[i] = a[i] + b[i];
-    }
+void generate_data(float *x, int n) {
+    static std::random_device dev;
+    static std::mt19937 rng(dev());
+
+    std::uniform_real_distribution<float> dist(0.0, 1.0);
+    for (int i = 0; i < n; i++) x[i] = dist(rng);
 }
 
-int main(){
-    float *a, *b, *out;
-    float *d_a, *d_b, *d_out; 
+__global__
+void normal_add(float *inp, float *oup, int n) {
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    if (index < n) oup[index] = inp[index] + 100.0;
+}
 
-    // Allocate host memory
-    a   = (float*)malloc(sizeof(float) * N);
-    b   = (float*)malloc(sizeof(float) * N);
-    out = (float*)malloc(sizeof(float) * N);
+__global__
+void offset_add(float *inp, float *oup, int n, int offset) {
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    index += offset;
+    oup[index] = inp[index] + 100.0;
+}
 
-    // Initialize host arrays
-    for(int i = 0; i < N; i++){
-        a[i] = 1.0f;
-        b[i] = 2.0f;
-    }
+__global__
+void strided_add(float *inp, float *oup, int n, int stride) {
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    index *= stride;
+    oup[index] = inp[index] + 100.0;
+}
 
-    // Allocate device memory
-    cudaMalloc((void**)&d_a, sizeof(float) * N);
-    cudaMalloc((void**)&d_b, sizeof(float) * N);
-    cudaMalloc((void**)&d_out, sizeof(float) * N);
 
-    // Transfer data from host to device memory
-    cudaMemcpy(d_a, a, sizeof(float) * N, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, b, sizeof(float) * N, cudaMemcpyHostToDevice);
+int main(int argc, char **argv){
+    int offset = atoi(argv[1]);
+    int stride = atoi(argv[2]);
+    int n = (N-offset)/stride;
 
-    int blockSize = 256;
-    int numBlocks = (N + blockSize - 1) / blockSize;
+    float *a, *out1, *out2, *out3;
 
-    // Executing kernel 
-    vector_add<<<numBlocks,blockSize>>>(d_out, d_a, d_b, N);
+    size_t u_size = sizeof(float)*n;
+
+    cudaMallocManaged(&a, u_size);
+    cudaMallocManaged(&out1, u_size);
+    cudaMallocManaged(&out2, u_size);
+    cudaMallocManaged(&out3, u_size);
+
+    generate_data(a, n);
+
+    auto start = std::chrono::high_resolution_clock::now();
     
-    // Transfer data back to host memory
-    cudaMemcpy(out, d_out, sizeof(float) * N, cudaMemcpyDeviceToHost);
+    normal_add<<<ceil(n/1024.0),1024>>>(a, out1, n);
+    cudaDeviceSynchronize();
 
-    // Verification
-    for(int i = 0; i < N; i++){
-        assert(fabs(out[i] - a[i] - b[i]) < MAX_ERR);
-    }
-    printf("out[0] = %f\n", out[0]);
-    printf("PASSED\n");
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
-    // Deallocate device memory
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_out);
+    std::cout << "CUDA Duration = " << duration.count() << " ms" << std::endl;
 
-    // Deallocate host memory
-    free(a); 
-    free(b); 
-    free(out);
+
+
+    start = std::chrono::high_resolution_clock::now();
+    
+    offset_add<<<ceil(n/1024.0),1024>>>(a, out2, n, offset);
+    cudaDeviceSynchronize();
+
+    stop = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+    std::cout << "CUDA Duration = " << duration.count() << " ms" << std::endl;
+
+
+
+    start = std::chrono::high_resolution_clock::now();
+    
+    strided_add<<<ceil(n/1024.0),1024>>>(a, out2, n, stride);
+    cudaDeviceSynchronize();
+
+    stop = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+    std::cout << "CUDA Duration = " << duration.count() << " ms" << std::endl;
+
+
+    cudaFree(a);
+    cudaFree(out1);
+    cudaFree(out2);
+    cudaFree(out3);
 }

@@ -35,7 +35,7 @@
 #include <cuda_runtime.h>
 
 #define MAX_ERR 1e-10
-#define TILE_WIDTH 16
+#define TILE_WIDTH 32
 
 void print_vector(float *x, size_t n) {
     std::cout << "[";
@@ -64,6 +64,18 @@ void cuda_mul(float *a, float *b, float *c, int n, int m, int p) {
 }
 
 __global__ 
+void cuda_mul_bt(float *a, float *b, float *c, int n, int m, int p) {
+    int row = blockIdx.y*blockDim.y + threadIdx.y;
+    int col = blockIdx.x*blockDim.x + threadIdx.x;
+
+    if (row < n && col < p) {
+        float res = 0.0;
+        for (int i = 0; i < m; i++) res += a[row*m+i]*b[col*m+i];
+        c[row*p+col] = res;
+    }
+}
+
+__global__ 
 void cuda_mul_tiled(float *a, float *b, float *c, int n, int m, int p) {
     __shared__ float Mds[TILE_WIDTH*TILE_WIDTH];
     __shared__ float Nds[TILE_WIDTH*TILE_WIDTH];
@@ -81,13 +93,42 @@ void cuda_mul_tiled(float *a, float *b, float *c, int n, int m, int p) {
         if (row < n && (ph*TILE_WIDTH + tx) < m) Mds[ty*TILE_WIDTH+tx] = a[row*m + ph*TILE_WIDTH + tx];
         else Mds[ty*TILE_WIDTH+tx] = 0.0f;
 
-
         if ((ph*TILE_WIDTH + ty) < m && col < p) Nds[ty*TILE_WIDTH+tx] = b[(ph*TILE_WIDTH+ty)*p + col];
         else Nds[ty*TILE_WIDTH+tx] = 0.0f;
 
         __syncthreads();
 
         for (int i = 0; i < TILE_WIDTH; i++) res += Mds[ty*TILE_WIDTH+i]*Nds[i*TILE_WIDTH+tx];
+        __syncthreads();
+    }
+
+    if (row < n && col < p) c[row*p+col] = res; 
+}
+
+__global__ 
+void cuda_mul_bt_tiled(float *a, float *b, float *c, int n, int m, int p) {
+    __shared__ float Mds[TILE_WIDTH*TILE_WIDTH];
+    __shared__ float Nds[TILE_WIDTH*TILE_WIDTH];
+
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+    int tx = threadIdx.x;
+    int ty = threadIdx.y;
+
+    int row = by*TILE_WIDTH + ty;
+    int col = bx*TILE_WIDTH + tx;
+
+    float res = 0.0;
+    for (int ph = 0; ph < ceil(m/float(TILE_WIDTH)); ph++) {
+        if (row < n && (ph*TILE_WIDTH + tx) < m) Mds[ty*TILE_WIDTH+tx] = a[row*m + ph*TILE_WIDTH + tx];
+        else Mds[ty*TILE_WIDTH+tx] = 0.0f;
+
+        if ((ph*TILE_WIDTH + ty) < m && col < p) Nds[tx*TILE_WIDTH+ty] = b[(ph*TILE_WIDTH+ty)*p + col];
+        else Nds[tx*TILE_WIDTH+ty] = 0.0f;
+
+        __syncthreads();
+
+        for (int i = 0; i < TILE_WIDTH; i++) res += Mds[ty*TILE_WIDTH+i]*Nds[tx*TILE_WIDTH+i];
         __syncthreads();
     }
 
@@ -109,11 +150,11 @@ void mat_mul(float *a, float *b, float *c, int n, int m, int p) {
 }
 
 int main(){
-    int n = 1024;
-    int m = 1024;
-    int p = 1024;
+    int n = 2048;
+    int m = 2048;
+    int p = 2048;
 
-    float *a, *b, *c, *d;
+    float *a, *b, *bt, *c;
 
     size_t size_a = sizeof(float)*n*m;
     size_t size_b = sizeof(float)*m*p;
@@ -121,19 +162,20 @@ int main(){
 
     cudaMallocManaged(&a, size_a);
     cudaMallocManaged(&b, size_b);
+    cudaMallocManaged(&bt, size_b);
     cudaMallocManaged(&c, size_c);
-    d = (float*)malloc(size_c);
+    // d = (float*)malloc(size_c);
 
     generate_data(a, n, m);
     generate_data(b, m, p);
+    generate_data(bt, p, m);
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    dim3 bd(16, 16, 1);
-    dim3 gd(ceil(p/16.0), ceil(n/16.0), 1);
+    dim3 bd(32, 32, 1);
+    dim3 gd(ceil(p/32.0), ceil(n/32.0), 1);
 
-    cuda_mul<<<gd, bd>>>(a, b, c, n, m, p);
-    
+    cuda_mul_tiled<<<gd, bd>>>(a, b, c, n, m, p);
     cudaDeviceSynchronize();
 
     auto stop = std::chrono::high_resolution_clock::now();
@@ -141,19 +183,22 @@ int main(){
 
     std::cout << "CUDA Duration = " << duration.count() << " ms" << std::endl;
 
-    print_vector(c, 100);
+    // print_vector(c, 100);
 
     start = std::chrono::high_resolution_clock::now();
-    mat_mul(a, b, d, n, m, p);
+    cuda_mul_bt_tiled<<<gd, bd>>>(a, bt, c, n, m, p);
+    cudaDeviceSynchronize();
+    // mat_mul(a, b, d, n, m, p);
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
     std::cout << "Standard Duration = " << duration.count() << " ms" << std::endl;
 
-    print_vector(d, 100);
+    // print_vector(d, 100);
 
     cudaFree(a);
     cudaFree(b);
+    cudaFree(bt);
     cudaFree(c);
-    free(d);
+    // free(d);
 }
