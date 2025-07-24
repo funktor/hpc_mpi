@@ -62,6 +62,8 @@
         "set": "cpp",
         "unordered_set": "cpp",
         "format": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "__locale": "cpp",
+        "variant": "cpp"
     }
 }

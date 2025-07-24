@@ -34,7 +34,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#define N 50000000
+#define N 10000000
 #define MAX_ERR 1e-6
 
 void generate_data(float *x, int n) {
@@ -69,22 +69,26 @@ void strided_add(float *inp, float *oup, int n, int stride) {
 int main(int argc, char **argv){
     int offset = atoi(argv[1]);
     int stride = atoi(argv[2]);
-    int n = (N-offset)/stride;
+    int n1 = N+offset;
+    int n2 = N*stride;
 
-    float *a, *out1, *out2, *out3;
+    float *a, *b, *c, *out1, *out2, *out3;
 
-    size_t u_size = sizeof(float)*n;
+    cudaMallocManaged(&a, sizeof(float)*N);
+    cudaMallocManaged(&b, sizeof(float)*n1);
+    cudaMallocManaged(&c, sizeof(float)*n2);
 
-    cudaMallocManaged(&a, u_size);
-    cudaMallocManaged(&out1, u_size);
-    cudaMallocManaged(&out2, u_size);
-    cudaMallocManaged(&out3, u_size);
+    cudaMallocManaged(&out1, sizeof(float)*N);
+    cudaMallocManaged(&out2, sizeof(float)*n1);
+    cudaMallocManaged(&out3, sizeof(float)*n2);
 
-    generate_data(a, n);
+    generate_data(a, N);
+    generate_data(b, n1);
+    generate_data(c, n2);
 
     auto start = std::chrono::high_resolution_clock::now();
     
-    normal_add<<<ceil(n/1024.0),1024>>>(a, out1, n);
+    normal_add<<<ceil(N/1024.0),1024>>>(a, out1, N);
     cudaDeviceSynchronize();
 
     auto stop = std::chrono::high_resolution_clock::now();
@@ -96,7 +100,7 @@ int main(int argc, char **argv){
 
     start = std::chrono::high_resolution_clock::now();
     
-    offset_add<<<ceil(n/1024.0),1024>>>(a, out2, n, offset);
+    offset_add<<<ceil(N/1024.0),1024>>>(b, out2, n1, offset);
     cudaDeviceSynchronize();
 
     stop = std::chrono::high_resolution_clock::now();
@@ -108,7 +112,7 @@ int main(int argc, char **argv){
 
     start = std::chrono::high_resolution_clock::now();
     
-    strided_add<<<ceil(n/1024.0),1024>>>(a, out2, n, stride);
+    strided_add<<<ceil(N/1024.0),1024>>>(c, out3, n2, stride);
     cudaDeviceSynchronize();
 
     stop = std::chrono::high_resolution_clock::now();
@@ -118,6 +122,8 @@ int main(int argc, char **argv){
 
 
     cudaFree(a);
+    cudaFree(b);
+    cudaFree(c);
     cudaFree(out1);
     cudaFree(out2);
     cudaFree(out3);
