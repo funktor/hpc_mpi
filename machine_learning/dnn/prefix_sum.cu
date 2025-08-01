@@ -35,9 +35,30 @@
 #include <cuda_runtime.h>
 
 #define BLOCK_WIDTH 1024
-#define COARSE_FACTOR 4
+#define COARSE_FACTOR 8
 #define MAX_N 1e7
 __device__ int counter=0;
+
+#define NUM_BANKS 32
+#define LOG_NUM_BANKS 5
+#define CONFLICT_FREE_OFFSET(n)((n) >> (LOG_NUM_BANKS))
+#define BUFFER 255
+
+// 0 1 2 .... 8195
+
+// 0 1 2 3 ... 31
+// 32 33 ..... 63
+// ....
+// 0 2 4 ... 30 33 35 ... 63
+// 1 5 9 ... 29 33 36 ... 63 66 69 ... 96 99
+
+// 32 - 1
+// 64 - 1
+// 96 - 1
+// ...
+// COARSE_FACTOR*BLOCK_WIDTH COARSE_FACTOR*BLOCK_WIDTH/32
+
+// 1+2+3
 
 bool are_equal(float *x, float *y, int start, int end) {
     for (int i = start; i < end; i++) {
@@ -100,13 +121,13 @@ void prefix_sum_brent_kung_block(float *arr, float *XY, int n) {
     for (unsigned int stride = 1; stride < blockDim.x; stride *= 2) {
         int i = 2*(threadIdx.x+1)*stride-1;
         if (i < BLOCK_WIDTH && i >= stride) XY[i] += XY[i-stride];
-        __syncthreads();
     }
+
+    __syncthreads();
 
     for (unsigned int stride = BLOCK_WIDTH/4; stride > 0; stride /= 2) {
         int i = 2*(threadIdx.x+1)*stride-1;
         if (i + stride < BLOCK_WIDTH) XY[i + stride] += XY[i];
-        __syncthreads();
     }
 }
 
@@ -114,8 +135,9 @@ __device__
 void prefix_sum_brent_kung_block_coarsened(float *arr, float *XY, int n) {
     for (unsigned int i = threadIdx.x; i < COARSE_FACTOR*blockDim.x; i += blockDim.x) {
         unsigned int index = COARSE_FACTOR*blockIdx.x*blockDim.x + i;
-        if (index < n) XY[i] = arr[index]; 
-        else XY[i] = 0.0f;
+        unsigned int offset = CONFLICT_FREE_OFFSET(i);
+        if (index < n) XY[i + offset] = arr[index]; 
+        else XY[i + offset] = 0.0f;
     }
 
     __syncthreads();
@@ -123,15 +145,21 @@ void prefix_sum_brent_kung_block_coarsened(float *arr, float *XY, int n) {
     for (unsigned int stride = 1; stride < COARSE_FACTOR*blockDim.x; stride *= 2) {
         for (unsigned int i = threadIdx.x; i < COARSE_FACTOR*blockDim.x; i += blockDim.x) {
             int j = 2*(i+1)*stride-1;
-            if (j < COARSE_FACTOR*BLOCK_WIDTH && j >= stride) XY[j] += XY[j-stride];
+            unsigned int offset1 = CONFLICT_FREE_OFFSET(j);
+            unsigned int offset2 = CONFLICT_FREE_OFFSET(j-stride);
+            if (j + offset1 < COARSE_FACTOR*BLOCK_WIDTH + BUFFER && j + offset2 >= stride) XY[j + offset1] += XY[j-stride + offset2];
         }
         __syncthreads();
     }
 
+    
+
     for (unsigned int stride = COARSE_FACTOR*BLOCK_WIDTH/4; stride > 0; stride /= 2) {
         for (unsigned int i = threadIdx.x; i < COARSE_FACTOR*blockDim.x; i += blockDim.x) {
             int j = 2*(i+1)*stride-1;
-            if (j + stride < COARSE_FACTOR*BLOCK_WIDTH) XY[j + stride] += XY[j];
+            unsigned int offset1 = CONFLICT_FREE_OFFSET(j+stride);
+            unsigned int offset2 = CONFLICT_FREE_OFFSET(j);
+            if (j + stride + offset1 < COARSE_FACTOR*BLOCK_WIDTH + BUFFER) XY[j + stride + offset1] += XY[j + offset2];
         }
         __syncthreads();
     }
@@ -177,7 +205,8 @@ void prefix_sum_coarsened(float *arr, float *out, int *flags, float *S, int n, i
 
     if (blockIdx.x + 1 < m && threadIdx.x == 0) {
         while (atomicAdd(&flags[blockIdx.x], 0) == 0) {}
-        S[blockIdx.x + 1] = S[blockIdx.x] + XY[min(COARSE_FACTOR*blockDim.x-1, n-1-COARSE_FACTOR*blockIdx.x*blockDim.x)];
+        int j = min(COARSE_FACTOR*blockDim.x-1, n-1-COARSE_FACTOR*blockIdx.x*blockDim.x);
+        S[blockIdx.x + 1] = S[blockIdx.x] + XY[j + CONFLICT_FREE_OFFSET(j)];
         __threadfence();
         atomicAdd(&flags[blockIdx.x + 1], 1);
     }
@@ -187,13 +216,14 @@ void prefix_sum_coarsened(float *arr, float *out, int *flags, float *S, int n, i
         while (atomicAdd(&flags[blockIdx.x], 0) == 0) {}
 
         for (unsigned int i = threadIdx.x; i < COARSE_FACTOR*blockDim.x; i += blockDim.x) {
-            XY[i] += S[blockIdx.x];
+            int j = i + CONFLICT_FREE_OFFSET(i);
+            XY[j] += S[blockIdx.x];
         }
     }
 
     for (unsigned int i = threadIdx.x; i < COARSE_FACTOR*blockDim.x; i += blockDim.x) {
         unsigned int index = COARSE_FACTOR*blockIdx.x*blockDim.x + i;
-        if (index < n) out[index] = XY[i];
+        if (index < n) out[index] = XY[i + CONFLICT_FREE_OFFSET(i)];
     }
 }
 
@@ -248,8 +278,8 @@ void prefix_sum_coarsened_static(float *arr, float *out, int *flags, float *S, i
 }
 
 int main(){
-    int n = 1e7;
-    int m = int(ceil(float(n)/BLOCK_WIDTH));
+    int n = 2e7;
+    int m = int(ceil(float(n)/(COARSE_FACTOR*BLOCK_WIDTH)));
 
     float *a, *S, *c1, *c2;
     int *flags;
@@ -277,7 +307,7 @@ int main(){
 
     start = std::chrono::high_resolution_clock::now();
 
-    prefix_sum_coarsened<<<m, BLOCK_WIDTH, BLOCK_WIDTH*COARSE_FACTOR*sizeof(float)>>>(a, c2, flags, S, n, m);
+    prefix_sum_coarsened<<<m, BLOCK_WIDTH, (BLOCK_WIDTH*COARSE_FACTOR + BUFFER)*sizeof(float)>>>(a, c2, flags, S, n, m);
     cudaDeviceSynchronize();
 
     stop = std::chrono::high_resolution_clock::now();
